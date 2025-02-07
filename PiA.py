@@ -3,6 +3,17 @@ from comms.receive import *
 from datetime import datetime
 from time import sleep
 
+# Triggers when change in GPS location
+def new_scan():
+    # Captures 2 images
+    # Perform object detectio 
+    # Retreive slave images and data
+    # send rotational stage control signal
+    # Perform pano stitching
+    # Receive hsi photo and data 
+    # Updates json and moves images to correct folder
+    pass
+
 TRIGGER_PIN=26
 
 if __name__ == "__main__":

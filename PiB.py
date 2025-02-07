@@ -3,6 +3,20 @@ from comms.send import *
 from cameras import *
 from time import sleep
 
+def on_trigger():
+    # Capture images
+    # Perform object detection
+    # Send slave images and  data
+    pass
+
+def on_rotate():
+    # Rotate rotational stage 
+    # take hsi image
+    # process hsi image
+    # return hsi colour image and data
+    pass
+
+
 TRIGGER_PIN=26
 last = 0
 
