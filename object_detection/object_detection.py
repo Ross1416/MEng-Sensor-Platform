@@ -1,10 +1,10 @@
-from ultralytics import YOLO
+from ultralytics import YOLOWorld
 import gpiod
 from picamera2 import Picamera2
 from libcamera import controls
 import cv2
 from time import time
-                                                        
+import math                                                        
 
 def setup_GPIO():
     chip = gpiod.Chip('gpiochip4')
@@ -51,29 +51,22 @@ def capture(cams, save_dir=None):
 
 
 def object_detection(model, frame):
-    results = model.predict(frame)
-    # format results
+    detections = model.predict(frame)
+    results = []
+    for box in detections[0].boxes:
+        label = model.names[int(box.cls[0])]
+        coords = box.xywh.tolist()
+        conf = math.ceil((box.conf[0] * 100)) / 100
+        results.append([label,coords,conf])
     return results
-
-
-def to_json(result):
-    """Takes ultralytics result and returns json format"""
-    pass
 
 
 TRIGGER_PIN=26
 
+
 if __name__ == "__main__":
-    # Setup cameras and capture images
-    cams = setup_cameras()
-
-    line = setup_GPIO()
-
-    # Trigger
-    line.set_value(1)
-
-    capture(cams, "./captures/")
-
-    line.set_value(0)
-
-  
+    model = YOLOWorld("./yolo_models/yolov8s-worldv2.pt")
+    model.set_classes(["dog"])
+    img = cv2.imread("dog.jpg")
+    results = object_detection(model,img)
+    print(results)
