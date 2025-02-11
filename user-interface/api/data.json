@@ -1,0 +1,69 @@
+{
+    "location": "Glasgow",
+    "pins": [
+        {
+            "coords": [
+                55.88,
+                -4.32
+            ],
+            "imgRef": "./images/img1.jpg",
+            "objects": [
+                {
+                    "top": "300",
+                    "left": "150px",
+                    "width": "200px",
+                    "height": "200px",
+                    "RGB_classification": "Building",
+                    "HS_classification": "Stone",
+                    "distance": 300
+                },
+                {
+                    "top": "350px",
+                    "left": "500px",
+                    "width": "500px",
+                    "height": "150px",
+                    "RGB_classification": "Bridge",
+                    "HS_classification": "Metal",
+                    "distance": 2
+                }
+            ]
+        },
+        {
+            "coords": [
+                55.88,
+                -4.31
+            ],
+            "imgRef": "./images/img2.jpg",
+            "objects": [
+                {
+                    "top": "100px",
+                    "left": "350px",
+                    "width": "800px",
+                    "height": "300px",
+                    "RGB_classification": "City",
+                    "HS_classification": "Metal",
+                    "distance": 100
+                }
+            ]
+        },
+        {
+            "coords": [
+                55.88,
+                -4.3
+            ],
+            "imgRef": "./images/img3.jpg",
+            "objects": [
+                {
+                    "pixel_coords": [
+                        0,
+                        0,
+                        200
+                    ],
+                    "RGB_classification": "car",
+                    "HS_classification": "metal",
+                    "distance": 2
+                }
+            ]
+        }
+    ]
+}

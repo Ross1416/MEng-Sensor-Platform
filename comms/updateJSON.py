@@ -129,18 +129,11 @@ def getPlatformStatus():
     with open(file_path, "r") as file:
         data = json.load(file)
 
-<<<<<<< Updated upstream
     status = data["status"]
     activeFile = data["activeFile"]
 
     return status, activeFile
         
-=======
-    filename = data["activeFile"]
-    status = data["status"]
-
-    return filename, status
->>>>>>> Stashed changes
 
 if __name__ == "__main__":
     dummydataJSON()
