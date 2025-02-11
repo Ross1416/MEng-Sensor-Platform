@@ -1,17 +1,27 @@
-### Imports ###
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import time
-import numpy as np
 
-### Show Images ####
+### Show Images for testing + debugging ####
 def showImage(image, title='Snapshot'):
     cv2.imshow(title, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-### Convert to Cylindrical Projection ####
+### Return a cropped object from a black background ####
+def cropImage(image):
+    # Crop to Smallest Rectangle
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, binary = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    x, y, w, h = cv2.boundingRect(largest_contour)
+        
+    croppedImage = image[y:y+h, x:x+w]
+
+    return croppedImage
+
+### Warp raw images for improved stitching ####
 def cylindricalProjection(img):
 
     # Simplified intrinsic matrix
@@ -21,149 +31,209 @@ def cylindricalProjection(img):
     
     theta = (map_x - w / 2) / (w / 2)
     phi = (map_y - h / 2) / (h / 2)
+
+    theta = np.arctan((map_x - w / 2) / (w / 5))  # Reduced denominator for more distortion
+    phi = (map_y - h / 2) / (h / 5)  # Stronger vertical warping
     
     x = np.sin(theta) * np.cos(phi)
     y = np.sin(phi)
     z = np.cos(theta) * np.cos(phi)
-    
-    map_x = (w / 2) * (x / z + 1)
-    map_y = (h / 2) * (y / z + 1)
+
+    # Note: change coefficients to change warping effect
+    map_x = (w / 2) * (x / z +1)
+    map_y = (h / 2) * (y / z +1)
 
     cylindricalProjection = cv2.remap(img, map_x.astype(np.float32), map_y.astype(np.float32), cv2.INTER_LINEAR)
 
-    # Crop to Smallest Rectangle
-    gray = cv2.cvtColor(cylindricalProjection, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    largest_contour = max(contours, key=cv2.contourArea)
-
-    x, y, w, h = cv2.boundingRect(largest_contour)
-        
-    cylindricalProjection = cylindricalProjection[y:y+h, x:x+w]
+    cylindricalProjection = cropImage(cylindricalProjection)
         
     return cylindricalProjection
 
-
-### Take Two Images, Return Homography Matrix ####
+### Calcute homorgrapyh between two images  ####
 def calculateHomography(referenceImage, warpImage):
+    height, width, _ = referenceImage.shape
+
+    # Convert to grayscale
+    referenceImage = cv2.cvtColor(referenceImage, cv2.COLOR_BGR2GRAY)
+    warpImage = cv2.cvtColor(warpImage, cv2.COLOR_BGR2GRAY)
+
+    # Equalize histogram
+    referenceImage = cv2.equalizeHist(referenceImage)
+    warpImage = cv2.equalizeHist(warpImage)
+
+    # Gaussian Blur
+    # referenceImage = cv2.GaussianBlur(referenceImage, (5, 5), 0)
+    # warpImage = cv2.GaussianBlur(warpImage, (5, 5), 0)
 
     # Perform SIFT
-    sift = cv2.SIFT_create()
-    kp1, des1 = sift.detectAndCompute(referenceImage, None)
-    kp2, des2 = sift.detectAndCompute(warpImage, None)
+    sift = cv2.SIFT_create(contrastThreshold=0.005)
+    # sift = cv2.SIFT_create()
 
-    # Match Features
+    # Create mask and apply SIFT to reference image
+    mask = np.zeros((height, width), dtype=np.uint8)
+    mask[:, int(7 * width / 8) :] = 255  
+    kp1, des1 = sift.detectAndCompute(referenceImage, mask)
+
+    # Create mask and apply SIFT to wrap image
+    mask = np.zeros((height, width), dtype=np.uint8)
+    mask[:, :int(1*width / 8) ] = 255  # White region in the rightmost quarter
+    kp2, des2 = sift.detectAndCompute(warpImage, mask)
+
+    # Perform FLANN
+    # index_params = dict(algorithm=1, trees=5)
+    # search_params = dict(checks=50)
+
+    # flann = cv2.FlannBasedMatcher(index_params, search_params)
+    # matches = flann.knnMatch(des1, des2, k=2)
+
+    # Brute Force Match
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
-    
-    # Find Good matches
+
+    # Perform Lowe's Ratio Test
     goodMatches = []
-    threshold = 0.75
     for m, n in matches:
-        if m.distance < threshold * n.distance:
+        if m.distance < 0.75*n.distance:
             goodMatches.append(m)
 
-    # Show Images
-    if (False):
-        # Show Features
-        frame1withKeypoints = cv2.drawKeypoints(warpImage, kp1, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        showImage(frame1withKeypoints, 'Frame 1')
-        frame2withKeypoints = cv2.drawKeypoints(referenceImage, kp2, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        showImage(frame2withKeypoints, 'Frame 2')
+    # Visualise SIFT
+    # frame1withKeypoints = cv2.drawKeypoints(referenceImage, kp1, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    # showImage(frame1withKeypoints, 'Frame 1')
+    # frame2withKeypoints = cv2.drawKeypoints(warpImage, kp2, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    # showImage(frame2withKeypoints, 'Frame 2')
 
-        # Show Descriptors
-        sampleDescriptors = des1[:1]
-        for i, descriptor in enumerate(sampleDescriptors, start=1):
-            plt.plot(descriptor, label=f"Descriptor {i}")
-        plt.show()
+    # Visualise Matches
+    # matchedImage = cv2.drawMatchesKnn(referenceImage, kp1, warpImage, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # showImage(matchedImage)
+    goodMatchesImage = cv2.drawMatches(referenceImage, kp1, warpImage, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS, matchesThickness=1)
+    showImage(goodMatchesImage)
 
-        # Show Matches
-        matchedImage = cv2.drawMatchesKnn(referenceImage, kp1, warpImage, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-        showImage(matchedImage)
-        goodMatchesImage = cv2.drawMatches(referenceImage, kp1, warpImage, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS, matchesThickness=1)
-        showImage(goodMatchesImage)
-
-    if len(goodMatches) > 4: # Ensure there are  enough matches for homography 
-
+    if len(goodMatches) > 4:
         src_pts = np.float32([kp1[m.queryIdx].pt for m in goodMatches]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in goodMatches]).reshape(-1, 1, 2)
+
         H, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
         return H
-    else:
-        print("Not enough matches found to compute homography.")
+    else: 
+        print('not enough good matches')
+
+        return -1
 
 ### Apply Homography ###
 def applyHomography(referenceImage, warpImage, H):
 
-    result = cv2.warpPerspective(warpImage, H, (referenceImage.shape[1] + warpImage.shape[1], referenceImage.shape[0]))
-    result[0:referenceImage.shape[0], 0:referenceImage.shape[1]] = referenceImage
+    panorama = cv2.warpPerspective(warpImage, H, (referenceImage.shape[1] + warpImage.shape[1], referenceImage.shape[0]))
+    panorama[0:referenceImage.shape[0], 0:referenceImage.shape[1]] = referenceImage
 
-    return result
+    panorama = cropImage(panorama)
+    return panorama
 
-### Dewarp Image ####
-def dewarpImage(image):
-    height, width = image.shape[:2]
-    for x in range(width):
-        for y in range(height):
-            pixel = list(image[y, x])
-            
-            # Find first non black pixel
-            if pixel != [0, 0, 0]:
-                image[y:y+5, x] = [0, 255, 0]
-                start = y
-                break  
+### Unwarp stitched image ###
+def unwarp(img):
+    height, width, _ = img.shape
 
-        for y in range(height-1, 0, -1):
-            pixel = list(image[y, x])
-            
-            # Find last non black pixel
-            if pixel != [0, 0, 0]:
-                image[y:y+5, x] = [0, 255, 0]
-                end = y
-                break  # Move to the next column after marking the first non-black pixel
-        
-        # Strect pixels
-        sourcePixels = image[start:end, x, :]
-            
-        # Stretch the extracted range to the target height
-        stretchedPixels = cv2.resize(sourcePixels[:, np.newaxis],(1, height), interpolation=cv2.INTER_LINEAR).squeeze()  # Remove the singleton dimension
-            
-        # Assign stretched pixels to the new image
-        image[:, x, :] = stretchedPixels
+    # Convert to grayscale
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    return image
+    # Binary threshold
+    mask = np.where(gray_img > 0, 60, 0).astype(np.uint8)
 
-def exportImage(image):
-    try:
-        cv2.imwrite('user-interface/src/assets/panoramas/panorama.png', image)
-        print(f"Image successfully saved")
-    except Exception as e:
-        print(f"Failed to save image: {e}")
+    # Open and close
+    kernel = np.ones((7, 7), np.uint8) 
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+    showImage(mask)
 
+    # Init corners
+    upperLeft = [0, 0]
+    upperRight = [0, 0]
+    bottomLeft = [0, 0]
+    bottomRight = [0, 0]
 
-### Main Function - this will be called from UI ####
-def getPanorama(leftImage, rightImage):
-    showImage(leftImage, 'Left Image')
-    showImage(rightImage, 'Right Image')
+    # Find corners
+    for i in range(height):
+        if  np.any(mask[i, :10] == 60):
+            mask[i, :10] = 255
+            upperLeft = [0, i]
+            break
 
-    leftImage = cylindricalProjection(leftImage)
-    rightImage = cylindricalProjection(rightImage)
+    for i in range(height):
+        if  np.any(mask[i, width-10:] == 60):
+            mask[i, width-10:] = 255
+            upperRight = [width, i]
+            break
 
-    H = calculateHomography(leftImage, rightImage)
-    panorama = applyHomography(leftImage, rightImage, H)
+    for i in range(height-1, -1, -1):
+        if  np.any(mask[i, :10] == 60):
+            mask[i, :10] = 255
+            bottomLeft = [0, i]
+            break
+
+    for i in range(height-1, -1, -1):
+        if  np.any(mask[i, width-10:] == 60):
+            mask[i, width-10:] = 255
+            bottomRight = [width, i]
+            break
+
+    color = 255
+    thickness = 1
+
+    mask = cv2.line(mask, (upperLeft[0], upperLeft[1]), (upperRight[0], upperRight[1]), color, thickness)
+    mask = cv2.line(mask, (bottomLeft[0], bottomLeft[1]), (bottomRight[0], bottomRight[1]), color, thickness)
+
+    showImage(mask)
+
+    # Define source points (original square corners)
+    src_pts = np.float32([
+        upperLeft,
+        upperRight,
+        bottomLeft,
+        bottomRight
+    ])
+
+    # Define destination points 
+    dst_pts = np.float32([
+        [0, 0],      
+        [width, 0],    
+        [0, height],     
+        [width, height]
+    ])
+
+    # Compute perspective transformation matrix
+    M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+
+    # Perform the perspective warp
+    warped = cv2.warpPerspective(img, M, (width, height))
+
+    return warped
+
+def panorama(image1, image2, image3, image4):
+
+    # Stitch first two images
+    ref = cylindricalProjection(image1)
+    warp = cylindricalProjection(image2)
+    showImage(ref)
+
+    H = calculateHomography(ref, warp)
+    panorama = applyHomography(ref, warp, H)
+    panorama = unwarp(panorama)
     showImage(panorama)
 
-    panoramaDewarped = dewarpImage(panorama)
-    showImage(panoramaDewarped)
+    # Add third image
+    ref = cylindricalProjection(panorama)
+    warp = cylindricalProjection(image3)
+    showImage(ref, 'REF')
+    showImage(warp, 'WARP')
+    H = calculateHomography(ref, warp)
+    panorama = applyHomography(ref, warp, H)
+    showImage(panorama, 'Applied Homography')
+    panorama = unwarp(panorama)
+    showImage(panorama)
 
-    exportImage(panoramaDewarped)
+    # cv2.imwrite('./test-images/panorama3.JPG', panorama)
 
 
-### Testing ###
-leftImage = cv2.imread('./computer-vision/panorama/IMG_2588.JPG')
-rightImage = cv2.imread('./computer-vision/panorama/IMG_2589_Cropped.JPG')
-getPanorama(leftImage, rightImage) 
 
+images = [cv2.imread('./test-images/3/1.JPG'), cv2.imread('./test-images/3/2.JPG'), cv2.imread('./test-images/3/3.JPG'), cv2.imread('./test-images/3/4.JPG')]
 
-def testBackend(n):
-    return n * 100
+panorama(images[0], images[1], images[2], images[3])
