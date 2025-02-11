@@ -71,14 +71,8 @@ if __name__ == "__main__":
     while True:
         # TODO: Check for location change
         # Update save location
-<<<<<<< Updated upstream
         status, activeFile = getPlatformStatus()
         GPS_coordinate_change = True
-=======
-        filepath, status = getPlatformStatus()
-        timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        save_location = f"./capture/{timestamp}-capture/"
->>>>>>> Stashed changes
 
         if status == 2 or (status == 1 and GPS_coordinate_change):
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
