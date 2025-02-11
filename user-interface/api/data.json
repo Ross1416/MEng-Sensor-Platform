@@ -64,41 +64,6 @@
                     "distance": 2
                 }
             ]
-        },
-        {
-            "coords": [
-                55.88,
-                -4.26
-            ],
-            "imgRef": "./images/img4.jpg"
-        },
-        {
-            "coords": [
-                55.88,
-                -4.25
-            ],
-            "imgRef": "./images/img5.jpg"
-        },
-        {
-            "coords": [
-                55.88,
-                -4.24
-            ],
-            "imgRef": "./images/img6.jpg"
-        },
-        {
-            "coords": [
-                55.88,
-                -4.2299999999999995
-            ],
-            "imgRef": "./images/img7.jpg"
-        },
-        {
-            "coords": [
-                55.88,
-                -4.22
-            ],
-            "imgRef": "./images/img8.jpg"
         }
     ]
 }
