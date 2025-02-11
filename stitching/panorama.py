@@ -32,8 +32,8 @@ def cylindricalProjection(img):
     theta = (map_x - w / 2) / (w / 2)
     phi = (map_y - h / 2) / (h / 2)
 
-    theta = np.arctan((map_x - w / 2) / (w / 5))  # Reduced denominator for more distortion
-    phi = (map_y - h / 2) / (h / 5)  # Stronger vertical warping
+    # theta = np.arctan((map_x - w / 2) / (w / 5))  # Reduced denominator for more distortion
+    # phi = (map_y - h / 2) / (h / 5)  # Stronger vertical warping
     
     x = np.sin(theta) * np.cos(phi)
     y = np.sin(phi)
@@ -66,8 +66,8 @@ def calculateHomography(referenceImage, warpImage):
     # warpImage = cv2.GaussianBlur(warpImage, (5, 5), 0)
 
     # Perform SIFT
-    sift = cv2.SIFT_create(contrastThreshold=0.005)
-    # sift = cv2.SIFT_create()
+    # sift = cv2.SIFT_create(contrastThreshold=0.005)
+    sift = cv2.SIFT_create()
 
     # Create mask and apply SIFT to reference image
     mask = np.zeros((height, width), dtype=np.uint8)
@@ -99,12 +99,12 @@ def calculateHomography(referenceImage, warpImage):
     # Visualise SIFT
     # frame1withKeypoints = cv2.drawKeypoints(referenceImage, kp1, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     # showImage(frame1withKeypoints, 'Frame 1')
-    # frame2withKeypoints = cv2.drawKeypoints(warpImage, kp2, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    # showImage(frame2withKeypoints, 'Frame 2')
+    frame2withKeypoints = cv2.drawKeypoints(warpImage, kp2, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    showImage(frame2withKeypoints, 'Frame 2')
 
     # Visualise Matches
-    # matchedImage = cv2.drawMatchesKnn(referenceImage, kp1, warpImage, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    # showImage(matchedImage)
+    matchedImage = cv2.drawMatchesKnn(referenceImage, kp1, warpImage, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    showImage(matchedImage)
     goodMatchesImage = cv2.drawMatches(referenceImage, kp1, warpImage, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS, matchesThickness=1)
     showImage(goodMatchesImage)
 
@@ -213,27 +213,28 @@ def panorama(image1, image2, image3, image4):
     ref = cylindricalProjection(image1)
     warp = cylindricalProjection(image2)
     showImage(ref)
+    showImage(warp)
 
     H = calculateHomography(ref, warp)
     panorama = applyHomography(ref, warp, H)
-    panorama = unwarp(panorama)
+    # panorama = unwarp(panorama)
     showImage(panorama)
 
     # Add third image
-    ref = cylindricalProjection(panorama)
+    # ref = cylindricalProjection(panorama)
     warp = cylindricalProjection(image3)
-    showImage(ref, 'REF')
-    showImage(warp, 'WARP')
-    H = calculateHomography(ref, warp)
-    panorama = applyHomography(ref, warp, H)
-    showImage(panorama, 'Applied Homography')
-    panorama = unwarp(panorama)
-    showImage(panorama)
+    # showImage(ref, 'REF')
+    # showImage(warp, 'WARP')
+    H = calculateHomography(panorama, warp)
+    panorama = applyHomography(panorama, warp, H)
+    # showImage(panorama, 'Applied Homography')
+    # panorama = unwarp(panorama)
+    # showImage(panorama)
 
     # cv2.imwrite('./test-images/panorama3.JPG', panorama)
 
 
 
-images = [cv2.imread('./test-images/3/1.JPG'), cv2.imread('./test-images/3/2.JPG'), cv2.imread('./test-images/3/3.JPG'), cv2.imread('./test-images/3/4.JPG')]
+images = [cv2.imread('./test-images/4/1.JPG'), cv2.imread('./test-images/4/2.JPG'), cv2.imread('./test-images/4/3.JPG'), cv2.imread('./test-images/4/4.JPG')]
 
 panorama(images[0], images[1], images[2], images[3])

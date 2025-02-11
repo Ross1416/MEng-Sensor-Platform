@@ -56,7 +56,6 @@ img2 = cv2.imread('./test-images/3/2.JPG')
 
 blended = blend_images(img1, img2)
 
-
 # concatenated = cv2.hconcat([img1, img2])
 
 showImage(blended)
