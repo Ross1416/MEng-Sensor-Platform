@@ -4,37 +4,42 @@ from datetime import datetime
 from time import sleep
 
 # Triggers when change in GPS location
-def new_scan():
+def new_scan(rgb_model):
     # Captures 2 images
-    # Perform object detectio 
-    # Retreive slave images and data
+    frames = capture(cams, "PiA", save_location)
+    # Triggers capture on PiB
+    request_client_capture(server_socket, conn)
+    # Perform object detection
+    results = []
+    for f in frames:
+        results.append(object_detection(rgb_model,f))
+    # Retrieve slave images and data
+    receive_images(save_location, server_socket, conn)  
     # send rotational stage control signal
+    #TODO write function to translate pixel coords to angle
     # Perform pano stitching
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
-    pass
+    #TODO (SD): update json test script
 
-TRIGGER_PIN=26
+PORT = 5002
+HOST = "0.0.0.0" # i.e. listening
 
 if __name__ == "__main__":
-    try:
-        # Setup cameras and GPIO
-        cams = setup_cameras()
+    # Setup cameras and GPIO
+    cams = setup_cameras()
+    # Make connection
+    server_socket, conn = make_server_connection(HOST, PORT)
+    # Setup object detection model
+    rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
 
-        port = 5002
-        host = "0.0.0.0" # i.e. listening
-
+    #Mainloop
+    while True:
+        # TODO: Check for location change
+        # Update save location
         timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
         save_location = f"./capture/{timestamp}-capture/"
-        
-        server_socket, conn = make_server_connection(host, port)
-        
-        # Trigger capture on PiB
 
-        capture(cams, "PiA", save_location)
-        request_client_capture(server_socket, conn)
-        receive_images(save_location, server_socket, conn)
-        sleep(1)
-    
-    except Exception as e:
-        print(f"Error in PiA.py: {e}")
+        new_scan(rgb_model)        
+        break
+

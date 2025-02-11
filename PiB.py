@@ -3,11 +3,16 @@ from comms.send import *
 from cameras import *
 from time import sleep
 
-def on_trigger():
+def on_trigger(rgb_model):
     # Capture images
+    frames = capture(cams, "PiB", PATH)
     # Perform object detection
-    # Send slave images and  data
-    pass
+    results = []
+    for f in frames:
+        results.append(object_detection(rgb_model,f))
+    # Send images to PiA
+    send_images(path, client_socket)
+    
 
 def on_rotate():
     # Rotate rotational stage 
@@ -17,29 +22,25 @@ def on_rotate():
     pass
 
 
-TRIGGER_PIN=26
-last = 0
+# IP = "10.12.23.188"
+IP = "hsiA.local"
+PORT = 5002
+PATH = "./captures/"
 
 if __name__ == "__main__":
     try:
         # Setup cameras and capture images
         cams = setup_cameras()
-    
-        # ip = "10.12.23.188"
-        ip = "hsiA.local"
-        port = 5002
-        path = "./captures/"
-  
-        client_socket = make_client_connection(ip, port)
+        # Make connection with PiA
+        client_socket = make_client_connection(IP, PORT)
+        # Setup object detection model
+        rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
 
         # Poll for trigger capture signal
         capture_triggered = False
         while not capture_triggered:
             if receive_capture_request(client_socket) == 1:
-                print("Triggered Capture")
-                capture(cams, "PiB", path)
-                sleep(4)
-                send_images(path, client_socket)
+                on_trigger(rgb_model)
                 capture_triggered = True
         
 
