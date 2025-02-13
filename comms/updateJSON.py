@@ -39,10 +39,10 @@ def resetJSON(filename="New Scan"):
     
 
 # Save images to front-end, then update JSON with latest data
-def updateJSON(uid, lon, lat, objects):
+def updateJSON(uid, lon, lat, objects,image):
     try:
         # Specify panorama path
-        save_path = './user-interface/public/images/img' + str(uid) + '.jpg'
+        save_path = './user-interface/public/images/img' + uid + '.jpg'
         # Write image
         cv2.imwrite(save_path, image)
         pass
@@ -83,10 +83,10 @@ def dummydataJSON():
             "geo_coords": [55.88,-4.32],
             "panorama_ref": "./images/img1.jpg",
             "objects": [{
-                "pixel_coords": ["300px","150px", "200px", "200px"] # top, left, width, height
+                "pixel_coords": ["300px","150px", "200px", "200px"], # top, left, width, height
                 "RGB_classification": "Building",
                 "HS_classification": {
-                    "wood": '20'
+                    "wood": '20',
                     "plastic": '70',
                     "stone": '10'
                 }
