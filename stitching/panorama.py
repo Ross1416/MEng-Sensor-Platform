@@ -96,6 +96,12 @@ def calculateHomography(referenceImage, warpImage):
         if m.distance < 0.75*n.distance:
             goodMatches.append(m)
 
+    goodMatches = sorted(goodMatches, key=lambda x: x.distance)
+    
+    # Select top 3 matches
+    goodMatches = goodMatches[:10]
+    
+
     # Visualise SIFT
     # frame1withKeypoints = cv2.drawKeypoints(referenceImage, kp1, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     # showImage(frame1withKeypoints, 'Frame 1')
