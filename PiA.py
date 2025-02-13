@@ -4,6 +4,7 @@ from datetime import datetime
 from time import sleep
 from comms.updateJSON import updateJSON
 import cv2
+from cameras import *
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, lon=0.00, lat=0.00):
@@ -18,7 +19,7 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     # Retrieve slave images and data
     receive_images(save_location, server_socket, conn)  
     # send rotational stage control signal
-    #TODO write function to translate pixel coords to angle
+    pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
@@ -28,6 +29,8 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
+RESOLUTION = (4608,2592)
+FOV = (102,67)
 
 if __name__ == "__main__":
     # Setup cameras and GPIO
