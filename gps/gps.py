@@ -2,6 +2,7 @@ import serial
 import pynmea2
 import math
 import time
+import numpy as np
 
 class Neo6M:
     def __init__(self, port="/dev/ttyAMA0", baudrate=9600, timeout=1, distance_threshold=10, movement_callback=None):
@@ -12,6 +13,11 @@ class Neo6M:
         self.distance_threshold = distance_threshold
         self.last_location = (0,0)
         self.movement_callback = movement_callback
+
+        #TO REMOVE
+        self._dummy_coords_index = 0
+        self._dummy_x_coords = np.linspace(55.844216,55.853709,50)
+        self._dummy_y_coords = np.linspace(-4.245121,-4.233920,50)
 
     def read_raw_data(self):
         """Reads raw NMEA sentence from the GPS module. Returns Raw NMEA sentence as a string or None if no data is available."""
@@ -75,6 +81,14 @@ class Neo6M:
                         self.movement_callback(location)
                 
             time.sleep(1)
+
+    def get_dummy_gps_coords(self):
+        self._dummy_coords_index += 1
+        if self._dummy_coords_index > 49:
+            print("At end of dummy coords")
+            return (self._dummy_x_coords[49],self._dummy_y_coords[49])
+        else:
+            return (self._dummy_x_coords[self._dummy_coords_index],self._dummy_y_coords[self._dummy_coords_index])
 
     def close(self):
         """Closes the serial connection."""
