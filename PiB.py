@@ -2,6 +2,7 @@ from object_detection.object_detection import *
 from comms.send import *
 from cameras import *
 from time import sleep
+import logging
 
 def on_trigger(rgb_model):
     # Capture images
@@ -28,18 +29,31 @@ PORT = 5002
 PATH = "./captures/"
 
 if __name__ == "__main__":
+    # Setup Logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="{asctime} - {levelname} - {name}: {message}",style="{",datefmt="%Y-%m-%d %H:%M",
+        handlers=[
+        logging.FileHandler("piB.log"),
+        logging.StreamHandler()
+        ])
+    logging.info("##### Start up new sesson. #####")
     try:
         # Setup cameras and capture images
         cams = setup_cameras()
+        logging.debug("Setup cameras.")
         # Make connection with PiA
         client_socket = make_client_connection(IP, PORT)
+        logging.debug("Connected to PiA")
         # Setup object detection model
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
+        logging.debug("Loaded RGB object detection model.")
 
         # Poll for trigger capture signal
         capture_triggered = False
         while not capture_triggered:
             if receive_capture_request(client_socket) == 1:
+                logging.info("Triggered Capture.")
                 on_trigger(rgb_model)
                 capture_triggered = True
         
