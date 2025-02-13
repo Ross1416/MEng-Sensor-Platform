@@ -22,8 +22,8 @@ def on_rotate():
     pass
 
 
-# IP = "10.12.23.188"
-IP = "hsiA.local"
+IP = "10.12.23.188"
+# IP = "hsiA.local"
 PORT = 5002
 PATH = "./captures/"
 
