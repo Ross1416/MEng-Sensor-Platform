@@ -71,12 +71,14 @@ class Neo6M:
 
     def wait_for_movement(self):
         """Holds until distance moved > {distance_threshold} and triggers callback function if provided and exits."""
+        distance_moved = -99
         while distance_moved < self.distance_threshold:
             location = self.get_location()
             if location:
                 distance_moved = self.haversine(location, self.last_location)
                 
                 if distance_moved >= self.distance_threshold:
+                    self.last_location - location
                     if self.movement_callback:
                         self.movement_callback(location)
                 
@@ -95,9 +97,11 @@ class Neo6M:
         if self.connection and self.connection.is_open:
             self.connection.close()
 
+def callback(loc):
+    print(f"Trigger @ {loc}")
 
 if __name__ == "__main__":
-    gps = Neo6M(port="/dev/ttyAMA0")
+    gps = Neo6M(port="/dev/ttyAMA0",distance_threshold=10, movement_callback=callback)
 
     location = gps.get_location()
     if location:
@@ -106,5 +110,8 @@ if __name__ == "__main__":
         )
     else:
         print("No GPS fix.")
+
+    while True:
+        gps.wait_for_movement()
 
     gps.close()
