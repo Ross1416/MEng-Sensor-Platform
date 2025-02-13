@@ -25,7 +25,7 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     # Updates json and moves images to correct folder
     #TODO (SD): update json test script
     uid = str(lon)+str(lat)
-    updateJSON(uid, lon, lat, objects)
+    updateJSON(uid, lon, lat, objects,frames[0])
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
@@ -49,4 +49,4 @@ if __name__ == "__main__":
 
         new_scan(rgb_model)       
         print("Completed scan!") 
-        cv2.waitKey(0)
+        input("Press key to continue...")
