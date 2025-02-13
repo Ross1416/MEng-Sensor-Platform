@@ -2,17 +2,19 @@ from object_detection.object_detection import *
 from comms.receive import *
 from datetime import datetime
 from time import sleep
+from comms.updateJSON import updateJSON
+import cv2
 
 # Triggers when change in GPS location
-def new_scan(rgb_model):
+def new_scan(rgb_model, lon=0.00, lat=0.00):
     # Captures 2 images
     frames = capture(cams, "PiA", save_location)
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
     # Perform object detection
-    results = []
+    objects = []
     for f in frames:
-        results.append(object_detection(rgb_model,f))
+        objects.append(object_detection(rgb_model,f))
     # Retrieve slave images and data
     receive_images(save_location, server_socket, conn)  
     # send rotational stage control signal
@@ -21,6 +23,8 @@ def new_scan(rgb_model):
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
     #TODO (SD): update json test script
+    uid = str(lon)+str(lat)
+    updateJSON(uid, lon, lat, objects)
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
@@ -40,6 +44,6 @@ if __name__ == "__main__":
         timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
         save_location = f"./capture/{timestamp}-capture/"
 
-        new_scan(rgb_model)        
-        break
-
+        new_scan(rgb_model)       
+        print("Completed scan!") 
+        cv2.waitKey(0)
