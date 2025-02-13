@@ -5,6 +5,7 @@ from time import sleep
 from comms.updateJSON import updateJSON
 import cv2
 from cameras import *
+import logging 
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, lon=0.00, lat=0.00):
@@ -32,12 +33,24 @@ RESOLUTION = (4608,2592)
 FOV = (102,67)
 
 if __name__ == "__main__":
+    # Setup Logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="{asctime} - {levelname} - {name}: {message}",style="{",datefmt="%Y-%m-%d %H:%M",
+        handlers=[
+        logging.FileHandler("piA.log"),
+        logging.StreamHandler()
+        ])
+    logging.info("##### Start up new sesson. #####")
     # Setup cameras and GPIO
     cams = setup_cameras()
+    logging.debug("Setup cameras.")
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
+    logging.debug("Connected to PiB")
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
+    logging.debug("Loaded RGB object detection model.")
 
     #Mainloop
     while True:
@@ -47,5 +60,5 @@ if __name__ == "__main__":
         save_location = f"./capture/{timestamp}-capture/"
 
         new_scan(rgb_model)       
-        print("Completed scan!") 
+        logging.info("Completed scan.")
         input("Press key to continue...")
