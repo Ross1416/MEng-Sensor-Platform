@@ -54,8 +54,8 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     goodMatches = sorted(goodMatches, key=lambda x: x.distance)
     
     # Keep only top 3 matches
-    if len(goodMatches) > 30:
-        goodMatches = goodMatches[:30]
+    if len(goodMatches) > 20:
+        goodMatches = goodMatches[:20]
     
     # Draw matches
     img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
@@ -81,8 +81,7 @@ def applyAffine(img1, img2, src_pts, dst_pts, ransac_threshold=3):
     transformed = cv2.warpAffine(img2, matrix, (width*4, height*4))
     # transformed = cv2.warpPerspective(img2, H, (width*4, height*4))
     
-    # Place the reference im
-    # age on top
+    # Place the reference image on top
     transformed[:height,:width,:] = img1
 
     # Crop
@@ -170,6 +169,27 @@ def unwarp(img):
 
     return warped
 
+
+def estimatePureTranslation(matches, kp1, kp2):
+    """ Estimate pure translation from matched keypoints. """
+    translations = []
+    
+    for match in matches:
+        pt1 = np.array(kp1[match.queryIdx].pt)
+        pt2 = np.array(kp2[match.trainIdx].pt)
+        translations.append(pt2 - pt1)
+    
+    translations = np.array(translations)
+    
+    # Use the median translation to reduce the effect of outliers
+    tx, ty = np.median(translations, axis=0)
+    
+    # Construct the affine matrix for pure translation
+    translation_matrix = np.array([[1, 0, tx],
+                                   [0, 1, ty]], dtype=np.float32)
+    
+    return translation_matrix
+
 ### Warp raw images for improved stitching ####
 def cylindricalProjection(img):
 
@@ -228,30 +248,28 @@ image2 = cv2.imread('./4/3.JPG')
 image3 = cv2.imread('./4/4.JPG')
 image4 = cv2.imread('./4/1.JPG')
 
-image1 = cylindricalProjection(image1)
-image2 = cylindricalProjection(image2)
-image3 = cylindricalProjection(image3)
-image4 = cylindricalProjection(image4)
+# image1 = cylindricalProjection(image1)
+# image2 = cylindricalProjection(image2)
+# image3 = cylindricalProjection(image3)
+# image4 = cylindricalProjection(image4)
 
-image = np.hstack((image1, image2))
+# image = np.hstack((image1, image2))
 
 
-# src_pts, dst_pts = findKeyPoints(image1, image2)
+src_pts, dst_pts = findKeyPoints(image1, image2)
 
-# transformed = applyAffine(image1, image2, dst_pts, src_pts)
+transformed = applyAffine(image1, image2, dst_pts, src_pts)
 
-# src_pts, dst_pts = findKeyPoints(transformed, image3)
+src_pts, dst_pts = findKeyPoints(transformed, image3)
 
-# transformed = applyAffine(transformed, image3, dst_pts, src_pts)
+transformed = applyAffine(transformed, image3, dst_pts, src_pts)
 
-# src_pts, dst_pts = findKeyPoints(transformed, image4)
+src_pts, dst_pts = findKeyPoints(transformed, image4)
 
-# transformed = applyAffine(transformed, image4, dst_pts, src_pts)
+transformed = applyAffine(transformed, image4, dst_pts, src_pts)
 
-# showImage(transformed)
+showImage(transformed)
 
-# transformed = unwarp(transformed)
+transformed = unwarp(transformed)
 
-# showImage(transformed)
-
-fillColor(image)
+showImage(transformed)
