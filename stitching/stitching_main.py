@@ -17,7 +17,8 @@ def performPanoramicStitching(image1, image2, image3, image4, defaultAffine=defa
     frobenius_norm = np.linalg.norm(calculatedAffine - defaultAffine, 'fro')
     
     # Use the most suitable transform
-    if frobenius_norm < 300:
+    # if frobenius_norm < 300:
+    if True:
         panorama = applyTransform(image1, image2, calculatedAffine)
     else:
         panorama = applyTransform(image1, image2, defaultAffine)
@@ -31,7 +32,8 @@ def performPanoramicStitching(image1, image2, image3, image4, defaultAffine=defa
     frobenius_norm = np.linalg.norm(calculatedAffine - defaultAffine, 'fro')
     
     # Use the most suitable transform
-    if frobenius_norm < 300:
+    # if frobenius_norm < 300:
+    if True:
         panorama = applyTransform(panorama, image3, calculatedAffine)
     else:
         panorama = applyTransform(panorama, image3, defaultAffine)
@@ -45,7 +47,8 @@ def performPanoramicStitching(image1, image2, image3, image4, defaultAffine=defa
     frobenius_norm = np.linalg.norm(calculatedAffine - defaultAffine, 'fro')
     
     # Use the most suitable transform
-    if frobenius_norm < 300:
+    # if frobenius_norm < 300:
+    if True:
         panorama = applyTransform(panorama, image4, calculatedAffine)
     else:
         panorama = applyTransform(panorama, image4, defaultAffine)
