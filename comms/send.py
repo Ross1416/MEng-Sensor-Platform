@@ -6,16 +6,20 @@ from os import listdir
 from time import sleep
 
 def make_client_connection(ip, port):
-    try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((ip, port))
-        print(f"Connected to {ip}:{port}")
-        print(type(client_socket))
-        return client_socket
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        return
+    # TODO: Add timeout?
+    while True:
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((ip, port))
+            print(f"Connected to {ip}:{port}")
+            print(type(client_socket))
+            return client_socket
+        except ConnectionRefusedError:
+            print("Connection failed, retrying in 2 seconds...")
+            sleep(2)
+        except Exception as e:
+            print(f"Error: {e}")
+            sleep(2)
 
 
 def list_images(folder_path, client_socket):
