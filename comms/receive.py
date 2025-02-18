@@ -3,6 +3,7 @@
 import socket
 import os
 import pickle
+import logging
 
 def make_server_connection(host, port):
     try:
@@ -72,9 +73,16 @@ def receive_images(save_location, server_socket, conn):
 def receive_image_arrays(conn):
     # Get number of images
     num_images = conn.recv(8)   
+    if not num_images:
+        return []
+    num_images = int.from_bytes(num_images, byteorder='big')
+    logging.debug(f"Receiving {num_images} frames.")
+
     frames = []
     if num_images:
-        for img in num_images:
+        for i in range(num_images):
+            logging.debug(f"Receiving frame {i}.")
+
             data_size = conn.recv(8)  # First 8 bytes for size
             if not data_size:
                 break
@@ -85,6 +93,8 @@ def receive_image_arrays(conn):
                 if not packet:
                     break
                 data += packet
+            logging.debug(f"Frame received.")
+
             frames.append(pickle.loads(data))
 
     return frames

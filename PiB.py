@@ -24,7 +24,7 @@ def on_rotate():
     pass
 
 
-IP = "10.12.23.188"
+IP = "10.12.101.192"
 # IP = "hsiA.local"
 PORT = 5002
 PATH = "./captures/"
