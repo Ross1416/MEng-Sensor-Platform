@@ -145,10 +145,38 @@ def defaultAffineTransform(image1=None, image2=None):
     
     return matrix
 
+def unwarp4(image):
+
+    # Binary threshold
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, binary = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    showImage(binary)
+
+    kernel = np.ones((3, 3), np.uint8)
+    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+
+    showImage(binary)
+
+    height, width = binary.shape
+    corners = np.zeros_like(binary)
+
+    edges = cv2.Canny(binary, 100, 100)
+
+    kernel = np.ones((5,5), np.uint8)  # Adjust kernel size as needed
+    filled = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+    showImage(filled)
+
+    return image
+
 if __name__ == "__main__":
-    image1 = cv2.imread('./image4.png')
-    image2 = cv2.imread('./image1.png')
-    matrix = defaultAffineTransform(image1, image2)
+    # image1 = cv2.imread('./image4.png')
+    # image2 = cv2.imread('./image1.png')
+    
+    # matrix = defaultAffineTransform(image1, image2)
+    image = cv2.imread('./panorama.png')
+    image = unwarp4(image)
+    showImage(image)
+    
 
 
 
