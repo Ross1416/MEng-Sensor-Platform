@@ -9,6 +9,7 @@ def object_detection(model, frame):
         coords = box.xywh.tolist()[0]
         conf = math.ceil((box.conf[0] * 100)) / 100
         results.append([label,coords,conf])
+    print(f"Object detection results:\n{results}")
     return results
 
 def pixel_to_angle(pixel,res,fov):
