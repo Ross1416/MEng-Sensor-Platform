@@ -9,12 +9,21 @@ import requests
     # pins: [
     #   {
     #       geo_coords: [lon, lat]
-    #       imgRef: './img
+    #       panorama_ref: './imgref'
     #       objects: [
     #           {
-    #           pixel_coords: [x y]
-    #           RGB_classifcation: string
+    #           x1: int
+    #           y1: int
+    #           x2: int
+    #           y2: int   
+    #           RGB_classification: string
+    #           RGB_confidence: float
+    #           HS_classification: {
+    #               material1: percentage
+    #               material2: percentage
+    #           }        
     #           HS_classification: string
+    #           HS_confidence: float
     #           distance: double
     #           } ...
     #       ]
@@ -83,16 +92,17 @@ def dummydataJSON():
             "geo_coords": [55.88,-4.32],
             "panorama_ref": "./images/img1.jpg",
             "objects": [{
-                "pixel_coords": ["300px","150px", "200px", "200px"], # top, left, width, height
-                "RGB_classification": "Building",
-                "HS_classification": {
-                    "wood": '20',
-                    "plastic": '70',
-                    "stone": '10'
-                }
-            }]
-        }]
-    }
+                "x1": 100,
+                "y1": 100,
+                "x2": 400,
+                "y2": 400,
+                "RGB_classification": 'dog',
+                "RGB_confidence": 0.8,
+                "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
+                "HS_confidence":0.7,
+                "distance":10}
+            ]}]
+        }
     try: 
         with open(file_path, "w") as file:
             json.dump(dummy_data, file, indent=4)
@@ -106,10 +116,10 @@ def format_results(object_detection):
     results_dict_arr = []
     for res in object_detection:
         print(f"individual res: {res}")
-        results_dict_arr.append({"x":res[0][1][0],
-                            "y":res[0][1][1],
-                            "w":res[0][1][2],
-                            "h":res[0][1][3],
+        results_dict_arr.append({"x1":res[0][1][0],
+                            "y1":res[0][1][1],
+                            "x2":res[0][1][2],
+                            "y2":res[0][1][3],
                             "RGB_classification":res[0][0],
                             "RGB_confidence":res[0][2],
                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
