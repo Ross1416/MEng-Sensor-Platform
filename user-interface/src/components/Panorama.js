@@ -42,10 +42,6 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
         stateFunction(!state)
     }
 
-    
-
-
-
     return (
         <div className='panorama-container'>
             {panorama ? (
@@ -56,9 +52,9 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
             }
 
             {objects?.map((item, index) => (
-                <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.left, top: item.top, width: item.width, height: item.height, display: showMaterials || showObjects?'block':'none'}}>
+                <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.x1, top: item.y1, right: item.x2, bottom: item.y2, display: showMaterials || showObjects?'block':'none'}}>
                     <p>{showObjects ? item.RGB_classification : ''}</p>
-                    <p>{showMaterials ? item.HS_classification : ''}</p>
+                    <p>{showMaterials ? String(item.HS_classification) : ''}</p>
                     <p>{showDistances ? item.distance + ' m': ''}</p>
                 </div>
             ))}
