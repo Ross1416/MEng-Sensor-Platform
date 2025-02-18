@@ -6,6 +6,7 @@ from os import listdir
 from time import sleep
 import pickle
 import logging
+import cv2
 
 def make_client_connection(ip, port):
     # TODO: Add timeout?
@@ -110,8 +111,9 @@ def send_image_arrays(client_socket, frames):
     client_socket.send(len(frames).to_bytes(8, byteorder='big'))
     # Send all images
     for img in frames:
-        logging.debug(f"Sending frame")
+        img_encode = cv2.imencode('.jpg', img)[1] # Compress image
         data = pickle.dumps(img)
+        logging.debug(f"Sending frame of size {len(data)}")
         client_socket.send(len(data).to_bytes(8, byteorder='big'))
         client_socket.sendall(data)
         logging.debug(f"Frame sent.")
