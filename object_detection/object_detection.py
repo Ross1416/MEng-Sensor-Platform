@@ -1,6 +1,4 @@
 from ultralytics import YOLOWorld
-from picamera2 import Picamera2
-from libcamera import controls
 import math                                                        
 
 def object_detection(model, frame):

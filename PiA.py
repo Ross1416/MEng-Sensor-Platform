@@ -5,6 +5,7 @@ from time import sleep
 from comms.updateJSON import updateJSON
 import cv2
 from cameras import *
+import logging 
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, lon=0.00, lat=0.00):
@@ -19,11 +20,10 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     # Retrieve slave images and data
     receive_images(save_location, server_socket, conn)  
     # send rotational stage control signal
-    pixel_to_angle((50,100),RESOLUTION,FOV)
+    angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
-    #TODO (SD): update json test script
     uid = str(lon)+str(lat)
     updateJSON(uid, lon, lat, objects,frames[0])
 
@@ -33,12 +33,24 @@ RESOLUTION = (4608,2592)
 FOV = (102,67)
 
 if __name__ == "__main__":
+    # Setup Logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="{asctime} - {levelname} - {name}: {message}",style="{",datefmt="%Y-%m-%d %H:%M",
+        handlers=[
+        logging.FileHandler("piA.log"),
+        logging.StreamHandler()
+        ])
+    logging.info("##### Start up new sesson. #####")
     # Setup cameras and GPIO
     cams = setup_cameras()
+    logging.debug("Setup cameras.")
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
+    logging.debug("Connected to PiB")
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
+    logging.debug("Loaded RGB object detection model.")
 
     #Mainloop
     while True:
@@ -48,5 +60,5 @@ if __name__ == "__main__":
         save_location = f"./capture/{timestamp}-capture/"
 
         new_scan(rgb_model)       
-        print("Completed scan!") 
+        logging.info("Completed scan.")
         input("Press key to continue...")
