@@ -4,6 +4,7 @@ import socket
 import os
 import pickle
 import logging
+import cv2
 
 def make_server_connection(host, port):
     try:
@@ -87,15 +88,19 @@ def receive_image_arrays(conn):
             if not data_size:
                 break
             data_size = int.from_bytes(data_size, byteorder='big')
+            logging.debug(f"Receiving frame {i} of size {data_size}.")
             data = b""
             while len(data) < data_size:
-                packet = conn.recv(4096)  # Receive in chunks
+                packet = conn.recv(min(4096, data_size - len(data)))
                 if not packet:
+                    logging.error(f"Packet lost.")
                     break
                 data += packet
             logging.debug(f"Frame received.")
 
-            frames.append(pickle.loads(data))
+            img = pickle.loads(data)
+            img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+            frames.append(img)
 
     return frames
 
