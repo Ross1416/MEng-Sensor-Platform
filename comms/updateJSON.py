@@ -51,7 +51,7 @@ def updateJSON(uid, lon, lat, objects,image):
 
     try:    
         # Specify JSON path and read data
-        file_path = "../user-interface/api/data.json"
+        file_path = "./user-interface/api/data.json"
         with open(file_path, "r") as file:
             data = json.load(file)
 
@@ -59,7 +59,7 @@ def updateJSON(uid, lon, lat, objects,image):
         newPin = {
             "geo_coords": [lon, lat],
             "panorama_ref": "./images/img" + uid + ".jpg",
-            "objects": objects
+            "objects": format_results(objects)
         }
 
         # Append update
@@ -100,6 +100,21 @@ def dummydataJSON():
     except Exception as e:
         print(f"An error occurred whilst resetting JSON: {e}")
 
+def format_results(object_detection):
+    # TODO: Add HS results and distance
+    results_dict_arr = []
+    for res in object_detection:
+        results_dict_arr.append({"x":res[1][0],
+                             "y":res[1][1],
+                             "w":res[1][2],
+                             "h":res[1][3],
+                             "RGB_classification":res[0],
+                             "RGB_confidence":res[2],
+                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
+                             "HS_confidence":0.7,
+                             "distance":10})
+        
+    return results_dict_arr
 
 if __name__ == "__main__":
     dummydataJSON()
