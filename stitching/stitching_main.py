@@ -1,4 +1,4 @@
-from stitching_functions import *
+from stitching.stitching_functions import *
 import cv2
 import numpy as np
 
@@ -8,6 +8,8 @@ def performPanoramicStitching(image1, image2, image3, image4, defaultAffine=defa
     image3 = cylindricalProjection(image3)
     image4 = cylindricalProjection(image4)
 
+    panorama = cv2.hconcat([image1, image2, image3, image4])
+    return panorama
     # FIRST STITCH
     # Find Key Points & Calculate Transform
     src_pts, dst_pts = findKeyPoints(image1, image2)
