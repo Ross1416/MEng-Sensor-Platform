@@ -5,6 +5,7 @@ import socket
 from os import listdir
 from time import sleep
 import pickle
+import logging
 
 def make_client_connection(ip, port):
     # TODO: Add timeout?
@@ -105,12 +106,16 @@ def send_images(folder_path, client_socket):
 def send_image_arrays(client_socket, frames):
     """Takes in an array of frames and sends them over socekt"""
     # Send number of frames to expect
+    logging.debug(f"Sending {len(frames)} frames.")
     client_socket.send(len(frames).to_bytes(8, byteorder='big'))
     # Send all images
     for img in frames:
-        data = pickle.dump(img)
+        logging.debug(f"Sending frame")
+        data = pickle.dumps(img)
         client_socket.send(len(data).to_bytes(8, byteorder='big'))
         client_socket.sendall(data)
+        logging.debug(f"Frame sent.")
+
 
 
 def receive_capture_request(client_socket):
