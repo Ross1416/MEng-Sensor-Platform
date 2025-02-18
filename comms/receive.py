@@ -2,6 +2,7 @@
 
 import socket
 import os
+import pickle
 
 def make_server_connection(host, port):
     try:
@@ -67,6 +68,26 @@ def receive_images(save_location, server_socket, conn):
     finally:
         server_socket.close()
         print("Connection ended.")
+
+def receive_image_arrays(conn):
+    # Get number of images
+    num_images = conn.recv(8)   
+    frames = []
+    if num_images:
+        for img in num_images:
+            data_size = conn.recv(8)  # First 8 bytes for size
+            if not data_size:
+                break
+            data_size = int.from_bytes(data_size, byteorder='big')
+            data = b""
+            while len(data) < data_size:
+                packet = conn.recv(4096)  # Receive in chunks
+                if not packet:
+                    break
+                data += packet
+            frames.append(pickle.loads(data))
+
+    return frames
 
 if __name__ == "__main__":
     port = 5002

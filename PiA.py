@@ -19,7 +19,12 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     for f in frames:
         objects.append(object_detection(rgb_model,f))
     # Retrieve slave images and data
-    receive_images(save_location, server_socket, conn)  
+    # receive_images(save_location, server_socket, conn)  
+    b_frames = receive_image_arrays(conn)
+    print(f"length of frames before {len(frames)}")
+    frames.append(b_frames)
+    print(f"length of frames after {len(frames)}")
+
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
