@@ -40,38 +40,38 @@ def resetJSON(filename="New Scan"):
 
 # Save images to front-end, then update JSON with latest data
 def updateJSON(uid, lon, lat, objects,image):
-    try:
-        # Specify panorama path
-        save_path = './user-interface/public/images/img' + uid + '.jpg'
-        # Write image
-        cv2.imwrite(save_path, image)
-        pass
-    except Exception as e:
-            print(f"An error occurred whilst saving images: {e}")
+    # try:
+    # Specify panorama path
+    save_path = './user-interface/public/images/img' + uid + '.jpg'
+    # Write image
+    cv2.imwrite(save_path, image)
+    # pass
+    # except Exception as e:
+    #         print(f"An error occurred whilst saving images: {e}")
 
-    try:    
-        # Specify JSON path and read data
-        file_path = "../user-interface/api/data.json"
-        with open(file_path, "r") as file:
-            data = json.load(file)
+    # try:    
+    # Specify JSON path and read data
+    file_path = "./user-interface/api/data.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
 
-        # Construct dictionary with new data
-        newPin = {
-            "geo_coords": [lon, lat],
-            "panorama_ref": "./images/img" + uid + ".jpg",
-            "objects": objects
-        }
+    # Construct dictionary with new data
+    newPin = {
+        "geo_coords": [lon, lat],
+        "panorama_ref": "./images/img" + uid + ".jpg",
+        "objects": format_results(objects)
+    }
 
-        # Append update
-        data["pins"].append(newPin)
+    # Append update
+    data["pins"].append(newPin)
 
-        # Write to file
-        with open(file_path, "w") as file:
-            json.dump(data, file, indent=4)
-        print("JSON file updated successfully.")
+    # Write to file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+    print("JSON file updated successfully.")
 
-    except Exception as e:
-            print(f"An error occurred whilst updating JSON: {e}")
+    # except Exception as e:
+    #         print(f"An error occurred whilst updating JSON: {e}")
 
 
 # Populate the JSON file with dummy data
@@ -100,6 +100,21 @@ def dummydataJSON():
     except Exception as e:
         print(f"An error occurred whilst resetting JSON: {e}")
 
+def format_results(object_detection):
+    # TODO: Add HS results and distance
+    results_dict_arr = []
+    for res in object_detection:
+        results_dict_arr.append({"x":res[1][0],
+                             "y":res[1][1],
+                             "w":res[1][2],
+                             "h":res[1][3],
+                             "RGB_classification":res[0],
+                             "RGB_confidence":res[2],
+                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
+                             "HS_confidence":0.7,
+                             "distance":10})
+        
+    return results_dict_arr
 
 if __name__ == "__main__":
     dummydataJSON()
