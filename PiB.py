@@ -12,7 +12,8 @@ def on_trigger(rgb_model):
     for f in frames:
         results.append(object_detection(rgb_model,f))
     # Send images to PiA
-    send_images(PATH, client_socket)
+    # send_images(PATH, client_socket)
+    send_image_arrays(client_socket,frames)
     
 
 def on_rotate():
