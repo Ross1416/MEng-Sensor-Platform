@@ -6,7 +6,7 @@ def object_detection(model, frame):
     results = []
     for box in detections[0].boxes:
         label = model.names[int(box.cls[0])]
-        coords = box.xywh.tolist()
+        coords = box.xywh.tolist()[0]
         conf = math.ceil((box.conf[0] * 100)) / 100
         results.append([label,coords,conf])
     return results
