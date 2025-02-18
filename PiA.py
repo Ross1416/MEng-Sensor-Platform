@@ -6,6 +6,7 @@ from comms.updateJSON import updateJSON
 import cv2
 from cameras import *
 import logging 
+from stitching.stitching_main import performPanoramicStitching
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, lon=0.00, lat=0.00):
@@ -22,10 +23,14 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
+    # TO DO: clean this up
+    image3 = cv2.imread(save_location+'PiB_0.jpg')
+    image4 = cv2.imread(save_location+'PiB_1.jpg')
+    panorama = performPanoramicStitching(frames[0], frames[1], image3, image4)
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
-    updateJSON(uid, lon, lat, objects,frames[0])
+    updateJSON(uid, lon, lat, objects, panorama)
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
