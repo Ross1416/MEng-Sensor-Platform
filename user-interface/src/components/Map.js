@@ -10,19 +10,18 @@ const UpdateMapCenter = ({ newCenter }) => {
     map.setView(newCenter);
 };
 
-// Add a new pin
-const AddPinOnClick = ({pins, setPins }) => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng; // Get latitude and longitude of the click
-        setPins((pins) => [
-          ...pins,
-          { id: Date.now(), coords: [lat, lng], img: ''},
-        ]);
-      },
-    });
-  };
-
+// // Add a new pin
+// const AddPinOnClick = ({pins, setPins }) => {
+//     useMapEvents({
+//       click(e) {
+//         const { lat, lng } = e.latlng; // Get latitude and longitude of the click
+//         setPins((pins) => [
+//           ...pins,
+//           { id: Date.now(), coords: [lat, lng], img: ''},
+//         ]);
+//       },
+//     });
+//   };
 
 
 export function Map({setPanorama, pins, setPins, setObjects}) {
@@ -44,15 +43,11 @@ export function Map({setPanorama, pins, setPins, setObjects}) {
           }
     }, [])      
 
-
-
-
     const handlePinClick = (pin) => {
       // let image = require(pin.imgRef)
       // let image = './images/img1.jpg'
-      setPanorama(pin.imgRef)
+      setPanorama(pin.panorama_ref)
       setObjects(pin.objects)
-      console.log(pin.objects)
     };
   
     
@@ -70,17 +65,17 @@ export function Map({setPanorama, pins, setPins, setObjects}) {
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           />
           {pins?.map((pin) => (
-                  <Marker key={pin.id} position={pin.coords} icon={customIcon} eventHandlers={{
+                  <Marker key={pin.id} position={pin.geo_coords} icon={customIcon} eventHandlers={{
                     click: () => handlePinClick(pin),
                   }}>
                   <Popup>
                       <strong>{pin.name}</strong> <br /> Coordinates:{" "}
-                      {pin.coords.join(", ")}
+                      {pin.geo_coords.join(", ")}
                   </Popup>
                   </Marker>
               ))}
           {/* <UpdateMapCenter newCenter={mapCenter} /> */}
-          <AddPinOnClick pins={pins} setPins={setPins} />
+          {/* <AddPinOnClick pins={pins} setPins={setPins} /> */}
       </MapContainer>
 
     );
