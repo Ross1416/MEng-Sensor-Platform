@@ -104,17 +104,16 @@ def format_results(object_detection):
     # TODO: Add HS results and distance
     print(f"object detection arg {object_detection}")
     results_dict_arr = []
-    for i in range(len(object_detection)):
-        for res in object_detection:
-            print(f"individual res: {res}")
-            results_dict_arr.append({"x":res[i][1][0],
-                                "y":res[i][1][1],
-                                "w":res[i][1][2],
-                                "h":res[i][1][3],
-                                "RGB_classification":res[i][0],
-                                "RGB_confidence":res[i][2],
-                                "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
-                                "HS_confidence":0.7,
+    for res in object_detection:
+        print(f"individual res: {res}")
+        results_dict_arr.append({"x":res[0][1][0],
+                            "y":res[0][1][1],
+                            "w":res[0][1][2],
+                            "h":res[0][1][3],
+                            "RGB_classification":res[0][0],
+                            "RGB_confidence":res[0][2],
+                            "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
+                            "HS_confidence":0.7,
                                 "distance":10})
         
     return results_dict_arr
