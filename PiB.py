@@ -51,12 +51,12 @@ if __name__ == "__main__":
         logging.debug("Loaded RGB object detection model.")
 
         # Poll for trigger capture signal
-        capture_triggered = False
-        while not capture_triggered:
+        while True:
             if receive_capture_request(client_socket) == 1:
                 logging.info("Triggered Capture.")
                 on_trigger(rgb_model)
                 capture_triggered = True
+            sleep(1)
         
 
     except Exception as e:
