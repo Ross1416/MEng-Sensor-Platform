@@ -111,7 +111,7 @@ def send_image_arrays(client_socket, frames):
     client_socket.send(len(frames).to_bytes(8, byteorder='big'))
     # Send all images
     for img in frames:
-        img_encode = cv2.imencode('.jpg', img)[1] # Compress image
+        img = cv2.imencode('.jpg', img)[1] # Compress image
         data = pickle.dumps(img)
         logging.debug(f"Sending frame of size {len(data)}")
         client_socket.send(len(data).to_bytes(8, byteorder='big'))
