@@ -6,47 +6,64 @@ import { Panorama } from './components/Panorama.js';
 
 function App() {
   
-  const [panorama, setPanorama] = useState();
-  const [locationName, setLocationName] = useState('unnamed location')
-  const [pins, setPins] = useState([])
-  const [objects, setObjects] = useState([])
-  const [enviroments, setEnvirorements] = useState()
-  const [platformActive, setPlatformActive] = useState(1) // 1 for active, 2 for test, 0 for deactive
+
+  // ENVIROREMENT DATA
+  const [panorama, setPanorama] = useState(); // image reference to panorama
+  const [locationName, setLocationName] = useState('New Enviroment') // enviroment name
+  const [pins, setPins] = useState([]) // pins in the enviroment
+  const [objects, setObjects] = useState([]) // objects in a pin
+  const [enviroments, setEnvirorements] = useState() // a list of possible enviroments saved on device
+  const [selectedEnviroment, setSelectedEnviroment] = useState('scan1.json') // a list of possible enviroments saved on device
+
+  // DEVICE CONTROL
+  const [platformActive, setPlatformActive] = useState(1) // 1 for active device, 2 for test, 0 for deactive
   
-  const refreshData = () => {
-    fetch("/getData").then(
-      res => res.json()
-    ).then(
-      data => {
-        setLocationName(data.location)
+
+  const refreshData = async () => {
+    try {
+      fetch("/getData", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({selectedEnviroment: selectedEnviroment}),
+      }).then(
+        resp => resp.json())
+      .then( data => {
+        // console.log(data)
         setPins(data.pins)
-      }
-    )
+        setLocationName(data.location)
+      });
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  const refreshJSON = () => {
+  // get list of files saved on device
+  const recieveFilenames = () => {
     fetch("/getJSONfilenames").then(
       res => res.json()
     ).then(
       data => {
         setEnvirorements(data)
-        console.log(enviroments)
       }
     )
   }
 
   useEffect(()=> {
-    refreshJSON()
+    recieveFilenames()
   }, [])
   
   useEffect(()=> {
     const interval = setInterval(() => {
       refreshData();
     }, 1000);
-
+  
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
-    }, [])
+  }, [refreshData])
+
+  useEffect(()=>{
+    refreshData()
+  }, [selectedEnviroment])
 
   const updatePlatformActiveStatus = async () => {
       if (platformActive == 0) {
@@ -54,7 +71,6 @@ function App() {
       } else if (platformActive == 1) {
         setPlatformActive(0)
       }
-      
       try {
         const resp = await fetch("/updatePlatformActiveStatus", {
           method: "POST",
@@ -74,7 +90,7 @@ function App() {
 
         <div className="dropdown">
           <label for="options">Choose a map:</label>
-          <select id="options">
+          <select id="options" value={selectedEnviroment} onChange={(event)=>setSelectedEnviroment(event.target.value)}>
 
             {enviroments?.map((item, index) => (
                 <option value={item}>{item}</option>
@@ -90,7 +106,7 @@ function App() {
           <input placeholder='Search...'/> 
           <button>{'↵'}</button>
         </div>
-        <h1>HYPERBOT</h1>
+        <h1>HYPERBRO</h1>
         
       </div>
       <div className='body'>

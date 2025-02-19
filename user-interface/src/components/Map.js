@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import '../styles/Map.css';
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
@@ -8,20 +8,6 @@ import L from "leaflet";
 const UpdateMapCenter = ({ newCenter }) => {
     const map = useMap();
 };
-
-// // Add a new pin
-// const AddPinOnClick = ({pins, setPins }) => {
-//     useMapEvents({
-//       click(e) {
-//         const { lat, lng } = e.latlng; // Get latitude and longitude of the click
-//         setPins((pins) => [
-//           ...pins,
-//           { id: Date.now(), coords: [lat, lng], img: ''},
-//         ]);
-//       },
-//     });
-//   };
-
 
 export function Map({setPanorama, pins, setPins, setObjects}) {
     
@@ -43,8 +29,6 @@ export function Map({setPanorama, pins, setPins, setObjects}) {
     }, [])      
 
     const handlePinClick = (pin) => {
-      // let image = require(pin.imgRef)
-      // let image = './images/img1.jpg'
       setPanorama(pin.panorama_ref)
       setObjects(pin.objects)
     };
@@ -57,8 +41,7 @@ export function Map({setPanorama, pins, setPins, setObjects}) {
           center={mapCenter} // Latitude and Longitude (e.g., London)
           zoom={14} // Zoom level
           >
-          
-
+        
           <TileLayer
               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
@@ -73,8 +56,6 @@ export function Map({setPanorama, pins, setPins, setObjects}) {
                   </Popup>
                   </Marker>
               ))}
-          {/* <UpdateMapCenter newCenter={mapCenter} /> */}
-          {/* <AddPinOnClick pins={pins} setPins={setPins} /> */}
       </MapContainer>
 
     );
