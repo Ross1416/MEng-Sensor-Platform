@@ -1,30 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
-import { render } from 'react-dom'
-// import {CubeOutline, LayersOutline, PinOutline, ThermometerOutline, BrushOutline, ArrowDownCircleOutline, RadioOutline } from 'react-ionicons'
-
 
 export function Panorama({panorama, objects, locationName, setLocationName}) {
 
-    // useEffect(() => {
-    //     // Fetch the photo URL from the backend
-    //     fetch("/api/photo") // Flask server URL
-    //     .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error(`Failed to fetch image: ${response.statusText}`);
-    //     }
-    //     return response.blob();
-    //   })
-    //   .then((blob) => {
-    //     const url = URL.createObjectURL(blob); // Create a URL for the image
-    //     setPhotoUrl(url); // Update state with the image URL
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching image:", error);
-    //   });
-    //   }, []);
-
-    const [defaultToggle, setDefaultToggle] = useState(false)
     const [showObjects, setShowObjects] = useState(false)
     const [showMaterials, setShowMaterials] = useState(false)
     const [showDistances, setShowDistances] = useState(false)
@@ -34,14 +12,12 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
     const [download, setDownload] = useState(false)
     const [connected, setConnected] = useState(false)
 
-    useEffect(()=> {
-        console.log(panorama)
-    }, [panorama])
-
+    // Toggle button change
     const toggleButton = (state, stateFunction) => {
         stateFunction(!state)
     }
 
+    // Update JSON with new location name
     const updateLocationName = async (event) => {
         setLocationName(event.target.value);
         try {
@@ -53,7 +29,7 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
         } catch (error) {
           console.log(error)
         }
-      };
+    };
 
 
     return (
@@ -111,12 +87,6 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
                 </button> */}
 
             </div>
-{/* 
-            <div className='topBar'>
-                <button>{'[]'}</button>
-                <button>{'[]'}</button>
-                <button>{'[]'}</button>
-            </div> */}
         </div>
     );
 }
