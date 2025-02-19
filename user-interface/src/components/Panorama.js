@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
 
-export function Panorama({panorama, objects, locationName, setLocationName}) {
+export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment}) {
 
     const [showObjects, setShowObjects] = useState(false)
     const [showMaterials, setShowMaterials] = useState(false)
@@ -24,7 +24,7 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
           const resp = await fetch("/updateLocationName", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({location: event.target.value}),
+            body: JSON.stringify({file: selectedEnviroment, location: event.target.value}),
           });
         } catch (error) {
           console.log(error)
@@ -50,7 +50,7 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
             ))}
             
             <div className='bottomBar'>
-                <input placeholder={locationName} onChange={updateLocationName}></input>
+                <input placeholder={selectedEnviroment} onChange={updateLocationName}></input>
                 {/* https://react-ionicons.netlify.app/ */}
                 <button style={{color: showObjects?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}>
                     Show Objects

@@ -1,6 +1,6 @@
 {
-    "location": "Edinburgh",
-    "status": 1,
+    "location": "Perthshire",
+    "status": 0,
     "pins": [
         {
             "geo_coords": [

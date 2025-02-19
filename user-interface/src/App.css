@@ -89,6 +89,39 @@
   font-weight: bold;
   color: white;
 }
+
+
+.new-button {
+  position: absolute;
+  right: 345px;
+  font-size: 18px;
+  top: 20px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: transparent;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+  border: 2px solid white;
+
+}
+
+.new-input {
+  position: absolute;
+  right: 390px;
+  width: 200px;
+  font-size: 18px;
+  top: 20px;
+  padding: 5px;
+  padding-left: 10px;
+  background-color: transparent;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+  border: 2px solid white;
+}
+
 .dropdown {
   position: absolute;
   left: 20px;
