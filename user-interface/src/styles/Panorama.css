@@ -33,9 +33,12 @@
     
 }
 
-.bottomBar h1 {
+.bottomBar input {
     font-size: 22px;
     margin-left: 5px;
+    background: none;
+    border: none;
+    text-align: center;
 }
 
 .overlay-square {

@@ -37,7 +37,8 @@ def resetJSON(filename="New Scan"):
     file_path = "../user-interface/api/data.json"
     blank_data = {
         "location": filename,
-        "pins": []
+        "pins": [],
+        "state": 0, # 0 for deactive, 1 for active, 2 for test
     }
     try: 
         with open(file_path, "w") as file:

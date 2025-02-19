@@ -1,5 +1,6 @@
 {
-    "location": "Glasgow",
+    "location": "My New Location",
+    "status": 1,
     "pins": [
         {
             "geo_coords": [
