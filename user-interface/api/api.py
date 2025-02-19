@@ -12,15 +12,17 @@ app = Flask(__name__)
 import json
 # import cv2
 
-@app.route('/getData')
+@app.route('/getData', methods=["POST"])
 def getData():
-
-    file_path = "data.json"
+    data = request.json
+    selectedEnviroment = data.get("selectedEnviroment")  # Extract parameter from request
+    file_path = "scans/" + str(selectedEnviroment)
 
     # Open and read the JSON file
     with open(file_path, "r") as file:
         data = json.load(file)
     
+    print(data)
     return data
 
 @app.route("/updateLocationName", methods=["POST"])
