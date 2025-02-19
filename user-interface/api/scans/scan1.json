@@ -25,6 +25,30 @@
                     "distance": 10
                 }
             ]
+        },
+        {
+            "geo_coords": [
+                55.89,
+                -4.33
+            ],
+            "panorama_ref": "./images/img2.jpg",
+            "objects": [
+                {
+                    "x1": 100,
+                    "y1": 100,
+                    "x2": 400,
+                    "y2": 500,
+                    "RGB_classification": "dog",
+                    "RGB_confidence": 0.8,
+                    "HS_classification": {
+                        "wood": 0.4,
+                        "stone": 0.3,
+                        "metal": 0.3
+                    },
+                    "HS_confidence": 0.7,
+                    "distance": 10
+                }
+            ]
         }
     ]
 }
