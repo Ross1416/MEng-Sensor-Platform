@@ -2,7 +2,10 @@
 # % . venv/bin/activate
 # flask run
 
-from flask import Flask, send_file
+from flask import Flask, send_file, request, jsonify
+import json
+import requests
+
 
 app = Flask(__name__)
 import json
@@ -18,6 +21,30 @@ def getData():
         data = json.load(file)
     
     return data
+
+@app.route("/updateLocationName", methods=["POST"])
+def updateLocationName():
+    data = request.get_json()
+    print(data)
+    location = data.get("location")  # Extract parameter from request
+    print(location)
+    if not location:
+        return jsonify({"error": "No parameter provided"}), 400
+    
+    file_path = "./api/data.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    # Append update
+    data["location"] = location
+
+    # Write to file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+    print("JSON file updated successfully.")
+    
+
     
 
 # @app.route('/api/photo')

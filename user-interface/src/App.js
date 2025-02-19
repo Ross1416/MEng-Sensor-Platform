@@ -21,10 +21,22 @@ function App() {
     )
   }
 
+  const updateLocationName = async () => {
+    try {
+      const res = await fetch("/updateLocationName", {
+        method: "POST",
+        body: JSON.stringify({location: 'New Location' }),
+      });
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
   useEffect(()=> {
     const interval = setInterval(() => {
       refreshData();
-    }, 500);
+      updateLocationName();
+    }, 5000);
 
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
