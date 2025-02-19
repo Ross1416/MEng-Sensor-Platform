@@ -3,12 +3,15 @@ import React, {useState, useEffect} from 'react';
 import { Map } from './components/Map.js';
 import { Panorama } from './components/Panorama.js';
 
+
 function App() {
   
   const [panorama, setPanorama] = useState();
   const [locationName, setLocationName] = useState('unnamed location')
   const [pins, setPins] = useState([])
   const [objects, setObjects] = useState([])
+  const [enviroments, setEnvirorements] = useState()
+  const [platformActive, setPlatformActive] = useState(1) // 1 for active, 2 for test, 0 for deactive
   
   const refreshData = () => {
     fetch("/getData").then(
@@ -21,32 +24,66 @@ function App() {
     )
   }
 
-  const updateLocationName = async () => {
-    try {
-      const res = await fetch("/updateLocationName", {
-        method: "POST",
-        body: JSON.stringify({location: 'New Location' }),
-      });
-    } catch (error) {
-      console.log(error)
-    }
-  };
+  const refreshJSON = () => {
+    fetch("/getJSONfilenames").then(
+      res => res.json()
+    ).then(
+      data => {
+        setEnvirorements(data)
+        console.log(enviroments)
+      }
+    )
+  }
 
+  useEffect(()=> {
+    refreshJSON()
+  }, [])
+  
   useEffect(()=> {
     const interval = setInterval(() => {
       refreshData();
-      updateLocationName();
-    }, 5000);
+    }, 1000);
 
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
     }, [])
 
+  const updatePlatformActiveStatus = async () => {
+      if (platformActive == 0) {
+        setPlatformActive(1)
+      } else if (platformActive == 1) {
+        setPlatformActive(0)
+      }
+      
+      try {
+        const resp = await fetch("/updatePlatformActiveStatus", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({status: platformActive}),
+        });
+      } catch (error) {
+        console.log(error)
+      }
+  };
+
   return (
   
     <div className='container'>
-      {/* <button onClick={searchNewPins}>Press me biatch</button> */}
+  
       <div className='header'>
+
+        <div className="dropdown">
+          <label for="options">Choose a map:</label>
+          <select id="options">
+
+            {enviroments?.map((item, index) => (
+                <option value={item}>{item}</option>
+            ))}
+          </select>
+          </div>
+        
+        <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
+
         <div className='search'>
           <button>{'<'}</button>
           <button>{'>'}</button>

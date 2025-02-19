@@ -7,7 +7,6 @@ import L from "leaflet";
 // Update Map Coordinates
 const UpdateMapCenter = ({ newCenter }) => {
     const map = useMap();
-    map.setView(newCenter);
 };
 
 // // Add a new pin

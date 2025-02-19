@@ -47,7 +47,6 @@
   top: 20px;
   background-color: white;
   border-radius: 15px;
-
 }
 
 .search button {
@@ -62,5 +61,54 @@
   background-color: transparent;
   border-color: transparent;
   font-size: 18px;
+}
 
+.button-on {
+  position: absolute;
+  right: 300px;
+  font-size: 18px;
+  top: 20px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: white;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.button-off {
+  position: absolute;
+  right: 300px;
+  font-size: 18px;
+  top: 20px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: transparent;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+}
+.dropdown {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background-color: white;
+  border-radius: 15px;
+}
+
+
+.dropdown label {
+  background-color: transparent;
+  border-color: transparent;
+  padding: 5px;
+  font-size: 18px;
+}
+
+.dropdown select {
+  background-color: transparent;
+  border-color: transparent;
+  padding: 5px;
+  font-size: 18px;
+  font-weight: bold;
 }
