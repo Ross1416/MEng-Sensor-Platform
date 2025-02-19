@@ -43,13 +43,13 @@ def pixel_to_angle(pixel,res,fov):
 
     return (x_angle,y_angle)
 
-def blur_faces(frame, detections,blur_size=5):
+def blur_faces(frame, detections,blur_size=25):
     """
     Blurs all the faces detected in an image.
     Input:
     -frame : image containing faces to be blurred
     -detections : array of object detections in image in format returned from "object_detection()"
-    -blur_size : size of kernel to apply gaussian blur - should be odd number (default = 5) 
+    -blur_size : size of kernel to apply gaussian blur - should be odd number (default = 25) 
     Output:
     - blurred_image : image with all detected faces blurred
     """
@@ -64,8 +64,8 @@ def blur_faces(frame, detections,blur_size=5):
 
 if __name__ == "__main__":
     import cv2
-    model = YOLOWorld("./yolo_models/yolov8l-world.pt")
-    model.set_classes(["person","face"])
+    model = YOLOWorld("./yolo_models/yolov8s-worldv2.pt")
+    model.set_classes(["dog","person","face"])
     img = cv2.imread("dog.jpg")
     results = object_detection(model,img)
     print(results)
