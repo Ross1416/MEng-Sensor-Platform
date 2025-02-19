@@ -5,6 +5,7 @@
 from flask import Flask, send_file, request, jsonify
 import json
 import requests
+import os
 
 
 app = Flask(__name__)
@@ -24,34 +25,54 @@ def getData():
 
 @app.route("/updateLocationName", methods=["POST"])
 def updateLocationName():
-    data = request.get_json()
-    print(data)
+
+    data = request.json
     location = data.get("location")  # Extract parameter from request
-    print(location)
+
     if not location:
         return jsonify({"error": "No parameter provided"}), 400
     
-    file_path = "./api/data.json"
+    file_path = "./data.json"
     with open(file_path, "r") as file:
         data = json.load(file)
 
-    # Append update
+    # Update location
     data["location"] = location
 
     # Write to file
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
 
-    print("JSON file updated successfully.")
-    
+    return 'Succesful update'
 
-    
+@app.route("/getJSONfilenames")
+def getJSONfilenames():
+    try:
+        files = os.listdir('./scans')
+        json_files = [file for file in files if file.lower().endswith('.json')]
+        print('JSON files in directory:', json_files)
+    except Exception as e:
+        print('Error reading directory:', e)
+    return json_files
 
-# @app.route('/api/photo')
-# def getPhoto():
-#     # Path to your image
-#     photoPath = "testImage.jpg"
-#     return send_file(photoPath, mimetype='image/jpeg')
+
+@app.route("/updatePlatformActiveStatus", methods=["POST"])
+def updatePlatformActiveStatus():
+    data = request.json
+    status = data.get("status")  # Extract parameter from request
+    
+    file_path = "./data.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    # Update location
+    data["status"] = status
+
+    # Write to file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+    return 'Succesful update'
 
 if __name__ == "__main__":
     app.run(debug=True)
