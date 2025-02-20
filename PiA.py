@@ -63,7 +63,7 @@ if __name__ == "__main__":
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
     logging.debug("Loaded RGB object detection model.")
-    model.set_classes(CLASSES)
+    rgb_model.set_classes(CLASSES)
     logging.info(f"Set YOLO classes to {CLASSES}.")
     logging.info(f"Privacy set {PRIVACY}.")
 
