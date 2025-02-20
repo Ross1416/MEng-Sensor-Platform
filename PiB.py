@@ -24,10 +24,11 @@ def on_rotate():
     pass
 
 
-IP = "10.12.101.192"
-# IP = "hsiA.local"
+# IP = "10.12.101.192"
+IP = "hsiA.local"
 PORT = 5002
 PATH = "./captures/"
+CLASSES = ["person","face"] 
 
 if __name__ == "__main__":
     # Setup Logging
@@ -49,6 +50,9 @@ if __name__ == "__main__":
         # Setup object detection model
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
         logging.debug("Loaded RGB object detection model.")
+        # TODO send search classes to PiB
+        rgb_model.set_classes(CLASSES)
+        logging.info(f"Set YOLO classes to {CLASSES}.")
 
         # Poll for trigger capture signal
         while True:
