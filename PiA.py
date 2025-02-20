@@ -25,12 +25,12 @@ def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False):
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
-    # TO DO: clean this up
+    # TODO: clean this up
     panorama = performPanoramicStitching(frames[0], frames[1], frames[2], frames[3])
-
+    # TODO: Transform object detection results
     # Blur faces if privacy 
     if privacy:
-        panorama = blur_faces(panorama,objects)
+        panorama = blur_people(panorama,objects)
 
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
@@ -41,8 +41,8 @@ PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
 RESOLUTION = (4608,2592)
 FOV = (102,67)
-PRIVACY = True  #Blur faces
-CLASSES = ["person","face"] 
+PRIVACY = False  #Blur peopl
+CLASSES = ["person"] 
 
 if __name__ == "__main__":
     # Setup Logging

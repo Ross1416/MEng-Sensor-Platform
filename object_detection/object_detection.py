@@ -1,5 +1,6 @@
 from ultralytics import YOLOWorld
 import math                                                        
+import cv2
 
 def object_detection(model, frame,conf=0.25):
     """
@@ -43,9 +44,9 @@ def pixel_to_angle(pixel,res,fov):
 
     return (x_angle,y_angle)
 
-def blur_faces(frame, detections,blur_size=25):
+def blur_people(frame, detections,blur_size=25):
     """
-    Blurs all the faces detected in an image.
+    Blurs all the people detected in an image.
     Input:
     -frame : image containing faces to be blurred
     -detections : array of object detections in image in format returned from "object_detection()"
@@ -55,7 +56,7 @@ def blur_faces(frame, detections,blur_size=25):
     """
 
     for i in range(len(detections)):
-        if detections[i][0] == "face":
+        if detections[i][0] == "person":
             x1,y1,x2,y2 = detections[i][1]
             roi = frame[y1:y2, x1:x2]
             roi = cv2.GaussianBlur(roi,(blur_size,blur_size),0)
@@ -79,7 +80,7 @@ if __name__ == "__main__":
         cv2.destroyAllWindows()
 
     detections = object_detection(model,img,0.01)
-    blurred_img = blur_faces(img, detections,25)
+    blurred_img = blur_people(img, detections,25)
     cv2.imshow("blurred frame",blurred_img)
     if (cv2.waitKey(0) & 0xFF) == ord('q'):
         cv2.destroyAllWindows()
