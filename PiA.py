@@ -9,7 +9,7 @@ import logging
 from stitching.stitching_main import performPanoramicStitching
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, lon=0.00, lat=0.00):
+def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False):
     # Captures 2 images
     frames = capture(cams, "PiA")
     # Triggers capture on PiB
@@ -25,8 +25,13 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
-    # TO DO: clean this up
+    # TODO: clean this up
     panorama = performPanoramicStitching(frames[0], frames[1], frames[2], frames[3])
+    # TODO: Transform object detection results
+    # Blur faces if privacy 
+    if privacy:
+        panorama = blur_people(panorama,objects)
+
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
@@ -36,6 +41,8 @@ PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
 RESOLUTION = (4608,2592)
 FOV = (102,67)
+PRIVACY = False  #Blur peopl
+CLASSES = ["person"] 
 
 if __name__ == "__main__":
     # Setup Logging
@@ -56,6 +63,9 @@ if __name__ == "__main__":
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
     logging.debug("Loaded RGB object detection model.")
+    rgb_model.set_classes(CLASSES)
+    logging.info(f"Set YOLO classes to {CLASSES}.")
+    logging.info(f"Privacy set {PRIVACY}.")
 
     #Mainloop
     while True:
@@ -64,6 +74,7 @@ if __name__ == "__main__":
         timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
         save_location = f"./capture/{timestamp}-capture/"
 
-        new_scan(rgb_model)       
+        new_scan(rgb_model,privacy=PRIVACY)       
+        
         logging.info("Completed scan.")
         input("Press key to continue...")
