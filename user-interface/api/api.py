@@ -7,51 +7,56 @@ import uuid
 
 app = Flask(__name__)
 
-# Retrieve data from then user-selected enviroment
+### Retrieve enviroment data from the user-specified file ###
 @app.route('/getData', methods=["POST"])
 def getData():
-    # Extract parameter from request
+    # Extract file from request
     data = request.json
     file = data.get("file")  
 
-    # Specify file path
-    filePath = "scans/" + file 
-
     # Open and read the JSON file
-    with open(filePath, "r") as file:
+    with open("scans/" + file, "r") as file:
         data = json.load(file)
     
-    # Return datta
+    # Return data
     return data
 
-# Retrieve the JSON files in the directory (one for each enviroment)
+
+### Retrieve the JSON files in the directory (one for each enviroment) ###
 @app.route("/getJSONfilenames")
 def getJSONfilenames():
     try:
+        # Read the files that end with json
         files = os.listdir('./scans')
         json_files = [file for file in files if file.lower().endswith('.json')]
+        
+        # Extract each file's correspnding location 
         location_names = []
         for f in json_files:
             path = './scans/'+f
             with open(path, "r") as file:
                 data = json.load(file)
             location_names.append(data.get("location"))
+        
+        # Combine data and return
         combined = [{"location": k, "filename": v} for k, v in zip(location_names, json_files)]
+        return combined
     except Exception as e:
         print('Error reading directory:', e)
-    return combined
 
-# Change the status of the platform
+### Update the status of the platfor ###
 @app.route("/updatePlatformActiveStatus", methods=["POST"])
 def updatePlatformActiveStatus():
+    # Extract parameter from request
     data = request.json
-    status = data.get("status")  # Extract parameter from request
+    status = data.get("status")  
     
+    # Read current data
     filePath = "./sensorConfiguration.json"
     with open(filePath, "r") as file:
         data = json.load(file)
 
-    # Update location
+    # Update data
     data["status"] = status
 
     # Write to file
@@ -60,40 +65,48 @@ def updatePlatformActiveStatus():
 
     return 'Succesful update'
 
-# Create a new enviroment for exploration
+
+### Create a new enviroment for exploration ###
 @app.route("/createNewEnviroment", methods=["POST"])
 def createNewEnviroment():
+    # Read file title from request
     data = request.json
     locationName = data.get("location")
 
+    # Create a unique identifier
     uid = uuid.uuid4()
 
+    # Create default data
     filePath = "scans/" + str(uid) + '.json'
     newData = {
         "location": locationName,
         "pins": [],
     }
 
+    # Write data to file
     with open(filePath, "w") as file:
         json.dump(newData, file, indent=4)
         print("JSON file updated successfully.")
 
+    # Create a folder for images
     os.makedirs('../public/images/'+str(uid), exist_ok=True)
 
     return 'Succesful update'
 
 
-# Change the enviroment 
+### Update the active enviroment ###
 @app.route("/updateActiveEnviroment", methods=["POST"])
 def updateActiveEnviroment():
+    # Read filename from API request
     data = request.json
     filename = data.get("file")
 
+    # Specify the save path
     filePath = "./sensorConfiguration.json"
     with open(filePath, "r") as file:
         data = json.load(file)
 
-    # Update location
+    # Update current active file, so backend knows where to save
     data["activeFile"] = filename
 
     # Write to file
