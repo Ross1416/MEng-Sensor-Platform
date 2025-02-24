@@ -168,6 +168,30 @@ def unwarp4(image):
 
     return image
 
+def blendImages(stitched, img2, overlap_width):
+    """
+    Blends the overlapping region of the stitched image and img2.
+    """
+    height, width = img2.shape[:2]
+
+    # Create a weight mask for blending
+    mask = np.zeros((height, overlap_width), dtype=np.float32)
+    for i in range(overlap_width):
+        mask[:, i] = i / overlap_width  # Linear gradient mask
+
+
+    # Extract overlapping region
+    stitched_crop = stitched[:, :overlap_width].astype(np.float32)
+    img2_crop = img2[:, :overlap_width].astype(np.float32)
+
+    # Blend using weighted sum
+    blended_region = (stitched_crop * (1 - mask[..., None]) + img2_crop * mask[..., None]).astype(np.uint8)
+
+    # Merge blended region back into stitched image
+    stitched[:, :overlap_width] = blended_region
+
+    return stitched
+
 if __name__ == "__main__":
     # image1 = cv2.imread('./image4.png')
     # image2 = cv2.imread('./image1.png')
