@@ -5,8 +5,9 @@ from cameras import *
 from time import sleep
 import logging
 from hyperspectral.zaber_driver import *
+from hyperspectral.hyperspectral_driver import *
 
-def on_trigger(rgb_model,axis):
+def on_trigger(rgb_model,axis,cal_arr):
     # Capture images
     frames = capture(cams, "PiB", PATH)
     # Perform object detection
@@ -17,36 +18,59 @@ def on_trigger(rgb_model,axis):
     detection_data = receive_object_detection_results(client_socket)
     objects = detection_data + objects
     # Send images to PiA
-    # send_images(PATH, client_socket)
     send_image_arrays(client_socket,frames)
     # Send object detection results to PiA
     send_object_detection_results(client_socket, objects[2:])  
+    # TODO: Get objects detected from PiA
     # Take hyperspectral scan - test for 1st object
     px_1 = results[0][0][1][:2]
     px_2 = results[0][0][1][2:]
     angle_x1, _ = pixel_to_angle(px_1,RESOLUTION,FOV)
     angle_x2, _ = pixel_to_angle(px_2,RESOLUTION,FOV)
-    on_rotate(axis,(angle_x1,angle_x2))
+    on_rotate(axis,(angle_x1,angle_x2),cal_arr)
+    # TODO: Send hyperspectral data to PiA
     
 
-def on_rotate(axis,angles):
+def on_rotate(axis,angles,hs_cam,cal_arr):
     # Rotate rotational stage 
-    axis.move_absolute(angles[0],Units.ANGLE_DEGREES,velocity=40,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
-    # take hsi image
-    # process hsi image
-    # return hsi colour image and data
-    pass
+    axis.move_relative(angles[0],Units.ANGLE_DEGREES,velocity=40,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
+    sleep(2)
+    logging.info("Rotating hyperspectral to {angles[0]} degrees.")
+    # Grab hyperspectral data
+    fps = hs_cam.ResultingFrameRateAbs.Value
+    logging.info("Calculated FPS: {fps}")
+    rotate_angle = angles[1]-angles[0]
+    nframes = 800 #TODO calculate?
+    speed = get_rotation_speed(nframes,fps,rotate_angle)
+    logging.info("Grabbing hyperspectral scan...")
+    rotate_relative(axis, rotate_angle, speed)
+    scene = grab_avg_hyperspectral_frames(hs_cam, nframes)
+    # Plot RGB image for test
+    print("Plotting RGB Image...")
+    plt.figure()
+    # Get indices of RGB bands from calibration file
+    RGB = (
+        get_wavelength_index(cal_arr, 690, 2),
+        get_wavelength_index(cal_arr, 535, 2),
+        get_wavelength_index(cal_arr, 470, 2),
+    )
+
+    plt.imshow(scene[:, :, RGB])
+    # TODO: Process hs data
+    # TODO: return hsi colour image and data
 
 
 # IP = "10.12.101.192"
 IP = "hsiA.local"
 PORT = 5002
 PATH = "./captures/"
-CLASSES = ["person","face"] 
+CLASSES = ["person"] 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0" # TODO: find automatically?
 
 RESOLUTION = (4608,2592)
 FOV = (102,67)
+
+CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 
 if __name__ == "__main__":
     # Setup Logging
@@ -62,13 +86,26 @@ if __name__ == "__main__":
         # Setup cameras and capture images
         cams = setup_cameras()
         logging.debug("Setup cameras.")
+        
         # Setup rotational stage
-        conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
+        zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
+        logging.debug("Setup rotational stage.")
+        
         # Home rotational stage
         axis.home(wait_until_idle=False)
+        logging.info("Homing rotational stage.")
+
+        # Get Hyperspectral Calibration
+        cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
+
+        # Setup hyperspectral
+        hs_cam = setup_hyperspectral()
+        logging.info("Setup hyperspectral camera.")
+
         # Make connection with PiA
         client_socket = make_client_connection(IP, PORT)
         logging.debug("Connected to PiA")
+        
         # Setup object detection model
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
         logging.debug("Loaded RGB object detection model.")
@@ -81,16 +118,20 @@ if __name__ == "__main__":
         while True:
             if receive_capture_request(client_socket) == 1:
                 logging.info("Triggered Capture.")
-                on_trigger(rgb_model,axis)
+                on_trigger(rgb_model,axis,hs_cam,cal_arr)
                 capture_triggered = True
             
             sleep(1)
-        
-
+    
     except Exception as e:
-        print(f"Error in PiB.py: {e}")
+        logging.error(f"Error in PiB.py: {e}")
+        client_socket.close()
+        hs_cam.Close()
+        zaber_conn.close()
+        logging.info("All connections closed.")
 
     finally:
         client_socket.close()
+        zaber_conn.close()
     
 
