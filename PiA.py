@@ -41,7 +41,7 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     panorama = performPanoramicStitching(frames[0], frames[1], frames[2], frames[3])
     # TODO: Transform object detection results    
 
-    # Receive hsi photo and data 
+    # TODO: Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
     updateJSON(uid, lon, lat, objects, panorama, activeFile)
