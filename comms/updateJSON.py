@@ -38,7 +38,6 @@ def resetJSON(filename="New Scan"):
     blank_data = {
         "location": filename,
         "pins": [],
-        "state": 0, # 0 for deactive, 1 for active, 2 for test
     }
     try: 
         with open(file_path, "w") as file:
@@ -68,7 +67,7 @@ def updateJSON(uid, lon, lat, objects,image):
     # Construct dictionary with new data
     newPin = {
         "geo_coords": [lon, lat],
-        "panorama_ref": "./images/img" + uid + ".jpg",
+        "panorama_ref": uid + ".jpg",
         "objects": format_results(objects)
     }
 
