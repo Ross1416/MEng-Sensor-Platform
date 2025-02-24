@@ -8,19 +8,19 @@ function App() {
   
   // ENVIROREMENT DATA 
   const [panorama, setPanorama] = useState(); // image reference to panorama
-  const [locationName, setLocationName] = useState('New Enviroment') // enviroment name
-  const [pins, setPins] = useState([]) // pins in the enviroment
-  const [objects, setObjects] = useState([]) // objects in a pin
+  const [locationName, setLocationName] = useState('') // enviroment name
+  const [pins, setPins] = useState([]) // list of pins in the enviroment
+  const [objects, setObjects] = useState([]) // list of objects in a pin
   const [enviroments, setEnvirorements] = useState() // a list of possible enviroments saved on device
-  const [selectedEnviroment, setSelectedEnviroment] = useState(null) 
+  const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
 
   // DEVICE CONTROL 
   const [platformActive, setPlatformActive] = useState(0) // 1 for active device, 2 for test, 0 for deactive
-  const [createNewEnviroment, setCreateNewEnviroment] = useState(false)
+  const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // press to create new enviroment
   const [newEnviromentName, setNewEnviromentName] = useState('')
-  const [searchText, setSearchText] = useState('')
+  const [searchText, setSearchText] = useState('') 
 
-
+  // Poll for data updates once every second
   const refreshData = async () => {
     try {
       fetch("/getData", {
@@ -45,7 +45,6 @@ function App() {
       })
   }
   
-  // For polling:
   useEffect(()=> {
     const interval = setInterval(() => {
       refreshData();
@@ -56,6 +55,7 @@ function App() {
   }, [refreshData])
 
 
+  // Update the platform's status (1 for active, 0 for inactive, 2 for test)
   const updatePlatformActiveStatus = async () => {
       if (platformActive == 0) {
         setPlatformActive(1)
@@ -74,6 +74,7 @@ function App() {
       }
   };
 
+  // Alert the back-end that a new enviroment is active 
   const handleChangeEnviroment = async (event) => {
     setSelectedEnviroment(event.target.value)
     try {
@@ -87,6 +88,7 @@ function App() {
     }
   }
 
+  // Request the backend to create a new enviroment
   const handleCreateNewEnviroment = () => {
     if (createNewEnviroment == false) {
       setCreateNewEnviroment(true)
@@ -104,6 +106,7 @@ function App() {
     }
   }
 
+  // If the user types in 'Test', perform a one time capture 
   const handleSearch = async () => {
     if (searchText == 'Test') {
       try {
@@ -119,8 +122,6 @@ function App() {
     }
   }
 
-
-  
 
   return (
   
@@ -149,7 +150,6 @@ function App() {
           <input  value={searchText} onChange={(event)=>{setSearchText(event.target.value)}} placeholder='Search...'/> 
           <button onClick={handleSearch}>{'↵'}</button>
         </div>
-        {/* <h1>HYPERBRO</h1> */}
         
       </div>
       <div className='body'>
