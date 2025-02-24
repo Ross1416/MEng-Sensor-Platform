@@ -10,7 +10,7 @@ def object_detection(model, frame,conf=0.25):
     -frame : image frame to detect objects in
     -conf : confidence threshold for detecting objects (default=0.25)
     Outputs: 
-    -Array of objects [[label,[x1,y1,x2,x2],confidence]]
+    -Array of objects [[label,[x1,y1,x2,y2],confidence]]
     """
 
     detections = model.predict(frame,conf=conf)
