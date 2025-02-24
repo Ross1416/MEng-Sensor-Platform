@@ -6,8 +6,7 @@ import { Panorama } from './components/Panorama.js';
 
 function App() {
   
-
-  // ENVIROREMENT DATA
+  // ENVIROREMENT DATA 
   const [panorama, setPanorama] = useState(); // image reference to panorama
   const [locationName, setLocationName] = useState('New Enviroment') // enviroment name
   const [pins, setPins] = useState([]) // pins in the enviroment
@@ -15,10 +14,12 @@ function App() {
   const [enviroments, setEnvirorements] = useState() // a list of possible enviroments saved on device
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) 
 
-  // DEVICE CONTROL
-  const [platformActive, setPlatformActive] = useState(1) // 1 for active device, 2 for test, 0 for deactive
+  // DEVICE CONTROL 
+  const [platformActive, setPlatformActive] = useState(0) // 1 for active device, 2 for test, 0 for deactive
   const [createNewEnviroment, setCreateNewEnviroment] = useState(false)
   const [newEnviromentName, setNewEnviromentName] = useState('')
+  const [searchText, setSearchText] = useState('')
+
 
   const refreshData = async () => {
     try {
@@ -58,23 +59,32 @@ function App() {
   const updatePlatformActiveStatus = async () => {
       if (platformActive == 0) {
         setPlatformActive(1)
-      } else if (platformActive == 1) {
-        setPlatformActive(0)
-      }
-      try {
         const resp = await fetch("/updatePlatformActiveStatus", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({file: selectedEnviroment, status: platformActive}),
+          body: JSON.stringify({status: 1}),
         });
-      } catch (error) {
-        console.log(error)
+      } else {
+        setPlatformActive(0)
+        const resp = await fetch("/updatePlatformActiveStatus", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({status: 0}),
+        });
       }
   };
 
-  const handleChangeEnviroment = (event) => {
-    console.log(event.target.value)
+  const handleChangeEnviroment = async (event) => {
     setSelectedEnviroment(event.target.value)
+    try {
+      fetch("/updateActiveEnviroment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({file: event.target.value}),
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const handleCreateNewEnviroment = () => {
@@ -86,13 +96,30 @@ function App() {
       fetch("/createNewEnviroment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({file: 'newfile.json', location: newEnviromentName}),
+        body: JSON.stringify({location: newEnviromentName}),
       }).then(
       setCreateNewEnviroment(false))
       .then(
       setNewEnviromentName(''))
     }
   }
+
+  const handleSearch = async () => {
+    if (searchText == 'Test') {
+      try {
+        const resp = await fetch("/updatePlatformActiveStatus", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({status: 2}),
+        });
+        setPlatformActive(0)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
+
+
   
 
   return (
@@ -119,15 +146,15 @@ function App() {
         <div className='search'>
           <button>{'<'}</button>
           <button>{'>'}</button>
-          <input placeholder='Search...'/> 
-          <button>{'↵'}</button>
+          <input  value={searchText} onChange={(event)=>{setSearchText(event.target.value)}} placeholder='Search...'/> 
+          <button onClick={handleSearch}>{'↵'}</button>
         </div>
         {/* <h1>HYPERBRO</h1> */}
         
       </div>
       <div className='body'>
         <div className='map-container'>
-          <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} />
+          <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} selectedEnviroment={selectedEnviroment} />
         </div>
 
         <div className='panoramic-container'>

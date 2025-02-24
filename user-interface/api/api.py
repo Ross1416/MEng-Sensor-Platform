@@ -3,6 +3,7 @@ import json
 import requests
 import os
 import json
+import uuid
 
 app = Flask(__name__)
 
@@ -23,31 +24,7 @@ def getData():
     # Return datta
     return data
 
-# Update the enviroment with a new name
-@app.route("/updateLocationName", methods=["POST"])
-def updateLocationName():
-
-    # Extract paramaters
-    data = request.json
-    location = data.get("location") 
-    file = data.get("file")  
-
-    if not location or not file:
-        return jsonify({"error": "No parameter provided"}), 400
-    
-    filePath = "scans/" + file 
-    with open(filePath, "r") as file:
-        data = json.load(file)
-
-    # Update location
-    data["location"] = location
-
-    # Write to file
-    with open(filePath, "w") as file:
-        json.dump(data, file, indent=4)
-
-    return 'Succesful update'
-
+# Retrieve the JSON files in the directory (one for each enviroment)
 @app.route("/getJSONfilenames")
 def getJSONfilenames():
     try:
@@ -64,14 +41,13 @@ def getJSONfilenames():
         print('Error reading directory:', e)
     return combined
 
-
+# Change the status of the platform
 @app.route("/updatePlatformActiveStatus", methods=["POST"])
 def updatePlatformActiveStatus():
     data = request.json
     status = data.get("status")  # Extract parameter from request
-    file = data.get("file")
     
-    filePath = "scans/"+file
+    filePath = "./sensorConfiguration.json"
     with open(filePath, "r") as file:
         data = json.load(file)
 
@@ -84,23 +60,45 @@ def updatePlatformActiveStatus():
 
     return 'Succesful update'
 
-
+# Create a new enviroment for exploration
 @app.route("/createNewEnviroment", methods=["POST"])
 def createNewEnviroment():
     data = request.json
-    file = data.get("file")
     locationName = data.get("location")
 
-    filePath = "scans/" + file
+    uid = uuid.uuid4()
+
+    filePath = "scans/" + str(uid) + '.json'
     newData = {
         "location": locationName,
         "pins": [],
-        "state": 1, # 0 for deactive, 1 for active, 2 for test
     }
 
     with open(filePath, "w") as file:
         json.dump(newData, file, indent=4)
         print("JSON file updated successfully.")
+
+    os.makedirs('../public/images/'+str(uid), exist_ok=True)
+
+    return 'Succesful update'
+
+
+# Change the enviroment 
+@app.route("/updateActiveEnviroment", methods=["POST"])
+def updateActiveEnviroment():
+    data = request.json
+    filename = data.get("file")
+
+    filePath = "./sensorConfiguration.json"
+    with open(filePath, "r") as file:
+        data = json.load(file)
+
+    # Update location
+    data["activeFile"] = filename
+
+    # Write to file
+    with open(filePath, "w") as file:
+        json.dump(data, file, indent=4)
 
     return 'Succesful update'
 
