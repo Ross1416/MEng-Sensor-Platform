@@ -33,9 +33,10 @@
     
 }
 
-.bottomBar input {
+.bottomBar h1 {
     font-size: 22px;
-    margin-left: 5px;
+    margin-left: 20px;
+    margin-right: 20px;
     background: none;
     border: none;
     text-align: center;

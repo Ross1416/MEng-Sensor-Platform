@@ -17,20 +17,6 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         stateFunction(!state)
     }
 
-    // Update JSON with new location name
-    const updateLocationName = async (event) => {
-        setLocationName(event.target.value);
-        try {
-          const resp = await fetch("/updateLocationName", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({file: selectedEnviroment, location: event.target.value}),
-          });
-        } catch (error) {
-          console.log(error)
-        }
-    };
-
 
     return (
         <div className='panorama-container'>
@@ -50,7 +36,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
             ))}
             
             <div className='bottomBar'>
-                <input placeholder={selectedEnviroment} onChange={updateLocationName}></input>
+                <h1>{locationName}</h1>
                 {/* https://react-ionicons.netlify.app/ */}
                 <button style={{color: showObjects?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}>
                     Show Objects
