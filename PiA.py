@@ -9,7 +9,7 @@ import logging
 from stitching.stitching_main import performPanoramicStitching
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, activeFile, lon=0.00, lat=0.00,privacy=False):
+def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     # Captures 2 images
     frames = capture(cams, "PiA")
     # Triggers capture on PiB
