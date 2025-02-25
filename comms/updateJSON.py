@@ -51,7 +51,7 @@ def resetJSON(filename="New Scan"):
 def updateJSON(uid, lon, lat, objects,image, activeFile):
 
     # Specify panorama path
-    save_path = './user-interface/public/images/' +  activeFile[:-5] +'img' + uid + '.jpg'
+    save_path = './user-interface/public/images/' +  activeFile[:-5] +'/img' + uid + '.jpg'
 
     # Write image
     cv2.imwrite(save_path, image)
