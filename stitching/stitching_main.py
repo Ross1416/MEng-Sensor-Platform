@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 
 def performPanoramicStitching(image1, image2, image3, image4, defaultAffine=defaultAffineTransform()):
-    image1 = cylindricalProjection(image1)
-    image2 = cylindricalProjection(image2)
-    image3 = cylindricalProjection(image3)
-    image4 = cylindricalProjection(image4)
+    # image1 = cylindricalProjection(image1)
+    # image2 = cylindricalProjection(image2)
+    # image3 = cylindricalProjection(image3)
+    # image4 = cylindricalProjection(image4)
 
     panorama = cv2.hconcat([image1, image2, image3, image4])
     return panorama
