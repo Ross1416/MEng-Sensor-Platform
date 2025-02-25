@@ -48,17 +48,17 @@ def resetJSON(filename="New Scan"):
     
 
 # Save images to front-end, then update JSON with latest data
-def updateJSON(uid, lon, lat, objects,image):
+def updateJSON(uid, lon, lat, objects,image, activeFile):
 
     # Specify panorama path
-    save_path = './user-interface/public/images/img' + uid + '.jpg'
+    save_path = './user-interface/public/images/ ' +  activeFile[:-5] +'img' + uid + '.jpg'
 
     # Write image
     cv2.imwrite(save_path, image)
 
     # try:    
     # Specify JSON path and read data
-    file_path = "./user-interface/api/data.json"
+    file_path = "./user-interface/api/scans/'"+activeFile
     with open(file_path, "r") as file:
         data = json.load(file)
 
@@ -120,8 +120,20 @@ def format_results(object_detection):
                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
                             "HS_confidence":0.7,
                                 "distance":10})
-        
+
     return results_dict_arr
+
+
+def getPlatformStatus():
+    file_path = "./user-interface/api/sensorConfiguration.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    status = data["status"]
+    activeFile = data["activeFile"]
+
+    return status, activeFile
+        
 
 if __name__ == "__main__":
     dummydataJSON()
