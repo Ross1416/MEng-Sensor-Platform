@@ -51,14 +51,14 @@ def resetJSON(filename="New Scan"):
 def updateJSON(uid, lon, lat, objects,image, activeFile):
 
     # Specify panorama path
-    save_path = './user-interface/public/images/ ' +  activeFile[:-5] +'img' + uid + '.jpg'
+    save_path = './user-interface/public/images/' +  activeFile[:-5] +'img' + uid + '.jpg'
 
     # Write image
     cv2.imwrite(save_path, image)
 
     # try:    
     # Specify JSON path and read data
-    file_path = "./user-interface/api/scans/'"+activeFile
+    file_path = "./user-interface/api/scans/"+activeFile
     with open(file_path, "r") as file:
         data = json.load(file)
 
@@ -111,12 +111,12 @@ def format_results(object_detection):
     results_dict_arr = []
     for res in object_detection:
         print(f"individual res: {res}")
-        results_dict_arr.append({"x1":res[0][1][0],
-                            "y1":res[0][1][1],
-                            "x2":res[0][1][2],
-                            "y2":res[0][1][3],
-                            "RGB_classification":res[0][0],
-                            "RGB_confidence":res[0][2],
+        results_dict_arr.append({"x1":100,
+                            "y1":200,
+                            "x2":100,
+                            "y2":200,
+                            "RGB_classification":'dog',
+                            "RGB_confidence":0.9,
                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
                             "HS_confidence":0.7,
                                 "distance":10})
