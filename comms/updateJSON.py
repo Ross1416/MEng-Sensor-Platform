@@ -129,18 +129,23 @@ def getPlatformStatus():
     with open(file_path, "r") as file:
         data = json.load(file)
 
-<<<<<<< Updated upstream
     status = data["status"]
     activeFile = data["activeFile"]
 
     return status, activeFile
         
-=======
-    filename = data["activeFile"]
-    status = data["status"]
+def setPlatformStatus(status):
+    
+    file_path = "./user-interface/api/sensorConfiguration.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
 
-    return filename, status
->>>>>>> Stashed changes
+    # Construct dictionary with new data
+    data["status"] = status
+
+    # Write to file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
 
 if __name__ == "__main__":
     dummydataJSON()

@@ -2,7 +2,7 @@ from object_detection.object_detection import *
 from comms.receive import *
 from datetime import datetime
 from time import sleep
-from comms.updateJSON import updateJSON, getPlatformStatus
+from comms.updateJSON import updateJSON, getPlatformStatus, setPlatformStatus
 import cv2
 from cameras import *
 import logging 
@@ -82,3 +82,6 @@ if __name__ == "__main__":
         
             logging.info("Completed scan.")
             input("Press key to continue...")
+
+            if status == 2:
+                setPlatformStatus(0)
