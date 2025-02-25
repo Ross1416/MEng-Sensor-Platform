@@ -9,21 +9,12 @@ import requests
     # pins: [
     #   {
     #       geo_coords: [lon, lat]
-    #       panorama_ref: './imgref'
+    #       imgRef: './img
     #       objects: [
     #           {
-    #           x1: int
-    #           y1: int
-    #           x2: int
-    #           y2: int   
-    #           RGB_classification: string
-    #           RGB_confidence: float
-    #           HS_classification: {
-    #               material1: percentage
-    #               material2: percentage
-    #           }        
+    #           pixel_coords: [x y]
+    #           RGB_classifcation: string
     #           HS_classification: string
-    #           HS_confidence: float
     #           distance: double
     #           } ...
     #       ]
@@ -37,7 +28,7 @@ def resetJSON(filename="New Scan"):
     file_path = "../user-interface/api/data.json"
     blank_data = {
         "location": filename,
-        "pins": [],
+        "pins": []
     }
     try: 
         with open(file_path, "w") as file:
@@ -48,13 +39,23 @@ def resetJSON(filename="New Scan"):
     
 
 # Save images to front-end, then update JSON with latest data
+<<<<<<< HEAD
 def updateJSON(uid, lon, lat, objects,image, activeFile):
 
     # Specify panorama path
     save_path = './user-interface/public/images/ ' +  activeFile[:-5] +'img' + uid + '.jpg'
 
+=======
+def updateJSON(uid, lon, lat, objects,image):
+    # try:
+    # Specify panorama path
+    save_path = './user-interface/public/images/img' + uid + '.jpg'
+>>>>>>> 2b037f9974dd94e2b6a89f1bee77de987d5499f8
     # Write image
     cv2.imwrite(save_path, image)
+    # pass
+    # except Exception as e:
+    #         print(f"An error occurred whilst saving images: {e}")
 
     # try:    
     # Specify JSON path and read data
@@ -65,7 +66,7 @@ def updateJSON(uid, lon, lat, objects,image, activeFile):
     # Construct dictionary with new data
     newPin = {
         "geo_coords": [lon, lat],
-        "panorama_ref": uid + ".jpg",
+        "panorama_ref": "./images/img" + uid + ".jpg",
         "objects": format_results(objects)
     }
 
@@ -77,6 +78,9 @@ def updateJSON(uid, lon, lat, objects,image, activeFile):
         json.dump(data, file, indent=4)
     print("JSON file updated successfully.")
 
+    # except Exception as e:
+    #         print(f"An error occurred whilst updating JSON: {e}")
+
 
 # Populate the JSON file with dummy data
 def dummydataJSON():
@@ -87,17 +91,16 @@ def dummydataJSON():
             "geo_coords": [55.88,-4.32],
             "panorama_ref": "./images/img1.jpg",
             "objects": [{
-                "x1": 100,
-                "y1": 100,
-                "x2": 400,
-                "y2": 400,
-                "RGB_classification": 'dog',
-                "RGB_confidence": 0.8,
-                "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
-                "HS_confidence":0.7,
-                "distance":10}
-            ]}]
-        }
+                "pixel_coords": ["300px","150px", "200px", "200px"], # top, left, width, height
+                "RGB_classification": "Building",
+                "HS_classification": {
+                    "wood": '20',
+                    "plastic": '70',
+                    "stone": '10'
+                }
+            }]
+        }]
+    }
     try: 
         with open(file_path, "w") as file:
             json.dump(dummy_data, file, indent=4)
@@ -107,9 +110,9 @@ def dummydataJSON():
 
 def format_results(object_detection):
     # TODO: Add HS results and distance
-    print(f"object detection arg {object_detection}")
     results_dict_arr = []
     for res in object_detection:
+<<<<<<< HEAD
         print(f"individual res: {res}")
         results_dict_arr.append({"x1":res[0][1][0],
                             "y1":res[0][1][1],
@@ -121,6 +124,18 @@ def format_results(object_detection):
                             "HS_confidence":0.7,
                                 "distance":10})
 
+=======
+        results_dict_arr.append({"x":res[1][0],
+                             "y":res[1][1],
+                             "w":res[1][2],
+                             "h":res[1][3],
+                             "RGB_classification":res[0],
+                             "RGB_confidence":res[2],
+                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
+                             "HS_confidence":0.7,
+                             "distance":10})
+        
+>>>>>>> 2b037f9974dd94e2b6a89f1bee77de987d5499f8
     return results_dict_arr
 
 
