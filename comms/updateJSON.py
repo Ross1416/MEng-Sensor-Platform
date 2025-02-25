@@ -134,6 +134,18 @@ def getPlatformStatus():
 
     return status, activeFile
         
+def setPlatformStatus(status):
+    
+    file_path = "./user-interface/api/sensorConfiguration.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    # Construct dictionary with new data
+    data["status"] = status
+
+    # Write to file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
 
 if __name__ == "__main__":
     dummydataJSON()
