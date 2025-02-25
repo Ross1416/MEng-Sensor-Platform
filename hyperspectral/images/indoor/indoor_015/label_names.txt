@@ -1,6 +1,0 @@
-_background_
-black box
-plant
-rock
-soil
-spectralon
