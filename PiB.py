@@ -44,18 +44,18 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
     speed = get_rotation_speed(nframes,fps,rotate_angle)
     logging.info("Grabbing hyperspectral scan...")
     rotate_relative(axis, rotate_angle, speed)
-    scene = grab_avg_hyperspectral_frames(hs_cam, nframes)
-    # Plot RGB image for test
-    print("Plotting RGB Image...")
-    plt.figure()
-    # Get indices of RGB bands from calibration file
-    RGB = (
-        get_wavelength_index(cal_arr, 690, 2),
-        get_wavelength_index(cal_arr, 535, 2),
-        get_wavelength_index(cal_arr, 470, 2),
-    )
+    # scene = grab_avg_hyperspectral_frames(hs_cam, nframes)
+    # # Plot RGB image for test
+    # print("Plotting RGB Image...")
+    # plt.figure()
+    # # Get indices of RGB bands from calibration file
+    # RGB = (
+    #     get_wavelength_index(cal_arr, 690, 2),
+    #     get_wavelength_index(cal_arr, 535, 2),
+    #     get_wavelength_index(cal_arr, 470, 2),
+    # )
 
-    plt.imshow(scene[:, :, RGB])
+    # plt.imshow(scene[:, :, RGB])
     # TODO: Process hs data
     # TODO: return hsi colour image and data
 
@@ -89,6 +89,7 @@ if __name__ == "__main__":
         
         # Setup rotational stage
         zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
+        rotate_relative(axis, 20,40)
         logging.debug("Setup rotational stage.")
         
         # Home rotational stage
@@ -99,8 +100,9 @@ if __name__ == "__main__":
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
         # Setup hyperspectral
-        hs_cam = setup_hyperspectral()
-        logging.info("Setup hyperspectral camera.")
+        # hs_cam = setup_hyperspectral()
+        # logging.info("Setup hyperspectral camera.")
+        hs_cam = None
 
         # Make connection with PiA
         client_socket = make_client_connection(IP, PORT)
