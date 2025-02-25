@@ -65,7 +65,7 @@ def updateJSON(uid, lon, lat, objects,image, activeFile):
     # Construct dictionary with new data
     newPin = {
         "geo_coords": [lon, lat],
-        "panorama_ref": uid + ".jpg",
+        "panorama_ref": "/img" + uid + ".jpg",
         "objects": format_results(objects)
     }
 
@@ -115,7 +115,7 @@ def format_results(object_detection):
                             "y1":200,
                             "x2":100,
                             "y2":200,
-                            "RGB_classification":'dog',
+                            "RGB_classification":'fish',
                             "RGB_confidence":0.9,
                             "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
                             "HS_confidence":0.7,
