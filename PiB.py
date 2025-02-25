@@ -22,28 +22,34 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     # Send object detection results to PiA
     send_object_detection_results(client_socket, objects[2:])  
     # TODO: Get objects detected from PiA
-    # Take hyperspectral scan - test for 1st object
-    px_1 = results[0][0][1][:2]
-    px_2 = results[0][0][1][2:]
-    angle_x1, _ = pixel_to_angle(px_1,RESOLUTION,FOV)
-    angle_x2, _ = pixel_to_angle(px_2,RESOLUTION,FOV)
-    on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
-    # TODO: Send hyperspectral data to PiA
+
+    # Take hyperspectral scan 
+    for i in range(len(results)):# For every camera
+        for j in range(len(results[i])):# for every object detected in frame
+            # Get corner pixels of objects detected and convert to angle
+            px_1,px_2 = results[i][j][1][:2],results[0][0][1][2:]
+            xoffset = i*90
+            angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV,xoffset)[0] + xoffset + ROTATION_OFFSET # To remove rotation offset 
+            angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV,xoffset)[0] + xoffset + ROTATION_OFFSET
+
+            logging.debug("Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
+
+            on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
+            # TODO: Send hyperspectral data to PiA
     
 
 def on_rotate(axis,angles,hs_cam,cal_arr):
     # Rotate rotational stage 
-    axis.move_relative(angles[0],Units.ANGLE_DEGREES,velocity=40,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
-    sleep(2)
+    axis.move_absolute(angles[0],Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
     logging.info("Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
     # fps = hs_cam.ResultingFrameRateAbs.Value
-    logging.info("Calculated FPS: {fps}")
-    rotate_angle = angles[1]-angles[0]
+    # logging.info("Calculated FPS: {fps}")
     nframes = 800 #TODO calculate?
     # speed = get_rotation_speed(nframes,fps,rotate_angle)
+    speed = 5
     logging.info("Grabbing hyperspectral scan...")
-    rotate_relative(axis, rotate_angle, 5)
+    axis.move_absolute(angles[1],Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
     # scene = grab_avg_hyperspectral_frames(hs_cam, nframes)
     # # Plot RGB image for test
     # print("Plotting RGB Image...")
@@ -66,6 +72,7 @@ PORT = 5002
 PATH = "./captures/"
 CLASSES = ["person"] 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0" # TODO: find automatically?
+ROTATION_OFFSET = 20  # temporary 
 
 RESOLUTION = (4608,2592)
 FOV = (102,67)
@@ -92,9 +99,8 @@ if __name__ == "__main__":
         logging.debug("Setup rotational stage.")
         
         # Home rotational stage
-        axis.home(wait_until_idle=True)
-        rotate_relative(axis, 20,40)
         logging.info("Homing rotational stage.")
+        axis.home(wait_until_idle=True)
 
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
@@ -114,7 +120,8 @@ if __name__ == "__main__":
         # TODO send search classes to PiB
         rgb_model.set_classes(CLASSES)
         logging.info(f"Set YOLO classes to {CLASSES}.")
-        logging.info(f"Waiting for trigger...")
+        
+        logging.info("Setup complete. Waiting to start capture...")
 
         # Poll for trigger capture signal
         while True:
@@ -134,6 +141,9 @@ if __name__ == "__main__":
 
     finally:
         client_socket.close()
+        hs_cam.Close()
         zaber_conn.close()
+        logging.info("All connections closed.")
+        logging.info("System terminated.")
     
 
