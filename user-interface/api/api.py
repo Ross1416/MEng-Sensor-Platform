@@ -77,7 +77,7 @@ def createNewEnviroment():
     uid = uuid.uuid4()
 
     # Create default data
-    filePath = "scans/" + str(uid) + '.json'
+    filePath = "./scans/" + str(uid) + '.json'
     newData = {
         "location": locationName,
         "pins": [],

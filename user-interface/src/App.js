@@ -32,6 +32,7 @@ function App() {
       .then( data => {
         setPins(data.pins)
         setLocationName(data.location)
+        console.log(data)
       });
     } catch (error) {
       console.log(error)
