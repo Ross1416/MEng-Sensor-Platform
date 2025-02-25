@@ -64,7 +64,7 @@ if __name__ == "__main__":
         
 
     except Exception as e:
-        logging.error(f"Error in PiB.py: {e}")
+        print(f"Error in PiB.py: {e}")
 
     finally:
         client_socket.close()
