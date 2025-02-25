@@ -1,30 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
-import { render } from 'react-dom'
-// import {CubeOutline, LayersOutline, PinOutline, ThermometerOutline, BrushOutline, ArrowDownCircleOutline, RadioOutline } from 'react-ionicons'
 
+export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment}) {
 
-export function Panorama({panorama, objects, locationName, setLocationName}) {
-
-    // useEffect(() => {
-    //     // Fetch the photo URL from the backend
-    //     fetch("/api/photo") // Flask server URL
-    //     .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error(`Failed to fetch image: ${response.statusText}`);
-    //     }
-    //     return response.blob();
-    //   })
-    //   .then((blob) => {
-    //     const url = URL.createObjectURL(blob); // Create a URL for the image
-    //     setPhotoUrl(url); // Update state with the image URL
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching image:", error);
-    //   });
-    //   }, []);
-
-    const [defaultToggle, setDefaultToggle] = useState(false)
     const [showObjects, setShowObjects] = useState(false)
     const [showMaterials, setShowMaterials] = useState(false)
     const [showDistances, setShowDistances] = useState(false)
@@ -34,16 +12,10 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
     const [download, setDownload] = useState(false)
     const [connected, setConnected] = useState(false)
 
-    useEffect(()=> {
-        console.log(panorama)
-    }, [panorama])
-
+    // Toggle button change
     const toggleButton = (state, stateFunction) => {
         stateFunction(!state)
     }
-
-    
-
 
 
     return (
@@ -56,15 +28,15 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
             }
 
             {objects?.map((item, index) => (
-                <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.left, top: item.top, width: item.width, height: item.height, display: showMaterials || showObjects?'block':'none'}}>
+                <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.x1, top: item.y1, right: item.x2, bottom: item.y2, display: showMaterials || showObjects?'block':'none'}}>
                     <p>{showObjects ? item.RGB_classification : ''}</p>
-                    <p>{showMaterials ? item.HS_classification : ''}</p>
+                    <p>{showMaterials ? String(item.HS_classification) : ''}</p>
                     <p>{showDistances ? item.distance + ' m': ''}</p>
                 </div>
             ))}
             
             <div className='bottomBar'>
-                <h1>  {locationName}</h1>
+                <h1>{locationName}</h1>
                 {/* https://react-ionicons.netlify.app/ */}
                 <button style={{color: showObjects?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}>
                     Show Objects
@@ -101,12 +73,6 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
                 </button> */}
 
             </div>
-{/* 
-            <div className='topBar'>
-                <button>{'[]'}</button>
-                <button>{'[]'}</button>
-                <button>{'[]'}</button>
-            </div> */}
         </div>
     );
 }

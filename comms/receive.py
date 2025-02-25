@@ -2,6 +2,9 @@
 
 import socket
 import os
+import pickle
+import logging
+import cv2
 
 def make_server_connection(host, port):
     try:
@@ -67,6 +70,39 @@ def receive_images(save_location, server_socket, conn):
     finally:
         server_socket.close()
         print("Connection ended.")
+
+def receive_image_arrays(conn):
+    # Get number of images
+    num_images = conn.recv(8)   
+    if not num_images:
+        return []
+    num_images = int.from_bytes(num_images, byteorder='big')
+    logging.debug(f"Receiving {num_images} frames.")
+
+    frames = []
+    if num_images:
+        for i in range(num_images):
+            logging.debug(f"Receiving frame {i}.")
+
+            data_size = conn.recv(8)  # First 8 bytes for size
+            if not data_size:
+                break
+            data_size = int.from_bytes(data_size, byteorder='big')
+            logging.debug(f"Receiving frame {i} of size {data_size}.")
+            data = b""
+            while len(data) < data_size:
+                packet = conn.recv(min(4096, data_size - len(data)))
+                if not packet:
+                    logging.error(f"Packet lost.")
+                    break
+                data += packet
+            logging.debug(f"Frame received.")
+
+            img = pickle.loads(data)
+            img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+            frames.append(img)
+
+    return frames
 
 if __name__ == "__main__":
     port = 5002
