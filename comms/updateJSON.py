@@ -37,7 +37,7 @@ def resetJSON(filename="New Scan"):
     file_path = "../user-interface/api/data.json"
     blank_data = {
         "location": filename,
-        "pins": []
+        "pins": [],
     }
     try: 
         with open(file_path, "w") as file:
@@ -49,14 +49,12 @@ def resetJSON(filename="New Scan"):
 
 # Save images to front-end, then update JSON with latest data
 def updateJSON(uid, lon, lat, objects,image):
-    # try:
+
     # Specify panorama path
     save_path = './user-interface/public/images/img' + uid + '.jpg'
+
     # Write image
     cv2.imwrite(save_path, image)
-    # pass
-    # except Exception as e:
-    #         print(f"An error occurred whilst saving images: {e}")
 
     # try:    
     # Specify JSON path and read data
@@ -67,7 +65,7 @@ def updateJSON(uid, lon, lat, objects,image):
     # Construct dictionary with new data
     newPin = {
         "geo_coords": [lon, lat],
-        "panorama_ref": "./images/img" + uid + ".jpg",
+        "panorama_ref": uid + ".jpg",
         "objects": format_results(objects)
     }
 
@@ -78,9 +76,6 @@ def updateJSON(uid, lon, lat, objects,image):
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
     print("JSON file updated successfully.")
-
-    # except Exception as e:
-    #         print(f"An error occurred whilst updating JSON: {e}")
 
 
 # Populate the JSON file with dummy data
