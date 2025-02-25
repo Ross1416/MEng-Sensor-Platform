@@ -51,6 +51,6 @@ def npy_to_png(class_name):
 if __name__ == "__main__":
 
     CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
-    CLASS_NAME = "indoor"
+    CLASS_NAME = "outdoor_dataset"
 
     npy_to_png(class_name=CLASS_NAME)

@@ -44,7 +44,7 @@ def take_hyperspectral_image(PORT, nframe, angle, calibration):
         rotate_relative(axis, ANGLE, speed)
 
         scene = grab_hyperspectral_scene(
-            cam, NFRAMES, white_image, dark_image, "indoor"
+            cam, NFRAMES, white_image, dark_image, "outdoor_dataset"
         )
 
         print("Plotting RGB Image...")
