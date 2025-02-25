@@ -54,18 +54,16 @@ def grab_hyperspectral_scene(
 
         if i == nframes:
             break
+    """
+    calibrated_scene = np.zeros_like(scene)
 
-    if calibrate:
-        calibrated_scene = np.zeros_like(scene)
-
-        for frame_idx in range(i):
-            calibrated_scene[:, frame_idx, :] = calibrate_hyperspectral(
-                scene[:, frame_idx, :],
-                np.transpose(white_image),
-                np.transpose(dark_image),
-            )
-
-        scene = calibrated_scene
+    for frame_idx in range(i):
+        calibrated_scene[:, frame_idx, :] = calibrate_hyperspectral(
+            scene[:, frame_idx, :],
+            np.transpose(white_image),
+            np.transpose(dark_image),
+        )
+    """
 
     cam.StopGrabbing()
 
