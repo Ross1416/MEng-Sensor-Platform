@@ -127,10 +127,11 @@ def applyTransform(img1, img2, matrix):
     originalCorners = np.array([[0, 0], [width2, 0], [0, height2], [width2, height2]], dtype=np.float32)
     newCorners = cv2.transform(np.array([originalCorners]), matrix)[0]
     maxX = int(np.max(newCorners[:, 0]))
-    maxY = int(np.max(newCrners[:, 1]))
+    maxY = int(np.max(newCorners[:, 1]))
     
     # Apply the affine transformation, with a canvas = max coordinates
     canvas = cv2.warpAffine(img2, matrix, (maxX, maxY))
+    showImage(canvas)
     
     # Apply Blending
     blended = applyBlend(img1, canvas)
@@ -145,10 +146,12 @@ def applyBlend(image1, canvas):
     img1[:height1, :width1, :] = image1
 
     # Highlight the area to blend
-    identifyBlendedArea = np.where((transformed > 0) & (paddedImg1 > 0), 255, 0).astype(np.uint8)
+    identifyBlendedArea = np.where((canvas > 0) & (img1 > 0), 255, 0).astype(np.uint8)
+    showImage(identifyBlendedArea)
 
     # Crop to the smallest bounding box
     blendedObject, x, y = cropToObject(identifyBlendedArea)
+    showImage(blendedObject)
     
     # Get the blending area width
     height, width, _ = blendedObject.shape
@@ -157,16 +160,19 @@ def applyBlend(image1, canvas):
     gradient = np.linspace(0, 1, width)
     gradient = np.stack([gradient] * 3, axis=1)  # Shape: (width, 3)
     gradient = np.tile(gradient, (height, 1, 1))  # Repeat for height
+    showImage(gradient)
 
     # Project the new gradient to the blending shape
     gradient = np.where(blendedObject != 0, gradient, blendedObject)
+    showImage(gradient)
 
     # Place the new gradient back in its original position
-    newGradient = np.zeros_like(transformed).astype(np.float32)    
+    newGradient = np.zeros_like(canvas).astype(np.float32)    
     newGradient[y:y+height, x:x+width, :] = gradient
+    showImage(newGradient)
 
-    blended = ((1-newGradient)*paddedImg1 + newGradient*transformed).astype(np.uint8)    
-    blended = np.where(blended == 0, transformed, blended).astype(np.uint8) 
+    blended = ((1-newGradient)*img1 + newGradient*canvas).astype(np.uint8)    
+    blended = np.where(blended == 0, canvas, blended).astype(np.uint8) 
     showImage(blended, 'BLENDED')
 
     return blended

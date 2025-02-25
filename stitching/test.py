@@ -16,8 +16,8 @@ if __name__ == "__main__":
     panorama = applyTransform(image1, image2, H)
     showImage(panorama)
 
-    src_pts, dst_pts = findKeyPoints(panorama, image3)
-    H = calculateTransform(dst_pts, src_pts)
-    panorama = applyTransform(panorama, image3, H)
-    showImage(panorama)
+    # src_pts, dst_pts = findKeyPoints(panorama, image3)
+    # H = calculateTransform(dst_pts, src_pts)
+    # panorama = applyTransform(panorama, image3, H)
+    # showImage(panorama)
 
