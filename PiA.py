@@ -8,11 +8,7 @@ from cameras import *
 import logging 
 
 # Triggers when change in GPS location
-<<<<<<< HEAD
 def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False, activeFile):
-=======
-def new_scan(rgb_model, lon=0.00, lat=0.00):
->>>>>>> 2b037f9974dd94e2b6a89f1bee77de987d5499f8
     # Captures 2 images
     frames = capture(cams, "PiA", save_location)
     # Triggers capture on PiB
@@ -29,11 +25,7 @@ def new_scan(rgb_model, lon=0.00, lat=0.00):
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
-<<<<<<< HEAD
     updateJSON(uid, lon, lat, objects, panorama, activeFile)
-=======
-    updateJSON(uid, lon, lat, objects,frames[0])
->>>>>>> 2b037f9974dd94e2b6a89f1bee77de987d5499f8
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
@@ -64,16 +56,9 @@ if __name__ == "__main__":
     while True:
         # TODO: Check for location change
         # Update save location
-<<<<<<< Updated upstream
         status, activeFile = getPlatformStatus()
         GPS_coordinate_change = True
-=======
-        filepath, status = getPlatformStatus()
-        timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        save_location = f"./capture/{timestamp}-capture/"
->>>>>>> Stashed changes
 
-<<<<<<< HEAD
         if status == 2 or (status == 1 and GPS_coordinate_change):
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
@@ -82,8 +67,3 @@ if __name__ == "__main__":
         
             logging.info("Completed scan.")
             input("Press key to continue...")
-=======
-        new_scan(rgb_model)       
-        logging.info("Completed scan.")
-        input("Press key to continue...")
->>>>>>> 2b037f9974dd94e2b6a89f1bee77de987d5499f8
