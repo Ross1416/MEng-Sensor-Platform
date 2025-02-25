@@ -9,7 +9,7 @@ import logging
 from stitching.stitching_main import performPanoramicStitching
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False, activeFile):
+def new_scan(rgb_model, activeFile, lon=0.00, lat=0.00,privacy=False):
     # Captures 2 images
     frames = capture(cams, "PiA")
     # Triggers capture on PiB
@@ -71,20 +71,14 @@ if __name__ == "__main__":
     while True:
         # TODO: Check for location change
         # Update save location
-<<<<<<< Updated upstream
         status, activeFile = getPlatformStatus()
         GPS_coordinate_change = True
-=======
-        filepath, status = getPlatformStatus()
-        timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        save_location = f"./capture/{timestamp}-capture/"
->>>>>>> Stashed changes
 
         if status == 2 or (status == 1 and GPS_coordinate_change):
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
 
-            new_scan(rgb_model,privacy=PRIVACY, activeFile)       
+            new_scan(rgb_model,activeFile, privacy=PRIVACY)       
         
             logging.info("Completed scan.")
             input("Press key to continue...")
