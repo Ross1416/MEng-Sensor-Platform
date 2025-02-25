@@ -7,7 +7,7 @@ import logging
 from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
 
-def on_trigger(rgb_model,axis,cal_arr):
+def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     # Capture images
     frames = capture(cams, "PiB", PATH)
     # Perform object detection
@@ -27,7 +27,7 @@ def on_trigger(rgb_model,axis,cal_arr):
     px_2 = results[0][0][1][2:]
     angle_x1, _ = pixel_to_angle(px_1,RESOLUTION,FOV)
     angle_x2, _ = pixel_to_angle(px_2,RESOLUTION,FOV)
-    on_rotate(axis,(angle_x1,angle_x2),cal_arr)
+    on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
     # TODO: Send hyperspectral data to PiA
     
 
@@ -37,13 +37,13 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
     sleep(2)
     logging.info("Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
-    fps = hs_cam.ResultingFrameRateAbs.Value
+    # fps = hs_cam.ResultingFrameRateAbs.Value
     logging.info("Calculated FPS: {fps}")
     rotate_angle = angles[1]-angles[0]
     nframes = 800 #TODO calculate?
-    speed = get_rotation_speed(nframes,fps,rotate_angle)
+    # speed = get_rotation_speed(nframes,fps,rotate_angle)
     logging.info("Grabbing hyperspectral scan...")
-    rotate_relative(axis, rotate_angle, speed)
+    rotate_relative(axis, rotate_angle, 5)
     # scene = grab_avg_hyperspectral_frames(hs_cam, nframes)
     # # Plot RGB image for test
     # print("Plotting RGB Image...")
@@ -89,11 +89,11 @@ if __name__ == "__main__":
         
         # Setup rotational stage
         zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
-        rotate_relative(axis, 20,40)
         logging.debug("Setup rotational stage.")
         
         # Home rotational stage
-        axis.home(wait_until_idle=False)
+        axis.home(wait_until_idle=True)
+        rotate_relative(axis, 20,40)
         logging.info("Homing rotational stage.")
 
         # Get Hyperspectral Calibration
