@@ -29,7 +29,7 @@ def list_images(folder_path, client_socket):
     # get the path/directory
         images = [f for f in os.listdir(folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
         if not images:
-            logging.info("No images found")
+            print("No images found")
             client_socket.close()
             return
 
@@ -38,7 +38,7 @@ def list_images(folder_path, client_socket):
 
         for image in images:
             image_path = os.path.join(folder_path, image)
-            logging.info(f"Getting ready to send {image}...")
+            print(f"Getting ready to send {image}...")
             filesize = os.path.getsize(image)
             
             filename = os.path.basename(image)
@@ -49,17 +49,17 @@ def list_images(folder_path, client_socket):
             print("Waiting for acknowledgement...")
             ack = client_socket.recv(1024).decode()
             if ack != "READY":
-                logging.warning("Server is not ready to receive the file.")
+                print("Server is not ready to receive the file.")
                 return
-            logging.info("Acknowledgement received.")
+            print("Acknowledgement received.")
             # Send the image file
             with open(image_path, "rb") as file:
                 while (chunk := file.read(1024)):
                     client_socket.sendall(chunk)
             
-            logging.info(f"Image {filename} sent successfully!")
+            print(f"Image {filename} sent successfully!")
         
-        logging.info("All images sent!")
+        print("All images sent!")
         return
 
 def send_images(folder_path, client_socket):
@@ -67,39 +67,39 @@ def send_images(folder_path, client_socket):
         # get the path/directory of the photos taken locally on the child Pi
         images = [f for f in os.listdir(folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
         if not images:
-            logging.warning("No images found")
+            print("No images found")
             client_socket.close()
             return
 
-        logging.info(f"{len(images)} images found")
+        print(len(images))
         client_socket.sendall(f"{len(images)}".encode())
 
         for image in images:
             image_path = os.path.join(folder_path, image)
-            logging.info(f"Getting ready to send {image}...")
-            logging.info(f"Sending image to \"{image_path}\"")
+            print(f"Getting ready to send {image}...")
+            print(image_path)
             filesize = os.path.getsize(image_path)
             filename = os.path.basename(image_path)
             client_socket.sendall(f"{filename}|{filesize}".encode())
             # Wait for acknowledgment
-            logging.info("Waiting for acknowledgement...")
+            print("Waiting for acknowledgement...")
             ack = client_socket.recv(1024).decode()
             if ack != "READY":
-                logging.warning("Server is not ready to receive the file.")
+                print("Server is not ready to receive the file.")
                 return
-            logging.info("Acknowledgement received.")
+            print("Acknowledgement received.")
             # Send the image file
             with open(image_path, "rb") as file:
                 while (chunk := file.read(1024)):
                     client_socket.sendall(chunk)
             
-            logging.info(f"Image {filename} sent successfully!")
+            print(f"Image {filename} sent successfully!")
             sleep(1)
         
-        logging.info("All images sent!")
+        print("All images sent!")
     
     except Exception as e:
-        logging.error(f"Error: {e}")
+        print(f"Error: {e}")
 
     finally:
         client_socket.close()
@@ -124,14 +124,14 @@ def receive_capture_request(client_socket):
     try:
         ack = client_socket.recv(1024).decode()
         if ack != "CAPTURE REQUEST":
-            logging.warning("No capture request made.")
+            print("No capture request made.")
             return
-        logging.info("Capture request received.")
+        print("Capture request received.")
         sleep(2)    
         return 1
         
     except Exception as e:
-        logging.error(f"Error: {e}")
+        print(f"Error: {e}")
         sleep(1)
         # client_socket.close()
         return 0
