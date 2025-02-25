@@ -2,14 +2,14 @@ from object_detection.object_detection import *
 from comms.receive import *
 from datetime import datetime
 from time import sleep
-from comms.updateJSON import updateJSON
+from comms.updateJSON import updateJSON, getPlatformStatus
 import cv2
 from cameras import *
 import logging 
 from stitching.stitching_main import performPanoramicStitching
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False):
+def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False, activeFile):
     # Captures 2 images
     frames = capture(cams, "PiA")
     # Triggers capture on PiB
@@ -35,7 +35,7 @@ def new_scan(rgb_model, lon=0.00, lat=0.00,privacy=False):
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
-    updateJSON(uid, lon, lat, objects, panorama)
+    updateJSON(uid, lon, lat, objects, panorama, activeFile)
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
@@ -71,10 +71,14 @@ if __name__ == "__main__":
     while True:
         # TODO: Check for location change
         # Update save location
-        timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        save_location = f"./capture/{timestamp}-capture/"
+        status, activeFile = getPlatformStatus()
+        GPS_coordinate_change = True
 
-        new_scan(rgb_model,privacy=PRIVACY)       
+        if status == 2 or (status == 1 and GPS_coordinate_change):
+            timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+            save_location = f"./capture/{timestamp}-capture/"
+
+            new_scan(rgb_model,privacy=PRIVACY, activeFile)       
         
-        logging.info("Completed scan.")
-        input("Press key to continue...")
+            logging.info("Completed scan.")
+            input("Press key to continue...")
