@@ -22,21 +22,22 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     # Send object detection results to PiA
     send_object_detection_results(client_socket, objects[2:])  
     # TODO: Get objects detected from PiA
-
+    results = [None] + [None] + results
     # Take hyperspectral scan 
     for i in range(len(results)):# For every camera
-        for j in range(len(results[i])):# for every object detected in frame
-            # Get corner pixels of objects detected and convert to angle
-            px_1,px_2 = results[i][j][1][:2],results[0][0][1][2:]
-            xoffset = i*90
-            angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV,xoffset)[0] + xoffset + ROTATION_OFFSET # To remove rotation offset 
-            angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV,xoffset)[0] + xoffset + ROTATION_OFFSET
+        if results[i] != None:
+            for j in range(len(results[i])):# for every object detected in frame
+                # Get corner pixels of objects detected and convert to angle
+                px_1,px_2 = results[i][j][1][:2],results[i][j][1][2:]
+                xoffset = i*90
+                angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV)[0] + xoffset - ROTATION_OFFSET # To remove rotation offset 
+                angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV)[0] + xoffset - ROTATION_OFFSET
 
-            logging.debug("Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
+                logging.debug(f"Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
 
-            on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
-            # TODO: Send hyperspectral data to PiA
-    
+                on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
+                # TODO: Send hyperspectral data to PiA
+        
 
 def on_rotate(axis,angles,hs_cam,cal_arr):
     # Rotate rotational stage 
@@ -101,6 +102,7 @@ if __name__ == "__main__":
         # Home rotational stage
         logging.info("Homing rotational stage.")
         axis.home(wait_until_idle=True)
+        axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
 
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
@@ -134,12 +136,14 @@ if __name__ == "__main__":
     
     except Exception as e:
         logging.error(f"Error in PiB.py: {e}")
+        axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
         client_socket.close()
         hs_cam.Close()
         zaber_conn.close()
         logging.info("All connections closed.")
 
     finally:
+        axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
         client_socket.close()
         hs_cam.Close()
         zaber_conn.close()
