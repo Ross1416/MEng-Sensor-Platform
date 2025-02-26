@@ -1,8 +1,8 @@
+import numpy as np
 
-
-def longitudinal_depth(d,h1,h2):
+def longitudinal_depth(B,h1,h2):
     """ Calculates distances to objects based on change in scale for longitudinal (forward/backward) movement.
-    -d: change in distance between object detections
+    -B: change in real distance between object detections
     -h1: previous height of object in pixels
     -h2: current height of object in pixels
     
@@ -10,6 +10,18 @@ def longitudinal_depth(d,h1,h2):
 
     return d/((h2/h1)-1)
 
+
+def lateral_depth(B,d,width=4608,xFOV=102):
+    """ Calculates distances to objects based on change in scale for lateral movement.
+    -B: change in real distance between object detections
+    -d: change in x pixel displacement
+    -width: width of image in pixels (default=4608)
+    -xFOV: x FOV of camera (default=102)
+
+    returns: distance to object"""
+
+    f = (width * 0.5) / np.tan(xFOV*0.5*np.pi/180)
+    return (B*f)/d
 
 if __name__ == "__main__":
     from ultralytics import YOLOWorld
@@ -28,8 +40,9 @@ if __name__ == "__main__":
             results.append([label,coords,conf])
         return results
 
-    frame1 = cv2.imread("./test_images/test3/img1.jpg")
-    frame2 = cv2.imread("./test_images/test3/img2.jpg")
+    ##### Longitudinal Test #####
+    frame1 = cv2.imread("./longitudinal_test_images/test3/img1.jpg")
+    frame2 = cv2.imread("./longitudinal_test_images/test3/img2.jpg")
     frame2 = cv2.resize(frame2, np.flip(frame1.shape[:2]))
 
     #[:1800,:1350]#[:1762,:1322]
@@ -64,4 +77,35 @@ if __name__ == "__main__":
     d = 95 
 
     depth = longitudinal_depth(d,h1,h2)
+    print(f"Depth to object: {depth}")
+
+
+    ##### Lateral Test #####
+    frame1 = cv2.imread("./lateral_test_images/test1/img1.jpg")
+    frame2 = cv2.imread("./lateral_test_images/test1/img2.jpg")
+    frame2 = cv2.resize(frame2, np.flip(frame1.shape[:2]))
+
+    results1 = object_detection(model,frame1)
+    results2 = object_detection(model,frame2)
+
+    # Plot detections
+    detection_img1 = frame1.copy()
+    detection_img2 = frame2.copy()
+
+    detection_img1 = cv2.rectangle(detection_img1,results1[0][1][:2],results1[0][1][2:],(255,0,0),1)
+    detection_img2 = cv2.rectangle(detection_img2,results2[0][1][:2],results2[0][1][2:],(255,0,0),1)
+
+    detection_img1 = cv2.resize(detection_img1, (0,0), fx=0.5, fy=0.5) 
+    detection_img2 = cv2.resize(detection_img2, (0,0), fx=0.5, fy=0.5) 
+
+    cv2.imshow("frames",cv2.hconcat([detection_img1,detection_img2]))
+    cv2.waitKey(0)
+
+    B = 80 
+    # centre1x = int((results1[0][1][0]+results1[0][1][2])/2)
+    # centre2x = int((results2[0][1][0]+results2[0][1][2])/2)
+    # d = abs(centre1x-centre2x)    
+
+    d = abs(results1[0][1][0]-results2[0][1][0])
+    depth = lateral_depth(B,d,width=frame1.shape[1],xFOV=80)
     print(f"Depth to object: {depth}")
