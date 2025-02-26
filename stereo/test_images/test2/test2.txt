@@ -1,0 +1,4 @@
+object: road sign
+1st dist: 270cm
+2nd dist: 100cm
+dist moved: 170cm
