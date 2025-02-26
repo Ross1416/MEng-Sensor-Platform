@@ -1,6 +1,3 @@
-from ultralytics import YOLOWorld
-import math
-import cv2
 
 
 def longitudinal_depth(d,h1,h2):
@@ -15,10 +12,13 @@ def longitudinal_depth(d,h1,h2):
 
 
 if __name__ == "__main__":
-
+    from ultralytics import YOLOWorld
+    import math
+    import cv2
+    import numpy as np
     # copied from object_detection for tests
     def object_detection(model, frame):
-        detections = model.predict(frame)
+        detections = model.predict(frame,conf=0.05)
         results = []
         for box in detections[0].boxes:
             label = model.names[int(box.cls[0])]
@@ -28,14 +28,16 @@ if __name__ == "__main__":
             results.append([label,coords,conf])
         return results
 
-    frame1 = cv2.imread("./test_images/test2/img1.jpg")
-    frame2 = cv2.imread("./test_images/test2/img2.jpg")[:1800,:1350]#[:1762,:1322]
-    
+    frame1 = cv2.imread("./test_images/test3/img1.jpg")
+    frame2 = cv2.imread("./test_images/test3/img2.jpg")
+    frame2 = cv2.resize(frame2, np.flip(frame1.shape[:2]))
+
+    #[:1800,:1350]#[:1762,:1322]
     print(frame1.shape)
     print(frame2.shape)
 
     model = YOLOWorld("../object_detection/yolo_models/yolov8s-worldv2.pt")
-    model.set_classes(["road sign"])
+    model.set_classes(["sign"])
 
     results1 = object_detection(model,frame1)
     results2 = object_detection(model,frame2)
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     print(f"Height 1 {h1}, Height 2 {h2}")
 
     # d = 0.15 # 15 cm moved
-    d = 170 # 170cm moved
+    d = 95 
 
-    depth = longitudinal_depth(-170,h2,h1)
+    depth = longitudinal_depth(d,h1,h2)
     print(f"Depth to object: {depth}")
