@@ -19,7 +19,10 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     for f in frames:
         objects.append(object_detection(rgb_model,f))
     # Retrieve slave images and data
-    # receive_images(save_location, server_socket, conn)  
+    # receive_images(save_location, server_socket, conn)
+    # 
+    # Send object detection results to PiB
+    send_object_detection_results(conn, objects)  
     frames += receive_image_arrays(conn)
 
     # send rotational stage control signal

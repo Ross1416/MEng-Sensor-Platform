@@ -119,6 +119,38 @@ def send_image_arrays(client_socket, frames):
         logging.debug(f"Frame sent.")
 
 
+def receive_object_detection_results(client_socket):
+    # Get number of objects
+    num_objects = client_socket.recv(8)   
+    if not num_objects:
+        return []
+    num_objects = int.from_bytes(num_objects, byteorder='big')
+    logging.debug(f"Receiving {num_objects} objects.")
+
+    objects = []
+    if num_objects:
+        for i in range(num_objects):
+            logging.debug(f"Receiving object {i}.")
+
+            data_size = client_socket.recv(8)  # First 8 bytes for size
+            if not data_size:
+                break
+            data_size = int.from_bytes(data_size, byteorder='big')
+            logging.debug(f"Receiving object {i} of size {data_size}.")
+            data = b""
+            while len(data) < data_size:
+                packet = client_socket.recv(min(4096, data_size - len(data)))
+                if not packet:
+                    logging.error(f"Packet lost.")
+                    break
+                data += packet
+            logging.debug(f"Object received.")
+
+            obj = pickle.loads(data)
+            objects.append(obj)
+
+    return objects
+
 
 def receive_capture_request(client_socket):
     try:
