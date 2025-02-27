@@ -60,6 +60,8 @@ if __name__ == "__main__":
                 logging.info("Triggered Capture.")
                 on_trigger(rgb_model)
                 capture_triggered = True
+            
+            receive_object_detection_results(client_socket)
             sleep(1)
         
 
