@@ -105,6 +105,27 @@ def receive_image_arrays(conn):
 
     return frames
 
+
+
+def send_object_detection_results(client_socket, objects):
+    """Send object detection results to PiB over socket"""
+    try:
+        # Send number of objects
+        client_socket.send(len(objects).to_bytes(8, byteorder='big'))
+        # Send all objects
+        for obj in objects:
+            # Serialise the data
+            data = pickle.dumps(obj)
+            logging.debug(f"Sending frame of size {len(data)}")
+            client_socket.send(len(data).to_bytes(8, byteorder='big'))
+            client_socket.sendall(data)
+            logging.debug(f"Frame sent.")
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
 if __name__ == "__main__":
     port = 5002
     host = "0.0.0.0" # i.e. listening
