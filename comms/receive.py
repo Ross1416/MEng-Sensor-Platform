@@ -116,10 +116,10 @@ def send_object_detection_results(client_socket, objects):
         for obj in objects:
             # Serialise the data
             data = pickle.dumps(obj)
-            logging.debug(f"Sending frame of size {len(data)}")
+            logging.debug(f"Sending object detection data of size {len(data)}")
             client_socket.send(len(data).to_bytes(8, byteorder='big'))
             client_socket.sendall(data)
-            logging.debug(f"Frame sent.")
+            logging.debug(f"Object detection data sent.")
 
     except Exception as e:
         print(f"Error: {e}")

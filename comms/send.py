@@ -130,13 +130,13 @@ def receive_object_detection_results(client_socket):
     objects = []
     if num_objects:
         for i in range(num_objects):
-            logging.debug(f"Receiving object {i}.")
+            logging.debug(f"Receiving object object detection data {i}.")
 
             data_size = client_socket.recv(8)  # First 8 bytes for size
             if not data_size:
                 break
             data_size = int.from_bytes(data_size, byteorder='big')
-            logging.debug(f"Receiving object {i} of size {data_size}.")
+            logging.debug(f"Receiving object detection data {i} of size {data_size}.")
             data = b""
             while len(data) < data_size:
                 packet = client_socket.recv(min(4096, data_size - len(data)))
@@ -144,7 +144,7 @@ def receive_object_detection_results(client_socket):
                     logging.error(f"Packet lost.")
                     break
                 data += packet
-            logging.debug(f"Object received.")
+            logging.debug(f"Object detection data received.")
 
             obj = pickle.loads(data)
             objects.append(obj)
