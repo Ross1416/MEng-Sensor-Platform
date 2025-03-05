@@ -61,7 +61,9 @@ if __name__ == "__main__":
                 on_trigger(rgb_model)
                 capture_triggered = True
             
-            receive_object_detection_results(client_socket)
+            detection_data = receive_object_detection_results(client_socket)
+            for element in detection_data:
+                print(f"{element}")
             sleep(1)
         
 
