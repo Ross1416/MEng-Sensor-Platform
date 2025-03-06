@@ -44,25 +44,24 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
     axis.move_absolute(angles[0],Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
     logging.info("Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
-    # fps = hs_cam.ResultingFrameRateAbs.Value
-    # logging.info("Calculated FPS: {fps}")
+    fps = hs_cam.ResultingFrameRateAbs.Value
+    logging.info("Calculated FPS: {fps}")
     nframes = 800 #TODO calculate?
-    # speed = get_rotation_speed(nframes,fps,rotate_angle)
-    speed = 5
+    speed = get_rotation_speed(nframes,fps,abs(angles[1]-angles[0]))
     logging.info("Grabbing hyperspectral scan...")
-    axis.move_absolute(angles[1],Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
-    # scene = grab_avg_hyperspectral_frames(hs_cam, nframes)
-    # # Plot RGB image for test
-    # print("Plotting RGB Image...")
-    # plt.figure()
-    # # Get indices of RGB bands from calibration file
-    # RGB = (
-    #     get_wavelength_index(cal_arr, 690, 2),
-    #     get_wavelength_index(cal_arr, 535, 2),
-    #     get_wavelength_index(cal_arr, 470, 2),
-    # )
+    axis.move_absolute(angles[1],Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=False) # temporarily blocking
+    scene = grab_hyperspectral_scene(hs_cam, nframes, None, None,"test",calibrate=False)
+    # Plot RGB image for test
+    print("Plotting RGB Image...")
+    plt.figure()
+    # Get indices of RGB bands from calibration file
+    RGB = (
+        get_wavelength_index(cal_arr, 690, 2),
+        get_wavelength_index(cal_arr, 535, 2),
+        get_wavelength_index(cal_arr, 470, 2),
+    )
 
-    # plt.imshow(scene[:, :, RGB])
+    plt.imshow(scene[:, :, RGB])
     # TODO: Process hs data
     # TODO: return hsi colour image and data
 
@@ -108,15 +107,14 @@ if __name__ == "__main__":
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
         # Setup hyperspectral
-        # hs_cam = setup_hyperspectral()
-        # logging.info("Setup hyperspectral camera.")
-        hs_cam = None
+        hs_cam = setup_hyperspectral()
+        logging.info("Setup hyperspectral camera.")
 
         # Make connection with PiA
         client_socket = make_client_connection(IP, PORT)
         logging.debug("Connected to PiA")
         
-        # Setup object detection model
+        # Setup object detection modelx
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
         logging.debug("Loaded RGB object detection model.")
         # TODO send search classes to PiB
