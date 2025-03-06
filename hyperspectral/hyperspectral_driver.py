@@ -29,7 +29,7 @@ def setup_hyperspectral():
 
 
 def grab_hyperspectral_scene(
-    cam, nframes, white_image, dark_image, class_name
+    cam, nframes, white_image, dark_image, class_name, calibrate=True
 ):
     """Grabs {nframes} number of frames from hyperspectral camera"""
     from time import time  # Import the time module
@@ -53,14 +53,17 @@ def grab_hyperspectral_scene(
         if i == nframes:
             break
 
-    calibrated_scene = np.zeros_like(scene)
+    if calibrate:
+        calibrated_scene = np.zeros_like(scene)
 
-    for frame_idx in range(i):
-        calibrated_scene[:, frame_idx, :] = calibrate_hyperspectral(
-            scene[:, frame_idx, :],
-            np.transpose(white_image),
-            np.transpose(dark_image),
-        )
+        for frame_idx in range(i):
+            calibrated_scene[:, frame_idx, :] = calibrate_hyperspectral(
+                scene[:, frame_idx, :],
+                np.transpose(white_image),
+                np.transpose(dark_image),
+            )
+
+        scene = calibrated_scene
 
     cam.StopGrabbing()
 
@@ -78,10 +81,10 @@ def grab_hyperspectral_scene(
     scene_path = os.path.join(base_dir, f"{class_name}_{index:03d}.npy")
     white_image_path = os.path.join(base_dir, f"white_image_{index:03d}.npy")
 
-    np.save(scene_path, calibrated_scene)
+    np.save(scene_path, scene)
     np.save(white_image_path, white_image)
 
-    return calibrated_scene
+    return scene
 
 
 def grab_avg_hyperspectral_frames(cam, n_frames):
