@@ -1,4 +1,4 @@
-from stitching_functions import *
+from stitching.stitching_functions import *
 import cv2
 import numpy as np
 
