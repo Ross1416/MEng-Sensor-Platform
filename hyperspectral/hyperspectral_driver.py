@@ -27,6 +27,8 @@ def setup_hyperspectral():
 
     return cam
 
+def get_nframes(angle):
+    return round((angle/27)*800)
 
 def grab_hyperspectral_scene(
     cam, nframes, white_image, dark_image, class_name, calibrate=True
