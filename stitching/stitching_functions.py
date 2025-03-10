@@ -28,7 +28,7 @@ def cylindricalProjection(img):
 
     cylindricalProjection = cv2.remap(img, map_x.astype(np.float32), map_y.astype(np.float32), cv2.INTER_LINEAR)
 
-    cylindricalProjection = cropToObject(cylindricalProjection)
+    cylindricalProjection, _, _ = cropToObject(cylindricalProjection)
         
     return cylindricalProjection
 
@@ -48,8 +48,7 @@ def cropToObject(image):
     x, y, w, h = cv2.boundingRect(largest_contour)
     croppedImage = image[y:y+h, x:x+w]
 
-    return croppedImage
-
+    return croppedImage, x, y # return cropped image, plus left + upper lengths that was chopped off
 
 ### Find Matching Co-ordinates through SIFT ####
 def findKeyPoints(img1, img2, horizontal_overlap=500):
@@ -113,7 +112,7 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
 def calculateTransform(src_pts, dst_pts, ransac_threshold=3):
 
     # Compute the affine transformation matrix, using RANSAC
-    matrix, inliers = cv2.estimateAffine2D(src_pts, dst_pts, method=cv2.RANSAC, ransacReprojThreshold=ransac_threshold)
+    matrix, inliers = cv2.estimateAffine2D(src_pts, dst_pts, method=cv2.RANSAC, ransacReprojThreshold=ransac_threshold, maxIters=5000, confidence=0.9)
 
     return matrix
 
@@ -121,68 +120,61 @@ def calculateTransform(src_pts, dst_pts, ransac_threshold=3):
 ### Apply affine transform to warp images ####   
 def applyTransform(img1, img2, matrix):
     # Get image dimensions
-    height, width, _ = img1.shape
+    height1, width1, _ = img1.shape # First image / panorama
+    height2, width2, _ = img2.shape # Image to stitch on
+
+    # Find max coordinates after transformation:
+    originalCorners = np.array([[0, 0], [width2, 0], [0, height2], [width2, height2]], dtype=np.float32)
+    newCorners = cv2.transform(np.array([originalCorners]), matrix)[0]
+    maxX = int(np.max(newCorners[:, 0]))
+    maxY = int(np.max(newCorners[:, 1]))
     
-    # Apply the affine transformation
-    transformed = cv2.warpAffine(img2, matrix, (width*4, height*4))
+    # Apply the affine transformation, with a canvas = max coordinates
+    canvas = cv2.warpAffine(img2, matrix, (maxX, max(height1, maxY)))
 
-    # Place reference image on top
-    transformed[:height,:width,:] = np.where(img1 == 0, transformed[:height,:width,:], img1)
-
-    # Crop
-    transformed = cropToObject(transformed)
-
-    return transformed      
-
-### TO FIX: Blend images ####   
-def blendImages(img1, img2, mask=None):
-    # Ensure images are the same size
-    rows1, cols1, _ = img1.shape
-    rows2, cols2, _ = img2.shape
-    overlap = 50
+    # canvas[:height1, :width1, :] = img1
     
-    mask1 = np.ones((rows1, cols1-overlap//2, 3))
+    # Apply Blending
+    blended = applyBlend(img1, canvas)
 
-    mask2 = np.linspace(1, 0, overlap, dtype=np.float32)
-    mask2 = np.tile(mask2, (rows1, 1))
-    mask2 = np.dstack([mask2] * 3)
+    return blended
 
-    mask3 = np.zeros((rows1, cols2-overlap//2,3))
+def applyBlend(image1, canvas):
 
-    mask = np.hstack((mask1, mask2, mask3))
-    # showImage(mask)
+    # Extend image 1 to be the same size as the new canvas
+    height1, width1, _ = image1.shape # First image / panorama
+    img1 = np.zeros_like(canvas)
+    img1[:height1, :width1, :] = image1
 
-    img1 = cv2.copyMakeBorder(img1, 0, 0, 0, cols2, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    img2 = cv2.copyMakeBorder(img2, 0, 0, cols1, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    # Highlight the area to blend
+    identifyBlendedArea = np.where((canvas > 0) & (img1 > 0), 255, 0).astype(np.uint8)
+    # showImage(identifyBlendedArea)
 
-     # Convert images to float for accurate blending
-    img1 = img1.astype(np.float32)
-    img2 = img2.astype(np.float32)
+    # Crop to the smallest bounding box
+    blendedObject, x, y = cropToObject(identifyBlendedArea)
+    # showImage(blendedObject)
     
-    # Blend the images using the mask
-    blended = img1 * mask + img2 * (1 - mask)
+    # Get the blending area width
+    height, width, _ = blendedObject.shape
 
-    return blended.astype(np.uint8)
+    # Create a 3D gradient
+    gradient = np.linspace(0, 1, width)
+    gradient = np.stack([gradient] * 3, axis=1)  # Shape: (width, 3)
+    gradient = np.tile(gradient, (height, 1, 1))  # Repeat for height
+    # showImage(gradient)
 
+    # Project the new gradient to the blending shape
+    gradient = np.where(blendedObject != 0, gradient, blendedObject)
+    # showImage(gradient)
 
+    # Place the new gradient back in its original position
+    newGradient = np.zeros_like(canvas).astype(np.float32)    
+    newGradient[y:y+height, x:x+width, :] = gradient
+    # showImage(newGradient)
 
-### Identify default affine transform 
-def defaultAffineTransform():    
-    # TO DO: BEEF THIS OUT TO RETURN 3 Matrices
-    
-    # Define three points in the source image
-    src_pts = np.float32([[57, 422], [121, 1801], [309, 719]])
-    
-    # Define where those points should map to in the output
-    dst_pts = np.float32([[3173, 409], [3241, 1803], [3489, 712]])
-    
-    # Compute the affine transformation matrix
-    matrix = cv2.getAffineTransform(src_pts, dst_pts)
+    blended = ((1-newGradient)*img1 + newGradient*canvas).astype(np.uint8)    
+    blended = np.where(blended == 0, canvas, blended).astype(np.uint8) 
+    # showImage(blended, 'BLENDED')
 
-    # height, width, _ = image1.shape
-    # transformed = cv2.warpAffine(image2, matrix, (width*2, height))
-    # transformed[:, :width, :] = image1
-    # showImage(transformed)
-    
-    return matrix
+    return blended
 
