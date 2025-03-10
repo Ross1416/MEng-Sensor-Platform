@@ -130,13 +130,14 @@ def applyTransform(img1, img2, matrix):
     maxY = int(np.max(newCorners[:, 1]))
     
     # Apply the affine transformation, with a canvas = max coordinates
-    canvas = cv2.warpAffine(img2, matrix, (maxX, maxY))
-    showImage(canvas)
+    canvas = cv2.warpAffine(img2, matrix, (maxX, max(height1, maxY)))
+
+    # canvas[:height1, :width1, :] = img1
     
     # Apply Blending
     blended = applyBlend(img1, canvas)
 
-    return blended  
+    return blended
 
 def applyBlend(image1, canvas):
 
@@ -147,11 +148,11 @@ def applyBlend(image1, canvas):
 
     # Highlight the area to blend
     identifyBlendedArea = np.where((canvas > 0) & (img1 > 0), 255, 0).astype(np.uint8)
-    showImage(identifyBlendedArea)
+    # showImage(identifyBlendedArea)
 
     # Crop to the smallest bounding box
     blendedObject, x, y = cropToObject(identifyBlendedArea)
-    showImage(blendedObject)
+    # showImage(blendedObject)
     
     # Get the blending area width
     height, width, _ = blendedObject.shape
@@ -160,42 +161,20 @@ def applyBlend(image1, canvas):
     gradient = np.linspace(0, 1, width)
     gradient = np.stack([gradient] * 3, axis=1)  # Shape: (width, 3)
     gradient = np.tile(gradient, (height, 1, 1))  # Repeat for height
-    showImage(gradient)
+    # showImage(gradient)
 
     # Project the new gradient to the blending shape
     gradient = np.where(blendedObject != 0, gradient, blendedObject)
-    showImage(gradient)
+    # showImage(gradient)
 
     # Place the new gradient back in its original position
     newGradient = np.zeros_like(canvas).astype(np.float32)    
     newGradient[y:y+height, x:x+width, :] = gradient
-    showImage(newGradient)
+    # showImage(newGradient)
 
     blended = ((1-newGradient)*img1 + newGradient*canvas).astype(np.uint8)    
     blended = np.where(blended == 0, canvas, blended).astype(np.uint8) 
-    showImage(blended, 'BLENDED')
+    # showImage(blended, 'BLENDED')
 
     return blended
-
-    
-
-### Identify default affine transform 
-def defaultAffineTransform():    
-    # TO DO: BEEF THIS OUT TO RETURN 3 Matrices
-    
-    # Define three points in the source image
-    src_pts = np.float32([[57, 422], [121, 1801], [309, 719]])
-    
-    # Define where those points should map to in the output
-    dst_pts = np.float32([[3173, 409], [3241, 1803], [3489, 712]])
-    
-    # Compute the affine transformation matrix
-    matrix = cv2.getAffineTransform(src_pts, dst_pts)
-
-    # height, width, _ = image1.shape
-    # transformed = cv2.warpAffine(image2, matrix, (width*2, height))
-    # transformed[:, :width, :] = image1
-    # showImage(transformed)
-    
-    return matrix
 
