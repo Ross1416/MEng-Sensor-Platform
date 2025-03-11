@@ -1,5 +1,6 @@
 from object_detection.object_detection import *
 from comms.send import *
+from comms.receive import * 
 from cameras import *
 from time import sleep
 import logging
@@ -17,6 +18,8 @@ def on_trigger(rgb_model):
     # Send images to PiA
     # send_images(PATH, client_socket)
     send_image_arrays(client_socket,frames)
+    # Send object detection results to PiA
+    send_object_detection_results(client_socket, objects[:2])  
     
 
 def on_rotate():

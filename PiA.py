@@ -1,5 +1,6 @@
 from object_detection.object_detection import *
 from comms.receive import *
+from comms.send import *
 from datetime import datetime
 from time import sleep
 from comms.updateJSON import updateJSON, getPlatformStatus, setPlatformStatus
@@ -23,10 +24,13 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     send_object_detection_results(conn, objects)  
     # Retrieve slave images and data
     frames += receive_image_arrays(conn)
+    
+    # Receive object detection data
+    objects += receive_object_detection_results(conn)
 
     # Blur people if privacy 
-    # for i in range(len(frames)):
-    #     frames[i] = blur_people(frames[i],objects[i])
+    for i in range(len(frames)):
+        frames[i] = blur_people(frames[i],objects[i])
 
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
