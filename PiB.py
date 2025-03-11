@@ -23,11 +23,11 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     send_object_detection_results(client_socket, objects[2:])  
 
     # Take hyperspectral scan 
-    for i in range(len(results)):# For every camera
-        if results[i] != None:
-            for j in range(len(results[i])):# for every object detected in frame
+    for i in range(len(objects)):# For every camera
+        if objects[i] != None:
+            for j in range(len(objects[i])):# for every object detected in frame
                 # Get corner pixels of objects detected and convert to angle
-                px_1,px_2 = results[i][j][1][:2],results[i][j][1][2:]
+                px_1,px_2 = objects[i][j][1][:2],objects[i][j][1][2:]
                 xoffset = i*90
                 angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET # To remove rotation offset 
                 angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET
