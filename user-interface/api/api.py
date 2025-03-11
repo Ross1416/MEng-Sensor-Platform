@@ -22,7 +22,6 @@ def getData():
     # Return data
     return data
 
-
 ### Retrieve the JSON files in the directory (one for each enviroment) ###
 @app.route("/getJSONfilenames")
 def getJSONfilenames():

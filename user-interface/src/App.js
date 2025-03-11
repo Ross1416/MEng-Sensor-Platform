@@ -22,6 +22,7 @@ function App() {
 
   // Poll for data updates once every second
   const refreshData = async () => {
+    // If the user has selected an enviroment...
     if (selectedEnviroment) {
       try {
         fetch("/getData", {
@@ -29,22 +30,25 @@ function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({file: selectedEnviroment}),
         }).then(
+          // Proccess data
           resp => resp.json())
         .then( data => {
+          // Save data
           setPins(data.pins)
           setLocationName(data.location)
-          console.log(data)
         });
       } catch (error) {
         console.log(error)
       }
     } else {
+       // If not, set default file
       fetch("/getActiveFile").then(resp=>resp.json())
       .then((data) => {
         setSelectedEnviroment(data.activeFile);
     })
     };
-
+    
+    // If user has not selected a panorama yet, set default 
     if (pins && selectedEnviroment && !panorama) {
       try {
         setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pins[0].panorama_ref)
@@ -54,6 +58,7 @@ function App() {
       }
     }
 
+    // Update available filenames
     fetch("/getJSONfilenames").then(
       res => res.json()
     ).then(
@@ -71,6 +76,7 @@ function App() {
     return () => clearInterval(interval);
   }, [refreshData])
 
+  
   // Update the platform's status (1 for active, 0 for inactive, 2 for test)
   const updatePlatformActiveStatus = async () => {
       if (platformActive == 0) {
