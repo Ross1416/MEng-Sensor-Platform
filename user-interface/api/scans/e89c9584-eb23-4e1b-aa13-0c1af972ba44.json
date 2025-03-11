@@ -1,13 +1,12 @@
 {
     "location": "Glasgow",
-    "status": 1,
     "pins": [
         {
             "geo_coords": [
                 55.88,
                 -4.32
             ],
-            "panorama_ref": "./images/img1.jpg",
+            "panorama_ref": "./img1.jpg",
             "objects": [
                 {
                     "x1": 100,
@@ -31,7 +30,7 @@
                 55.89,
                 -4.33
             ],
-            "panorama_ref": "./images/img2.jpg",
+            "panorama_ref": "./img2.jpg",
             "objects": [
                 {
                     "x1": 100,

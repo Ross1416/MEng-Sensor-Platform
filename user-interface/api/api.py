@@ -77,7 +77,6 @@ def updatePlatformActiveStatus():
 
     return 'Succesful update'
 
-
 ### Create a new enviroment for exploration ###
 @app.route("/createNewEnviroment", methods=["POST"])
 def createNewEnviroment():
