@@ -23,7 +23,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
 
     const pannellumRef = useRef(null);
 
-
+    // Configure the panorama
     const config = {
         autoRotate: -2,
         haov: 320,
@@ -34,6 +34,8 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         mouseZoom: true,
         doubleClickZoom: true
     }
+
+    // Set style for the panorama
     const style={
         width: "100%",
         height: "100%",
@@ -41,6 +43,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         display: 'inline-block'
     }
     
+    // Map a square for every object
       useEffect(() => {
         objects.forEach(({RGB_classification}) => {
           ReactPannellum.addHotSpot(
@@ -59,7 +62,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
       }, [objects]);
 
 
-
+      
     return (
         <div className='panorama-container'>
             {panorama ? (
