@@ -72,6 +72,8 @@ def performPanoramicStitching(image1, image2, image3, image4):
 
     # panorama = unwarp(panorama)
 
+    cv2.imwrite('./panorama.jpg', panorama)
+
     return panorama
 
 

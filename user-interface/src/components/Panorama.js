@@ -26,8 +26,8 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     // Configure the panorama
     const config = {
         autoRotate: -2,
-        haov: 320,
-        vaov: 60,
+        haov: 355,
+        vaov: 40,
         autoLoad: true,
         showZoomCtrl: true,
         keyboardZoom: true,
@@ -72,7 +72,8 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                     ref={pannellumRef}
                     id="1"
                     sceneId="firstScene"
-                    imageSource={panorama}
+                    // imageSource={panorama}
+                    imageSource={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img2.jpg'}
                     // imageSource='https://pannellum.org/images/alma.jpg'
                     config={config}
                     className='panorama'
