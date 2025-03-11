@@ -25,15 +25,16 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     send_object_detection_results(conn, objects)  
     frames += receive_image_arrays(conn)
 
+    # Blur people if privacy 
+    # for i in range(len(frames)):
+    #     frames[i] = blur_people(frames[i],objects[i])
+
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
     # TODO: clean this up
     panorama = performPanoramicStitching(frames[0], frames[1], frames[2], frames[3])
-    # TODO: Transform object detection results
-    # Blur faces if privacy 
-    if privacy:
-        panorama = blur_people(panorama,objects)
+    # TODO: Transform object detection results    
 
     # Receive hsi photo and data 
     # Updates json and moves images to correct folder
