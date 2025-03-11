@@ -19,7 +19,7 @@ def on_trigger(rgb_model):
     # send_images(PATH, client_socket)
     send_image_arrays(client_socket,frames)
     # Send object detection results to PiA
-    send_object_detection_results(client_socket, objects[:2])  
+    send_object_detection_results(client_socket, objects[2:])  
     
 
 def on_rotate():
@@ -34,7 +34,7 @@ def on_rotate():
 IP = "hsiA.local"
 PORT = 5002
 PATH = "./captures/"
-CLASSES = ["person","face"] 
+CLASSES = ["person"] 
 
 if __name__ == "__main__":
     # Setup Logging
@@ -59,6 +59,7 @@ if __name__ == "__main__":
         # TODO send search classes to PiB
         rgb_model.set_classes(CLASSES)
         logging.info(f"Set YOLO classes to {CLASSES}.")
+        logging.info(f"Waiting for trigger...")
 
         # Poll for trigger capture signal
         while True:
