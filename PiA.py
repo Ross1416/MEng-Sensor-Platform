@@ -8,6 +8,7 @@ import cv2
 from cameras import *
 import logging 
 from stitching.stitching_main import performPanoramicStitching
+import json
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
@@ -29,8 +30,9 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     objects += receive_object_detection_results(conn)
 
     # Blur people if privacy 
-    for i in range(len(frames)):
-        frames[i] = blur_people(frames[i],objects[i])
+    if privacy:
+        for i in range(len(frames)):
+            frames[i] = blur_people(frames[i],objects[i],255)
 
     # send rotational stage control signal
     angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
@@ -48,7 +50,7 @@ PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
 RESOLUTION = (4608,2592)
 FOV = (102,67)
-PRIVACY = False  #Blur peopl
+PRIVACY = True  #Blur people
 CLASSES = ["person"] 
 
 if __name__ == "__main__":
@@ -73,14 +75,15 @@ if __name__ == "__main__":
     rgb_model.set_classes(CLASSES)
     logging.info(f"Set YOLO classes to {CLASSES}.")
     logging.info(f"Privacy set {PRIVACY}.")
-
+    logging.info(f"Waiting for trigger...")
+    
     #Mainloop
     while True:
         # TODO: Check for location change
         # Update save location
         try:
             status, activeFile = getPlatformStatus()
-        except:
+        except json.decoder.JSONDecodeError:
             logging.error("Error accessing JSON configuration file.")    
         GPS_coordinate_change = True
 
