@@ -118,3 +118,20 @@ def updateActiveEnviroment():
 if __name__ == "__main__":
     app.run(debug=True)
 
+### Get the active enviroment ###
+@app.route("/getActiveEnviroment", methods=[])
+def getActiveEnviroment():
+    print('got here')
+    # Specify the save path
+    filePath = "./sensorConfiguration.json"
+    with open(filePath, "r") as file:
+        data = json.load(file)
+    print(data)
+    activeFile = data['activeFile']
+    print(activeFile)
+
+    return activeFile
+
+if __name__ == "__main__":
+    app.run(debug=True)
+

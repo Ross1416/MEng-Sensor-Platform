@@ -55,6 +55,22 @@ function App() {
     return () => clearInterval(interval);
   }, [refreshData])
 
+  // Get active file on load
+  // useEffect(async ()=> {
+  //   try {
+  //     console.log('got here')
+  //     fetch("/getActiveEnviroment").then(
+  //       resp => console.log('ACTIVE FILE: ', resp)
+  //     // .then( data => {
+  //     //   setPins(data.pins)
+  //     //   setLocationName(data.location)
+  //     //   console.log(data)
+  //     // });
+  //   )} catch (err) {
+  //     console.log(err)
+  //   }
+  // }, [])
+
 
   // Update the platform's status (1 for active, 0 for inactive, 2 for test)
   const updatePlatformActiveStatus = async () => {
@@ -122,7 +138,6 @@ function App() {
       }
     }
   }
-
 
   return (
   

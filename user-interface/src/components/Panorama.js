@@ -21,11 +21,18 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         stateFunction(!state)
     }
 
+    const pannellumRef = useRef(null);
+
+
     const config = {
         autoRotate: -2,
-        haov: 355,
-        vaov: 70,
+        // haov: 355,
+        // vaov: 70,
         autoLoad: true,
+        showZoomCtrl: false,
+        keyboardZoom: false,
+        mouseZoom: false,
+        doubleClickZoom: false
     }
     const style={
         width: "100%",
@@ -33,35 +40,68 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         background: "#000000",
         display: 'inline-block'
     }
+    
+      useEffect(() => {
+        objects.forEach(({RGB_classification}) => {
+          ReactPannellum.addHotSpot(
+            {
+            pitch: 0, 
+            yaw: 90, 
+            type: "info",
+            text: RGB_classification,
+            cssClass: `custom-hotspot-${RGB_classification.replace(/\s+/g, "-")}`,
+            },
+            "firstScene"
+          );
+        });
+      }, [objects]);
 
 
 
     return (
         <div className='panorama-container'>
-
             {panorama ? (
                 // <img src={panorama} alt='Dynamic' className='panorama'/>
-                <ReactPannellum
+                <div style={{backgroundColor: 'green', width: '100%', height: '100%'}}>
+                    <ReactPannellum
                     ref={pannellumRef}
                     id="1"
                     sceneId="firstScene"
-                    imageSource={panorama}
+                    // imageSource={panorama}
+                    imageSource='https://pannellum.org/images/alma.jpg'
                     config={config}
                     className='panorama'
                     style={style}
-                />
+                /><style>{`
+                    ${objects
+                      .map(
+                        ({ RGB_classification, x1, x2, y1, y2 }) => `
+                          .custom-hotspot-${RGB_classification.replace(/\s+/g, "-" )} {
+                            border: 2px solid black;
+                            position: absolute;
+                            left: ${x1}px;
+                            top: ${y1}px;
+                            right: ${x2}px;
+                            bottom: ${y2}px;
+                          }
+                        `
+                      )
+                      .join("\n")} 
+                  `}</style>
+                </div>
+                
                 
             ) : 
             <p style={{color: 'white', margin: '10px', alignSelf:'center', justifySelf: 'center'}}>Select a location from the map</p>
             }
 
-            {objects?.map((item, index) => (
+            {/* {objects?.map((item, index) => (
                 <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.x1, top: item.y1, right: item.x2, bottom: item.y2, display: showMaterials || showObjects?'block':'none'}}>
                     <p>{showObjects ? item.RGB_classification : ''}</p>
                     <p>{showMaterials ? String(item.HS_classification) : ''}</p>
                     <p>{showDistances ? item.distance + ' m': ''}</p>
                 </div>
-            ))}
+            ))} */}
             
             <div className='bottomBar'>
                 <h1>{locationName}</h1>
