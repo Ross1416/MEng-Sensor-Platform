@@ -36,9 +36,9 @@
                 {
                     "x1": 100,
                     "y1": 100,
-                    "x2": 400,
-                    "y2": 500,
-                    "RGB_classification": "dog",
+                    "x2": 200,
+                    "y2": 200,
+                    "RGB_classification": "fish",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
                         "wood": 0.4,
