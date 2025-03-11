@@ -42,11 +42,13 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
 def on_rotate(axis,angles,hs_cam,cal_arr):
     # Rotate rotational stage 
     axis.move_absolute(angles[0],Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
-    logging.info("Rotating hyperspectral to {angles[0]} degrees.")
+    logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
-    logging.info("Calculated FPS: {fps}")
-    nframes = 800 #TODO calculate?
+    logging.debug(f"Calculated FPS: {fps}")
+    # Calculate number of frames
+    nframes = get_nframes(abs(angles[1]-angles[0]))
+    logging.debug(f"Will grab {nframes} frames.")
     speed = get_rotation_speed(nframes,fps,abs(angles[1]-angles[0]))
     logging.info("Grabbing hyperspectral scan...")
     axis.move_absolute(angles[1],Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=False) # temporarily blocking
