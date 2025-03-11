@@ -4,18 +4,25 @@ import os
 import socket
 from os import listdir
 from time import sleep
+import pickle
+import logging
+import cv2
 
 def make_client_connection(ip, port):
-    try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((ip, port))
-        print(f"Connected to {ip}:{port}")
-        print(type(client_socket))
-        return client_socket
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        return
+    # TODO: Add timeout?
+    while True:
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect((ip, port))
+            print(f"Connected to {ip}:{port}")
+            print(type(client_socket))
+            return client_socket
+        except ConnectionRefusedError:
+            print("Connection failed, retrying in 2 seconds...")
+            sleep(2)
+        except Exception as e:
+            print(f"Error: {e}")
+            sleep(2)
 
 
 def list_images(folder_path, client_socket):
@@ -96,6 +103,54 @@ def send_images(folder_path, client_socket):
 
     finally:
         client_socket.close()
+
+def send_image_arrays(client_socket, frames):
+    """Takes in an array of frames and sends them over socekt"""
+    # Send number of frames to expect
+    logging.debug(f"Sending {len(frames)} frames.")
+    client_socket.send(len(frames).to_bytes(8, byteorder='big'))
+    # Send all images
+    for img in frames:
+        img = cv2.imencode('.jpg', img)[1] # Compress image
+        data = pickle.dumps(img)
+        logging.debug(f"Sending frame of size {len(data)}")
+        client_socket.send(len(data).to_bytes(8, byteorder='big'))
+        client_socket.sendall(data)
+        logging.debug(f"Frame sent.")
+
+
+def receive_object_detection_results(client_socket):
+    # Get number of objects
+    num_objects = client_socket.recv(8)   
+    if not num_objects:
+        return []
+    num_objects = int.from_bytes(num_objects, byteorder='big')
+    logging.debug(f"Receiving {num_objects} objects.")
+
+    objects = []
+    if num_objects:
+        for i in range(num_objects):
+            logging.debug(f"Receiving object object detection data {i}.")
+
+            data_size = client_socket.recv(8)  # First 8 bytes for size
+            if not data_size:
+                break
+            data_size = int.from_bytes(data_size, byteorder='big')
+            logging.debug(f"Receiving object detection data {i} of size {data_size}.")
+            data = b""
+            while len(data) < data_size:
+                packet = client_socket.recv(min(4096, data_size - len(data)))
+                if not packet:
+                    logging.error(f"Packet lost.")
+                    break
+                data += packet
+            logging.debug(f"Object detection data received.")
+
+            obj = pickle.loads(data)
+            objects.append(obj)
+
+    return objects
+
 
 def receive_capture_request(client_socket):
     try:

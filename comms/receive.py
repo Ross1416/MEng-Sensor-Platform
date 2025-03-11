@@ -2,10 +2,14 @@
 
 import socket
 import os
+import pickle
+import logging
+import cv2
 
 def make_server_connection(host, port):
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((host,port))
         server_socket.listen(1)
         print(f"Server listening on {host}:{port}")
@@ -67,6 +71,60 @@ def receive_images(save_location, server_socket, conn):
     finally:
         server_socket.close()
         print("Connection ended.")
+
+def receive_image_arrays(conn):
+    # Get number of images
+    num_images = conn.recv(8)   
+    if not num_images:
+        return []
+    num_images = int.from_bytes(num_images, byteorder='big')
+    logging.debug(f"Receiving {num_images} frames.")
+
+    frames = []
+    if num_images:
+        for i in range(num_images):
+            logging.debug(f"Receiving frame {i}.")
+
+            data_size = conn.recv(8)  # First 8 bytes for size
+            if not data_size:
+                break
+            data_size = int.from_bytes(data_size, byteorder='big')
+            logging.debug(f"Receiving frame {i} of size {data_size}.")
+            data = b""
+            while len(data) < data_size:
+                packet = conn.recv(min(4096, data_size - len(data)))
+                if not packet:
+                    logging.error(f"Packet lost.")
+                    break
+                data += packet
+            logging.debug(f"Frame received.")
+
+            img = pickle.loads(data)
+            img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+            frames.append(img)
+
+    return frames
+
+
+
+def send_object_detection_results(client_socket, objects):
+    """Send object detection results to PiB over socket"""
+    try:
+        # Send number of objects
+        client_socket.send(len(objects).to_bytes(8, byteorder='big'))
+        # Send all objects
+        for obj in objects:
+            # Serialise the data
+            data = pickle.dumps(obj)
+            logging.debug(f"Sending object detection data of size {len(data)}")
+            client_socket.send(len(data).to_bytes(8, byteorder='big'))
+            client_socket.sendall(data)
+            logging.debug(f"Object detection data sent.")
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+
 
 if __name__ == "__main__":
     port = 5002
