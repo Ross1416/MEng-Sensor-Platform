@@ -7,9 +7,9 @@ import { Panorama } from './components/Panorama.js';
 function App() {
   
   // ENVIROREMENT DATA 
-  const [panorama, setPanorama] = useState(); // image reference to panorama
+  const [panorama, setPanorama] = useState(null); // image reference to panorama
   const [locationName, setLocationName] = useState('') // enviroment name
-  const [pins, setPins] = useState([]) // list of pins in the enviroment
+  const [pins, setPins] = useState(null) // list of pins in the enviroment
   const [objects, setObjects] = useState([]) // list of objects in a pin
   const [enviroments, setEnvirorements] = useState(null) // a list of possible enviroments saved on device
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
@@ -40,8 +40,19 @@ function App() {
       }
     } else {
       fetch("/getActiveFile").then(resp=>resp.json())
-      .then((data) => setSelectedEnviroment(data.activeFile))
+      .then((data) => {
+        setSelectedEnviroment(data.activeFile);
+    })
     };
+
+    if (pins && selectedEnviroment && !panorama) {
+      try {
+        setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pins[0].panorama_ref)
+        setObjects(pins[0].objects)
+      } catch (err) {
+        console.log(err)
+      }
+    }
 
     fetch("/getJSONfilenames").then(
       res => res.json()
