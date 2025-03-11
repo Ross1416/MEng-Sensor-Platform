@@ -8,9 +8,12 @@ def on_trigger(rgb_model):
     # Capture images
     frames = capture(cams, "PiB", PATH)
     # Perform object detection
-    results = []
+    objects = []
     for f in frames:
-        results.append(object_detection(rgb_model,f))
+        objects.append(object_detection(rgb_model,f))
+    # Receive object detection data
+    detection_data = receive_object_detection_results(client_socket)
+    objects = detection_data + objects
     # Send images to PiA
     # send_images(PATH, client_socket)
     send_image_arrays(client_socket,frames)
@@ -61,9 +64,6 @@ if __name__ == "__main__":
                 on_trigger(rgb_model)
                 capture_triggered = True
             
-            detection_data = receive_object_detection_results(client_socket)
-            for element in detection_data:
-                print(f"{element}")
             sleep(1)
         
 
