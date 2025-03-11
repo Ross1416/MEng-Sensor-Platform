@@ -29,8 +29,8 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
                 # Get corner pixels of objects detected and convert to angle
                 px_1,px_2 = results[i][j][1][:2],results[i][j][1][2:]
                 xoffset = i*90
-                angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV)[0] + xoffset - ROTATION_OFFSET # To remove rotation offset 
-                angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV)[0] + xoffset - ROTATION_OFFSET
+                angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET # To remove rotation offset 
+                angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET
 
                 logging.debug(f"Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
 
