@@ -11,7 +11,7 @@ function App() {
   const [locationName, setLocationName] = useState('') // enviroment name
   const [pins, setPins] = useState([]) // list of pins in the enviroment
   const [objects, setObjects] = useState([]) // list of objects in a pin
-  const [enviroments, setEnvirorements] = useState() // a list of possible enviroments saved on device
+  const [enviroments, setEnvirorements] = useState(null) // a list of possible enviroments saved on device
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
 
   // DEVICE CONTROL 
@@ -22,28 +22,33 @@ function App() {
 
   // Poll for data updates once every second
   const refreshData = async () => {
-    try {
-      fetch("/getData", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({file: selectedEnviroment}),
-      }).then(
-        resp => resp.json())
-      .then( data => {
-        setPins(data.pins)
-        setLocationName(data.location)
-        console.log(data)
-      });
-    } catch (error) {
-      console.log(error)
-    }
+    if (selectedEnviroment) {
+      try {
+        fetch("/getData", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({file: selectedEnviroment}),
+        }).then(
+          resp => resp.json())
+        .then( data => {
+          setPins(data.pins)
+          setLocationName(data.location)
+          console.log(data)
+        });
+      } catch (error) {
+        console.log(error)
+      }
+    } else {
+      fetch("/getActiveFile").then(resp=>resp.json())
+      .then((data) => setSelectedEnviroment(data.activeFile))
+    };
 
     fetch("/getJSONfilenames").then(
       res => res.json()
     ).then(
       data => {
         setEnvirorements(data)
-      })
+    })
   }
   
   useEffect(()=> {
@@ -54,7 +59,6 @@ function App() {
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
   }, [refreshData])
-
 
   // Update the platform's status (1 for active, 0 for inactive, 2 for test)
   const updatePlatformActiveStatus = async () => {
@@ -122,7 +126,6 @@ function App() {
       }
     }
   }
-
 
   return (
   
