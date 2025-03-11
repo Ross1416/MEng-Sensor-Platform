@@ -10,6 +10,7 @@ app = Flask(__name__)
 ### Retrieve enviroment data from the user-specified file ###
 @app.route('/getData', methods=["POST"])
 def getData():
+    
     # Extract file from request
     data = request.json
     file = data.get("file")  
@@ -43,6 +44,17 @@ def getJSONfilenames():
         return combined
     except Exception as e:
         print('Error reading directory:', e)
+
+### Get the active enviroment ###
+@app.route("/getActiveFile")
+def getActiveFile():
+    try: 
+        filePath = "./sensorConfiguration.json"
+        with open(filePath, "r") as file:
+            data = json.load(file)
+        return {'activeFile': data['activeFile']}
+    except Exception as e: 
+        return -1
 
 ### Update the status of the platfor ###
 @app.route("/updatePlatformActiveStatus", methods=["POST"])
@@ -115,22 +127,6 @@ def updateActiveEnviroment():
 
     return 'Succesful update'
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
-### Get the active enviroment ###
-@app.route("/getActiveEnviroment", methods=[])
-def getActiveEnviroment():
-    print('got here')
-    # Specify the save path
-    filePath = "./sensorConfiguration.json"
-    with open(filePath, "r") as file:
-        data = json.load(file)
-    print(data)
-    activeFile = data['activeFile']
-    print(activeFile)
-
-    return activeFile
 
 if __name__ == "__main__":
     app.run(debug=True)

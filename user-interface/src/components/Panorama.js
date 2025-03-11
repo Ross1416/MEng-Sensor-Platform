@@ -50,7 +50,9 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
             type: "info",
             text: RGB_classification,
             cssClass: `custom-hotspot-${RGB_classification.replace(/\s+/g, "-")}`,
-            },
+            createTooltipFunc: (hotSpotDiv) => {
+                hotSpotDiv.onclick = () => alert("You clicked a square!");
+            }},
             "firstScene"
           );
         });
