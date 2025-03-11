@@ -78,7 +78,10 @@ if __name__ == "__main__":
     while True:
         # TODO: Check for location change
         # Update save location
-        status, activeFile = getPlatformStatus()
+        try:
+            status, activeFile = getPlatformStatus()
+        except:
+            logging.error("Error accessing JSON configuration file.")    
         GPS_coordinate_change = True
 
         if status == 2 or (status == 1 and GPS_coordinate_change):
@@ -88,7 +91,6 @@ if __name__ == "__main__":
             new_scan(rgb_model,activeFile, privacy=PRIVACY)       
         
             logging.info("Completed scan.")
-            input("Press key to continue...")
 
             if status == 2:
                 setPlatformStatus(0)
