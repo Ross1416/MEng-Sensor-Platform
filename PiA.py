@@ -20,12 +20,10 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     objects = []
     for f in frames:
         objects.append(object_detection(rgb_model,f))
-    
-    # Send object detection results to PiB
-    send_object_detection_results(conn, objects)  
     # Retrieve slave images and data
     frames += receive_image_arrays(conn)
-    
+    # Send object detection results to PiB
+    send_object_detection_results(conn, objects)  
     # Receive object detection data
     objects += receive_object_detection_results(conn)
 
@@ -34,10 +32,7 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
         for i in range(len(frames)):
             frames[i] = blur_people(frames[i],objects[i],255)
 
-    # send rotational stage control signal
-    angle_x, _ = pixel_to_angle((50,100),RESOLUTION,FOV)
     # Perform pano stitching
-    # TODO: clean this up
     panorama = performPanoramicStitching(frames[0], frames[1], frames[2], frames[3])
     # TODO: Transform object detection results    
 

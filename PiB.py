@@ -14,15 +14,14 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     objects = []
     for f in frames:
         objects.append(object_detection(rgb_model,f))
+    # Send images to PiA
+    send_image_arrays(client_socket,frames)
     # Receive object detection data
     detection_data = receive_object_detection_results(client_socket)
     objects = detection_data + objects
-    # Send images to PiA
-    send_image_arrays(client_socket,frames)
     # Send object detection results to PiA
     send_object_detection_results(client_socket, objects[2:])  
-    # TODO: Get objects detected from PiA
-    results = [None] + [None] + results
+
     # Take hyperspectral scan 
     for i in range(len(results)):# For every camera
         if results[i] != None:
@@ -68,8 +67,8 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
     # TODO: return hsi colour image and data
 
 
-# IP = "10.12.101.192"
-IP = "hsiA.local"
+# IP = "hsiA.local"
+IP = "10.42.0.1"
 PORT = 5002
 PATH = "./captures/"
 CLASSES = ["person"] 
