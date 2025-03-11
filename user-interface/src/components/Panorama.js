@@ -1,8 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
 import { render } from 'react-dom'
 // import {CubeOutline, LayersOutline, PinOutline, ThermometerOutline, BrushOutline, ArrowDownCircleOutline, RadioOutline } from 'react-ionicons'
-
+import ReactPannellum, {setHorizonRoll} from 'react-pannellum'
+// https://www.npmjs.com/package/react-pannellum
 
 export function Panorama({panorama, objects, locationName, setLocationName}) {
 
@@ -24,6 +25,15 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
     //   });
     //   }, []);
 
+    const pannellumRef = useRef(null);
+    const handleSetRoll = () => {
+        if (pannellumRef.current) {
+          pannellumRef.current.setHorizonRoll(30); // Sets horizontal roll to 30 degrees
+        }
+      };
+    
+
+
     const [defaultToggle, setDefaultToggle] = useState(false)
     const [showObjects, setShowObjects] = useState(false)
     const [showMaterials, setShowMaterials] = useState(false)
@@ -42,14 +52,37 @@ export function Panorama({panorama, objects, locationName, setLocationName}) {
         stateFunction(!state)
     }
 
+    const config = {
+        autoRotate: -2,
+        haov: 355,
+        vaov: 70,
+        autoLoad: true,
+    }
+    const style={
+        width: "100%",
+        height: "100%",
+        background: "#000000",
+        display: 'inline-block'
+    }
+
     
 
 
 
     return (
         <div className='panorama-container'>
+
             {panorama ? (
-                <img src={panorama} alt='Dynamic' className='panorama'/>
+                // <img src={panorama} alt='Dynamic' className='panorama'/>
+                <ReactPannellum
+                    ref={pannellumRef}
+                    id="1"
+                    sceneId="firstScene"
+                    imageSource={panorama}
+                    config={config}
+                    className='panorama'
+                    style={style}
+                />
                 
             ) : 
             <p style={{color: 'white', margin: '10px', alignSelf:'center', justifySelf: 'center'}}>Select a location from the map</p>
