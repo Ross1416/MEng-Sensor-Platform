@@ -25,7 +25,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
 
     // Configure the panorama
     const config = {
-        autoRotate: -2,
+        autoRotate: 0,
         haov: 355,
         vaov: 40,
         autoLoad: true,
@@ -42,14 +42,20 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         background: "#000000",
         display: 'inline-block'
     }
+
+    const testObjects = [{RGB_classification: 'dog', x1: 0, y1: 0, x2: 500, y2: 500}]
     
     // Map a square for every object
       useEffect(() => {
-        objects.forEach(({RGB_classification}) => {
+        testObjects.forEach(({RGB_classification, x1, y1}) => {
           ReactPannellum.addHotSpot(
             {
-            pitch: 0, 
-            yaw: 90, 
+            pitch: 20,
+            yaw: -180+2.5,
+            // pitch: 5, // to focus on ross and sean
+            // yaw: -95,
+            // pitch: (x1 / 1700) * 180 - 90, // Normalize y to pitch
+            // yaw: (y1/ 12500) * 355 - 355/2, // Normalize x to yaw
             type: "info",
             text: RGB_classification,
             cssClass: `custom-hotspot-${RGB_classification.replace(/\s+/g, "-")}`,
@@ -79,16 +85,14 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                     className='panorama'
                     style={style}
                 /><style>{`
-                    ${objects
+                    ${testObjects
                       .map(
                         ({ RGB_classification, x1, x2, y1, y2 }) => `
                           .custom-hotspot-${RGB_classification.replace(/\s+/g, "-" )} {
-                            border: 2px solid black;
+                            border: 3px solid red;
                             position: absolute;
-                            left: ${x1}px;
-                            top: ${y1}px;
-                            right: ${x2}px;
-                            bottom: ${y2}px;
+                            width: 50px;
+                            height: 50px;
                           }
                         `
                       )

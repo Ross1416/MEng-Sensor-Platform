@@ -9,10 +9,10 @@
             "panorama_ref": "./img1.jpg",
             "objects": [
                 {
-                    "x1": 100,
-                    "y1": 100,
-                    "x2": 400,
-                    "y2": 500,
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": 1000,
+                    "y2": 1000,
                     "RGB_classification": "dog",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
