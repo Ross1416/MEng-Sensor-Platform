@@ -93,6 +93,41 @@ def blur_people(frame, detections,blur_size=25):
             frame[y1:y1+roi.shape[0], x1:x1+roi.shape[1]] = roi
     return frame
 
+def split_panorama(image):
+    """
+    Split a panorama image into approximate square images.
+
+    Input:
+        -image_path (str): Path to the input panorama image.
+
+    Output:
+        -list: A list of split images
+    """
+
+    if image is None:
+        raise ValueError("Image not found or unable to load.")
+        
+    height, width = image.shape[:2]
+    aspect_ratio = width / height
+
+    # Determine the optimal number of splits to get square images
+    num_images = math.ceil(aspect_ratio)
+
+    # Calculate the size of each split
+    tile_width = math.ceil(width / num_images)
+
+    # Split the image and store each part in a list
+    split_images = []
+    for i in range(num_images): 
+        x1 = i*tile_width
+        x2 = i*tile_width + tile_width
+
+        # Crop tile
+        tile = image[:,x1:x2]
+        split_images.append(tile)
+    return split_images
+
+
 if __name__ == "__main__":
     import cv2
     model = YOLOWorld("./yolo_models/yolov8s-worldv2.pt")
@@ -112,7 +147,17 @@ if __name__ == "__main__":
     bbox = xyxy_to_xywh(box,img.shape[0],img.shape[1],True)
     print(bbox)
 
+    # Test pixel_to_angle
     print(pixel_to_angle((4600,0),(4608,2592),(102,67)))
+
+    # Test split pano
+    pano = cv2.imread("../stitching/test_images/main.jpg")
+    print(pano.shape[:2])
+    split_imgs = split_panorama(pano)
+    print("splits")
+    for i, img in enumerate(split_imgs):
+        print(img.shape[:2])
+        # cv2.imwrite(f"{i}.jpg",img)
 
     # Test blur faces
     img = cv2.imread("test.jpg")
