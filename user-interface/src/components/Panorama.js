@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
 // import {CubeOutline, LayersOutline, PinOutline, ThermometerOutline, BrushOutline, ArrowDownCircleOutline, RadioOutline } from 'react-ionicons'
-import ReactPannellum, {setHorizonRoll} from 'react-pannellum'
+import ReactPannellum, {destroy, loadScene, setHorizonRoll, setYaw} from 'react-pannellum'
 // https://www.npmjs.com/package/react-pannellum
 
 export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment}) {
@@ -15,6 +15,17 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     const [reset, setReset] = useState(false)
     const [download, setDownload] = useState(false)
     const [connected, setConnected] = useState(false)
+
+
+    // temp
+    const [image, setImage] = useState('https://pannellum.org/images/alma.jpg')
+
+    const changeScene = () => {
+        setYaw(pannellumRef, 20)
+        // loadScene(pannellumRef, './images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img1.jpg')
+        // setImage("https://pannellum.org/images/cerro-toco-0.jpg");
+      };
+
 
     // Toggle button change
     const toggleButton = (state, stateFunction) => {
@@ -32,7 +43,8 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         showZoomCtrl: true,
         keyboardZoom: true,
         mouseZoom: true,
-        doubleClickZoom: true
+        doubleClickZoom: true,
+        dynamicUpdate: true,
     }
 
     // Set style for the panorama
@@ -46,39 +58,41 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     const testObjects = [{RGB_classification: 'dog', x1: 0, y1: 0, x2: 500, y2: 500}]
     
     // Map a square for every object
-      useEffect(() => {
-        testObjects.forEach(({RGB_classification, x1, y1}) => {
-          ReactPannellum.addHotSpot(
-            {
-            pitch: 20,
-            yaw: -180+2.5,
-            // pitch: 5, // to focus on ross and sean
-            // yaw: -95,
-            // pitch: (x1 / 1700) * 180 - 90, // Normalize y to pitch
-            // yaw: (y1/ 12500) * 355 - 355/2, // Normalize x to yaw
-            type: "info",
-            text: RGB_classification,
-            cssClass: `custom-hotspot-${RGB_classification.replace(/\s+/g, "-")}`,
-            createTooltipFunc: (hotSpotDiv) => {
-                hotSpotDiv.onclick = () => alert("You clicked a square!");
-            }},
-            "firstScene"
-          );
-        });
-      }, [objects]);
+    //   useEffect(() => {
+    //     testObjects.forEach(({RGB_classification, x1, y1}) => {
+    //       ReactPannellum.addHotSpot(
+    //         {
+    //         pitch: 20,
+    //         yaw: -180+2.5,
+    //         // pitch: 5, // to focus on ross and sean
+    //         // yaw: -95,
+    //         // pitch: (x1 / 1700) * 180 - 90, // Normalize y to pitch
+    //         // yaw: (y1/ 12500) * 355 - 355/2, // Normalize x to yaw
+    //         type: "info",
+    //         text: RGB_classification,
+    //         cssClass: `custom-hotspot-${RGB_classification.replace(/\s+/g, "-")}`,
+    //         createTooltipFunc: (hotSpotDiv) => {
+    //             hotSpotDiv.onclick = () => alert("You clicked a square!");
+    //         }},
+    //         "firstScene"
+    //       );
+    //     });
+    //   }, [objects]);
 
 
       
     return (
         <div className='panorama-container'>
+            <button onClick={changeScene}>PRESS ME</button>
             {panorama ? (
                 // <img src={panorama} alt='Dynamic' className='panorama'/>
                 <div style={{backgroundColor: 'green', width: '100%', height: '100%'}}>
                     <ReactPannellum
                     ref={pannellumRef}
-                    id="1"
-                    sceneId="firstScene"
-                    // imageSource={panorama}
+                    id="panorama"
+                    sceneId="panorama"
+                    // imageSource={image}
+                    // image={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img2.jpg'}
                     imageSource={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img2.jpg'}
                     // imageSource='https://pannellum.org/images/alma.jpg'
                     config={config}
