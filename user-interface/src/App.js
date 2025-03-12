@@ -70,7 +70,7 @@ function App() {
   useEffect(()=> {
     const interval = setInterval(() => {
       refreshData();
-    }, 1000);
+    }, 50);
   
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
