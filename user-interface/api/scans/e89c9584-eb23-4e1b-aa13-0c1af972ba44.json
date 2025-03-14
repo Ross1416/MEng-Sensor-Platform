@@ -9,10 +9,8 @@
             "panorama_ref": "./img1.jpg",
             "objects": [
                 {
-                    "x1": 0,
-                    "y1": 0,
-                    "x2": 1000,
-                    "y2": 1000,
+                    "x": -3633,
+                    "y": 237,
                     "RGB_classification": "dog",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
@@ -33,10 +31,8 @@
             "panorama_ref": "./img2.jpg",
             "objects": [
                 {
-                    "x1": 100,
-                    "y1": 100,
-                    "x2": 200,
-                    "y2": 200,
+                    "x": 1792,
+                    "y": 643,
                     "RGB_classification": "fish",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
@@ -46,7 +42,21 @@
                     },
                     "HS_confidence": 0.7,
                     "distance": 10
+                },
+                {
+                    "x": -3633,
+                    "y": 237,
+                    "RGB_classification": "dog",
+                    "RGB_confidence": 0.8,
+                    "HS_classification": {
+                        "wood": 0.4,
+                        "stone": 0.3,
+                        "metal": 0.3
+                    },
+                    "HS_confidence": 0.7,
+                    "distance": 10
                 }
+
             ]
         }
     ]

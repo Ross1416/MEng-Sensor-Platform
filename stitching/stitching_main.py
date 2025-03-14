@@ -13,28 +13,8 @@ def performPanoramicStitching(image1, image2, image3, image4):
     ### First stitch ###
     # src_pts, dst_pts = findKeyPoints(image1, image2)
     # H1 = calculateTransform(dst_pts, src_pts)
-    # [1.16777650e+00  3.24501623e-02  3.20424227e+03], [-4.82860118e-02  1.00046217e+00  8.67739018e+00]
-    # H1 = np.array([[1.16777650e+00,  3.24501623e-02,  3.20424227e+03], [-4.82860118e-02,  1.00046217e+00,  8.67739018e+00]])
-    # H1 = np.array([[1.16777650e+00,  3.24501623e-02,  3.20424227e+03], [0,  1,  0]])
-    # panorama = applyTransform(image1, image2, H1)
-
-    # ### Second Stitch ###
-    # # src_pts, dst_pts = findKeyPoints(panorama, image3)
-    # # H2 = calculateTransform(dst_pts, src_pts)
-    # # [9.55467955e-01  1.08327684e-01  7.00375956e+03], [-7.86960457e-02  9.88385699e-01 -1.73228273e+02]
-    # # H2 = np.array([[9.55467955e-01,  1.08327684e-01,  7.00375956e+03], [-7.86960457e-02,  9.88385699e-01, -1.73228273e+02]])
-    # H2 = np.array([[9.55467955e-01,  1.08327684e-01,  7.00375956e+03], [0,  1,  0]])
-    # panorama = applyTransform(panorama, image3, H2)
-
-    # ### Third Stitch ###
-    # # src_pts, dst_pts = findKeyPoints(panorama, image4)
-    # # H3 = calculateTransform(dst_pts, src_pts)
-    # # [ 8.66225987e-01  1.23513301e-01  1.00071255e+04], [-9.18225200e-02  1.00817467e+00 -3.24425081e+02]]
-    # # H3 = np.array([[ 8.66225987e-01,  1.23513301e-01,  1.00071255e+04], [-9.18225200e-02,  1.00817467e+00, -3.24425081e+02]])
-    # H3 = np.array([[ 8.66225987e-01,  1.23513301e-01,  1.00071255e+04], [0,  1,  0]])
-    # panorama = applyTransform(panorama, image4, H3)
-
-
+    # print(H1)
+    # [[ 9.24197515e-01  1.58205770e-01  3.10296331e+03][-1.06465276e-02  9.93407578e-01  1.18884774e+01]]
     H1 = np.array([[ 1,  0,  3.10296331e+03], [0, 1, 0]])
     panorama = applyTransform(image1, image2, H1)
 
@@ -55,12 +35,10 @@ def performPanoramicStitching(image1, image2, image3, image4):
     panorama = applyTransform(panorama, image4, H3)
     showImage(panorama)
 
-    height, width, _ = panorama.shape
-    panorama = panorama[200:1900, 200:width-200, :]
+    # Crop Image
+    panorama = panorama[200:1900, :, :]
 
-
-    # # Crop image
-    # panorama = panorama[160:1830, :, :]
+    print('PANORAMA SHAPE: ', panorama.shape)
 
     return panorama
 

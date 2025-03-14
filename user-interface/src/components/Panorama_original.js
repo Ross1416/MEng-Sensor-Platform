@@ -1,6 +1,8 @@
 import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
-import { Pannellum } from "pannellum-react";
+// import {CubeOutline, LayersOutline, PinOutline, ThermometerOutline, BrushOutline, ArrowDownCircleOutline, RadioOutline } from 'react-ionicons'
+import ReactPannellum, {destroy, loadScene, setHorizonRoll, setYaw} from 'react-pannellum'
+// https://www.npmjs.com/package/react-pannellum
 
 export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment}) {
 
@@ -14,12 +16,67 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     const [download, setDownload] = useState(false)
     const [connected, setConnected] = useState(false)
 
+
+    // temp
+    const [image, setImage] = useState('https://pannellum.org/images/alma.jpg')
+
+    const changeScene = () => {
+        setYaw(pannellumRef, 20)
+        // loadScene(pannellumRef, './images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img1.jpg')
+        // setImage("https://pannellum.org/images/cerro-toco-0.jpg");
+      };
+
+
     // Toggle button change
     const toggleButton = (state, stateFunction) => {
         stateFunction(!state)
     }
 
-    const testObjects = [{RGB_classification: 'dog', x: -3633, y: 237}, {RGB_classification: 'dog', x: 1792, y: 643}]
+    const pannellumRef = useRef(null);
+
+    // Configure the panorama
+    const config = {
+        autoRotate: 0,
+        haov: 358,
+        vaov: 60,
+        autoLoad: true,
+        showZoomCtrl: true,
+        keyboardZoom: true,
+        mouseZoom: true,
+        doubleClickZoom: true,
+        dynamicUpdate: true,
+    }
+
+    // Set style for the panorama
+    const style={
+        width: "100%",
+        height: "100%",
+        background: "#000000",
+        display: 'inline-block'
+    }
+
+    const testObjects = [{RGB_classification: 'dog', x1: 0, y1: 0, x2: 500, y2: 500}]
+    
+    // Map a square for every object
+      useEffect(() => {
+        testObjects.forEach(({RGB_classification, x1, y1}) => {
+          ReactPannellum.addHotSpot(
+            {
+            pitch: -30,
+            yaw: -180-1,
+            // pitch: (x1 / 1700) * 180 - 90, // Normalize y to pitch
+            // yaw: (y1/ 12500) * 355 - 355/2, // Normalize x to yaw
+            type: "info",
+            text: RGB_classification,
+            cssClass: `custom-hotspot-${RGB_classification.replace(/\s+/g, "-")}`,
+            createTooltipFunc: (hotSpotDiv) => {
+                hotSpotDiv.onclick = () => alert("You clicked a square!");
+            }},
+            "panorama"
+          );
+        });
+      }, [objects]);
+
 
       
     return (
@@ -27,41 +84,32 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
             {/* <button onClick={changeScene}>PRESS ME</button> */}
             {panorama ? (
                 // <img src={panorama} alt='Dynamic' className='panorama'/>
-                <div style={{backgroundColor: 'black', width: '100%', height: '100%'}}>
-                    <Pannellum
-                        width={"100%"}
-                        height={"100vh"}
-                        // title={scene.title}
-                        image={panorama}
-                        haov={358}
-                        vaov={60}
-                        autoLoad={true}
-                        autoRotate={0}
-                        showControls={false}
-                        showFullscreenCtrl={false}
-                        showZoomCtrl={false}
-                        orientationOnByDefault={true}
-                    >
-                    {objects?.map(({x, y}) => (
-                
-                        <Pannellum.Hotspot
-                            type="custom"
-                            pitch={(y/850)*30}
-                            yaw={(x/6453)*179}
-                            title="1"
-                            tooltip={(hotSpotDiv) => {
-                                hotSpotDiv.classList.add("custom-hotspot");
-                            }}
-                        
-                            
-                            handleClick={() => alert('Clicked!')}
-                        />
-    
-                
-                    ))}
-                </Pannellum>
-                
-                
+                <div style={{backgroundColor: 'green', width: '100%', height: '100%'}}>
+                    <ReactPannellum
+                    ref={pannellumRef}
+                    id="panorama"
+                    sceneId="panorama"
+                    // imageSource={image}
+                    // image={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img2.jpg'}
+                    imageSource={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img2.jpg'}
+                    // imageSource='https://pannellum.org/images/alma.jpg'
+                    config={config}
+                    className='panorama'
+                    style={style}
+                /><style>{`
+                    ${testObjects
+                      .map(
+                        ({ RGB_classification, x1, x2, y1, y2 }) => `
+                          .custom-hotspot-${RGB_classification.replace(/\s+/g, "-" )} {
+                            border: 3px solid red;
+                            position: absolute;
+                            width: 50px;
+                            height: 50px;
+                          }
+                        `
+                      )
+                      .join("\n")} 
+                  `}</style>
                 </div>
                 
                 

@@ -75,18 +75,11 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     mask[:, :horizontal_overlap] = 255  # White region in the rightmost quarter
     kp2, des2 = sift.detectAndCompute(img2, mask)
 
-    
-    # Perform FLANN
-    # index_params = dict(algorithm=1, trees=5)
-    # search_params = dict(checks=50)
-
-    # flann = cv2.FlannBasedMatcher(index_params, search_params)
-    # matches = flann.knnMatch(des1, des2, k=2)
 
     # Brute Force Match
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
-    img_matches = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # img_matches = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     # showImage(img_matches)
 
     # Perform Lowe's Ratio Test
@@ -106,7 +99,7 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
         goodMatches = goodMatches[:30]
     
     # Draw matches
-    img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     # showImage(img_matches)
 
     # Convert to numpy array
