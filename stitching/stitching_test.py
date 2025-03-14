@@ -65,7 +65,7 @@ def performPanoramicStitching(image1, image2, image3, image4):
     # [[ 8.76097633e-01  2.13350716e-01  9.28608977e+03][-4.10457543e-02  9.85452950e-01  1.21832106e+02]]
     H3 = np.array([[ 1,  0, 9.28608977e+03], [0, 1, 1.21832106e+02]])
     panorama = applyTransform(panorama, image4, H3)
-
+    showImage(panorama)
     # Crop image
     height, width, _ = panorama.shape
     panorama = panorama[200:1900, 200:width-200, :]
