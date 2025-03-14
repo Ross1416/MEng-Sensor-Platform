@@ -75,6 +75,7 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     mask[:, :horizontal_overlap] = 255  # White region in the rightmost quarter
     kp2, des2 = sift.detectAndCompute(img2, mask)
 
+    
     # Perform FLANN
     # index_params = dict(algorithm=1, trees=5)
     # search_params = dict(checks=50)
@@ -85,12 +86,17 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     # Brute Force Match
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
+    img_matches = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # showImage(img_matches)
 
     # Perform Lowe's Ratio Test
     goodMatches = []
     for m, n in matches:
         if m.distance < 0.75*n.distance:
             goodMatches.append(m)
+
+    img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # showImage(img_matches)
 
     # Sort matches, best to worst
     goodMatches = sorted(goodMatches, key=lambda x: x.distance)
@@ -131,6 +137,7 @@ def applyTransform(img1, img2, matrix):
     
     # Apply the affine transformation, with a canvas = max coordinates
     canvas = cv2.warpAffine(img2, matrix, (maxX, max(height1, maxY)))
+    # showImage(canvas)
 
     # canvas[:height1, :width1, :] = img1
     
@@ -145,6 +152,7 @@ def applyBlend(image1, canvas):
     height1, width1, _ = image1.shape # First image / panorama
     img1 = np.zeros_like(canvas)
     img1[:height1, :width1, :] = image1
+    # showImage(img1)
 
     # Highlight the area to blend
     identifyBlendedArea = np.where((canvas > 0) & (img1 > 0), 255, 0).astype(np.uint8)
@@ -166,7 +174,7 @@ def applyBlend(image1, canvas):
     # Project the new gradient to the blending shape
     gradient = np.where(blendedObject != 0, gradient, blendedObject)
     # showImage(gradient)
-
+# 
     # Place the new gradient back in its original position
     newGradient = np.zeros_like(canvas).astype(np.float32)    
     newGradient[y:y+height, x:x+width, :] = gradient
