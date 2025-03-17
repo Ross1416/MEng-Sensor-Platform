@@ -106,22 +106,12 @@ if __name__ == "__main__":
         axis.home(wait_until_idle=True)
         rotate_safe(axis, 0, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
 
-        sleep(2)
-        rotate_safe(axis, 150, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
-        sleep(2)
-        rotate_safe(axis, 200, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
-        sleep(5)
-
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
         # Setup hyperspectral
         hs_cam = setup_hyperspectral()
         logging.info("Setup hyperspectral camera.")
-
-        # Make connection with PiA
-        client_socket = make_client_connection(IP, PORT)
-        logging.debug("Connected to PiA")
         
         # Setup object detection modelx
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
@@ -129,6 +119,10 @@ if __name__ == "__main__":
         # TODO send search classes to PiB
         rgb_model.set_classes(CLASSES)
         logging.info(f"Set YOLO classes to {CLASSES}.")
+
+        # Make connection with PiA
+        client_socket = make_client_connection(IP, PORT)
+        logging.debug("Connected to PiA")
         
         logging.info("Setup complete. Waiting to start capture...")
 

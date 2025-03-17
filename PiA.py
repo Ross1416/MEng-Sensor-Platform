@@ -61,15 +61,17 @@ if __name__ == "__main__":
     # Setup cameras and GPIO
     cams = setup_cameras()
     logging.debug("Setup cameras.")
-    # Make connection
-    server_socket, conn = make_server_connection(HOST, PORT)
-    logging.debug("Connected to PiB")
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
     logging.debug("Loaded RGB object detection model.")
     rgb_model.set_classes(CLASSES)
     logging.info(f"Set YOLO classes to {CLASSES}.")
     logging.info(f"Privacy set {PRIVACY}.")
+
+    # Make connection
+    server_socket, conn = make_server_connection(HOST, PORT)
+    logging.debug("Connected to PiB")
+    
     logging.info(f"Waiting for trigger...")
     
     #Mainloop
