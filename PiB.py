@@ -81,6 +81,7 @@ FOV = (102,67)
 CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 
 if __name__ == "__main__":
+
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -102,7 +103,12 @@ if __name__ == "__main__":
         # Home rotational stage
         logging.info("Homing rotational stage.")
         axis.home(wait_until_idle=True)
-        axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+        axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=40,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+
+        axis.move_absolute(170,Units.ANGLE_DEGREES,velocity=30,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
+        axis.move_absolute(190,Units.ANGLE_DEGREES,velocity=40,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
+        axis.move_absolute(-100,Units.ANGLE_DEGREES,velocity=30,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
+        exit()
 
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
