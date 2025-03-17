@@ -33,7 +33,7 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
             frames[i] = blur_people(frames[i],objects[i],255)
 
     # Perform pano stitching
-    panorama = performPanoramicStitching(frames[0], frames[1], frames[2], frames[3])
+    panorama, objects = performPanoramicStitching(frames, objects)
     # TODO: Transform object detection results    
 
     # TODO: Receive hsi photo and data 
