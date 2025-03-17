@@ -7,15 +7,13 @@ def showImage(image, title='Snapshot'):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-### Warp raw images for improved stitching ####
-def cylindricalProjection(img):
+### determine cylindrical projection parameters ####
+def getCylindricalProjection(img):
 
-    # Simplified intrinsic matrix
-    h, w = img.shape[:2]
-    K = np.array([[w/2, 0, w/2],[0, w/2, h/2],[0, 0, 1]])  
-    map_x, map_y = np.meshgrid(np.arange(w), np.arange(h))
+    h, w = img.shape[:2] # Retrieve image dimensions
+    map_x, map_y = np.meshgrid(np.arange(w), np.arange(h)) # Create a coordinate array for mapping
     
-    theta = (map_x - w / 2) / (w / 2)
+    theta = (map_x - w / 2) / (w / 2) # Define approx. parameters
     phi = (map_y - h / 2) / (h / 2)
     
     x = np.sin(theta) * np.cos(phi)
@@ -25,12 +23,39 @@ def cylindricalProjection(img):
     # Note: change coefficients to change warping effect
     map_x = (w / 2) * (x / z +1)
     map_y = (h / 2) * (y / z +1)
+        
+    return map_x, map_y
 
+### Apply cylindrical projection ####
+def applyCylindricalProjection(img, map_x, map_y):
+
+    # Apply cylindrical projection
     cylindricalProjection = cv2.remap(img, map_x.astype(np.float32), map_y.astype(np.float32), cv2.INTER_LINEAR)
 
-    cylindricalProjection, _, _ = cropToObject(cylindricalProjection)
+    # Crop
+    cylindricalProjection, x_offset, y_offset = cropToObject(cylindricalProjection)
         
-    return cylindricalProjection
+    return cylindricalProjection, x_offset, y_offset
+
+### Determine the coordinates of an object, after cylindrical projection ####
+def findNewObjectLocation(x1, y1, x2, y2, map_x, map_y, x_offset, y_offset):
+    distances = np.sqrt((map_x - x1) ** 2 + (map_y - y1) ** 2)  # Find closest coordinate
+    min_index1 = np.unravel_index(np.argmin(distances), distances.shape)  
+
+    distances = np.sqrt((map_x - x2) ** 2 + (map_y - y2) ** 2)  # Find closest coordinate
+    min_index2 = np.unravel_index(np.argmin(distances), distances.shape)  
+    
+    (x1, y1) = tuple(min_index1[::-1])
+    (x2, y2) = tuple(min_index2[::-1])
+
+    # Subtract the offset from cropping
+    x1 -= x_offset
+    x2 -= x_offset
+    y1 -= y_offset
+    y2 -= y_offset
+
+    return (x1, x2, y1, y2) # Convert (row, col) -> (x', y')
+
 
 ### Return a cropped object from a black background ####
 def cropToObject(image):
@@ -117,7 +142,7 @@ def calculateTransform(src_pts, dst_pts, ransac_threshold=3):
 
 
 ### Apply affine transform to warp images ####   
-def applyTransform(img1, img2, matrix):
+def applyTransform(img1, img2, matrix, objects):
     # Get image dimensions
     height1, width1, _ = img1.shape # First image / panorama
     height2, width2, _ = img2.shape # Image to stitch on
@@ -130,14 +155,35 @@ def applyTransform(img1, img2, matrix):
     
     # Apply the affine transformation, with a canvas = max coordinates
     canvas = cv2.warpAffine(img2, matrix, (maxX, max(height1, maxY)))
-    # showImage(canvas)
-
-    # canvas[:height1, :width1, :] = img1
     
     # Apply Blending
     blended = applyBlend(img1, canvas)
 
-    return blended
+    # Find the new coordintes of an objects after warping
+    if objects != []:
+        for obj in objects:
+            x1 = obj[1][0]
+            y1 = obj[1][1]
+            x2 = obj[1][2]
+            y2 = obj[1][3]
+
+            original_coords = np.array([[x1, y1], [x2, y2]], dtype=np.float32)
+            new_coords = cv2.transform(np.array([original_coords]), matrix)[0]
+
+            x1 = round(new_coords[0][0])
+            y1 = round(new_coords[0][1])
+            x2 = round(new_coords[1][0])
+            y2 = round(new_coords[1][1])
+
+            obj[1][0] = x1
+            obj[1][1] = y1
+            obj[1][2] = x2
+            obj[1][3] = y2
+
+            blended[y1:y2, x1:x2, :] = [0, 0, 255]
+
+    return blended, objects
+
 
 def applyBlend(image1, canvas):
 
