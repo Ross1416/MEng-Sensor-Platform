@@ -3,11 +3,49 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import cv2
-from scipy.ndimage import median_filter, generic_filter
+from scipy.ndimage import median_filter
 from scipy.stats import mode
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+import joblib
+
+
+def plot_correlation_heatmap(hyperspectral_image, selected_bands=None):
+    """
+    Plots a correlation heatmap for spectral bands in a hyperspectral image.
+
+    Parameters:
+        hyperspectral_image (numpy array): 3D array of shape (height, width, num_bands)
+        selected_bands (list, optional): List of band indices to highlight.
+    """
+    # Reshape to (num_pixels, num_bands) for correlation computation
+    h, w, num_bands = hyperspectral_image.shape
+    reshaped_data = hyperspectral_image.reshape(-1, num_bands)
+
+    # Compute the correlation matrix
+    correlation_matrix = np.corrcoef(reshaped_data, rowvar=False)
+
+    # Plot heatmap
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        correlation_matrix,
+        cmap="coolwarm",
+        annot=False,
+        xticklabels=10,
+        yticklabels=10,
+    )
+    plt.title("Spectral Band Correlation Heatmap")
+    plt.xlabel("Spectral Band Index")
+    plt.ylabel("Spectral Band Index")
+
+    # Highlight selected bands if provided
+    if selected_bands is not None:
+        for band in selected_bands:
+            plt.axvline(x=band, color="black", linestyle="--", alpha=0.5)
+            plt.axhline(y=band, color="black", linestyle="--", alpha=0.5)
+
+    plt.show()
 
 
 def load_label_encoder(label_encoding_path):
@@ -31,6 +69,7 @@ def load_dataset(images_folder, selected_bands):
             continue
 
         for file in os.listdir(subfolder_path):
+
             if file.startswith("class_") and file.endswith(".npy"):
                 class_label = int(file.split("_")[1].split(".")[0])
                 data = np.load(os.path.join(subfolder_path, file))[
@@ -59,31 +98,21 @@ def train_random_forest(X_train, y_train, n_estimators=100, random_state=42):
     return clf
 
 
-def mode_filter(image, size=100):
+def apply_smoothing(image, filter_size=10):
     """
-    Applies a mode filter, replacing each pixel with the most common value in its neighborhood.
+    Applies median filtering to reduce speckling noise in classification results.
     """
-    return generic_filter(
-        image, lambda x: mode(x, axis=None)[0], size=(size, size)
-    )
-
-
-def morphological_smoothing(image, kernel_size=100):
-    """
-    Uses morphological operations to smooth the classification output:
-    - Closing removes small holes
-    - Opening removes small isolated pixels
-    """
-    kernel = np.ones((kernel_size, kernel_size), np.uint8)
-    closed = cv2.morphologyEx(image.astype(np.uint8), cv2.MORPH_CLOSE, kernel)
-    opened = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel)
-    return image
+    return median_filter(image, size=filter_size)
 
 
 def classify_and_visualise(
-    image, labels, model, selected_bands, filter_size=3
+    image,
+    labels,
+    model,
+    selected_bands,
+    filter_size=5,
 ):
-    """Classifies an image, smooths results, and visualizes predictions."""
+    """Classifies an image, applies filtering, and visualizes the results."""
     h, w, _ = image.shape
     image_selected = image[:, :, selected_bands]
 
@@ -93,8 +122,11 @@ def classify_and_visualise(
     )
     predicted_labels = predictions.reshape(h, w)
 
+    # Apply smoothing to the classification results
+    smoothed_labels = apply_smoothing(predicted_labels, filter_size)
+
     # Plot the results
-    fig, axes = plt.subplots(1, 4, figsize=(16, 6))
+    fig, axes = plt.subplots(1, 3, figsize=(16, 6))
 
     sns.heatmap(labels, cmap="jet", square=True, cbar=False, ax=axes[0])
     axes[0].set_title("Original Labels")
@@ -102,12 +134,12 @@ def classify_and_visualise(
     sns.heatmap(
         predicted_labels, cmap="jet", square=True, cbar=False, ax=axes[1]
     )
-    axes[1].set_title("Predicted Labels (Before Smoothing)")
+    axes[1].set_title("Raw Predicted Labels")
 
     sns.heatmap(
-        predicted_labels, cmap="jet", square=True, cbar=False, ax=axes[2]
+        smoothed_labels, cmap="jet", square=True, cbar=False, ax=axes[2]
     )
-    axes[2].set_title("Mode Filtered Labels")
+    axes[2].set_title("Smoothed Predictions")
 
     plt.show()
 
@@ -125,19 +157,15 @@ def test(sample):
             labels = labels[:, :, 0]
 
         classify_and_visualise(
-            image, labels, clf, selected_bands, filter_size=3
+            image, labels, clf, selected_bands, filter_size=5
         )
     else:
         print(f"{sample} not found.")
 
 
 if __name__ == "__main__":
-    images_folder = "images/outdoor_dataset"
-    label_encoding_path = os.path.join(images_folder, "label_encoding.npy")
 
-    # Load label encoder
-    label_encoder = load_label_encoder(label_encoding_path)
-    label_decoder = {v: k for k, v in label_encoder.items()}
+    images_folder = "images/outdoor_dataset_limited"
 
     # Select spectral bands
     selected_bands = select_bands()
@@ -150,11 +178,17 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
+
     print(f"Dataset shape: {X.shape}, Labels shape: {y.shape}")
     print(f"Train size: {X_train.shape}, Test size: {X_test.shape}")
 
     # Train the model
     clf = train_random_forest(X_train, y_train)
+
+    # Save the trained model
+    model_path = "RF_model.pkl"
+    joblib.dump(clf, model_path)
+    print(f"Model saved as {model_path}")
 
     # Evaluate model
     y_pred = clf.predict(X_test)
@@ -164,5 +198,7 @@ if __name__ == "__main__":
     for sample in os.listdir(images_folder):
         sample_path = os.path.join(images_folder, sample)
         if os.path.isdir(sample_path):  # Only process directories
+
             print(f"Processing sample: {sample}")
+            # plot_correlation_heatmap(sample)
             test(sample)
