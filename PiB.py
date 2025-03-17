@@ -106,6 +106,12 @@ if __name__ == "__main__":
         axis.home(wait_until_idle=True)
         rotate_safe(axis, 0, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
 
+        sleep(2)
+        rotate_safe(axis, 150, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
+        sleep(2)
+        rotate_safe(axis, 200, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
+        sleep(5)
+
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
