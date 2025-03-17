@@ -46,7 +46,7 @@ HOST = "0.0.0.0" # i.e. listening
 RESOLUTION = (4608,2592)
 FOV = (102,67)
 PRIVACY = True  #Blur people
-CLASSES = ["person"] 
+CLASSES = ["plant"] 
 
 if __name__ == "__main__":
     # Setup Logging
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
     logging.debug("Connected to PiB")
-    
+
     logging.info(f"Waiting for trigger...")
     
     #Mainloop

@@ -71,7 +71,7 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
 IP = "10.42.0.1"
 PORT = 5002
 PATH = "./captures/"
-CLASSES = ["person"] 
+CLASSES = ["plant"] 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0" # TODO: find automatically?
 ROTATION_OFFSET = 91  # temporary 
 ROTATION_SPEED = 30
