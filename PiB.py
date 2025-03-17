@@ -168,6 +168,7 @@ ENABLE_HS = True
 ENABLE_DEBUG = True
 
 if __name__ == "__main__":
+
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
