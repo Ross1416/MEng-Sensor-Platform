@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
     logging.debug("Connected to PiB")
-    
+
     logging.info(f"Waiting for trigger...")
 
     # Mainloop
