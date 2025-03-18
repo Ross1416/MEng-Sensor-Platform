@@ -34,7 +34,8 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
 
                 logging.debug(f"Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
 
-                on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
+                if ENABLE_HS:
+                    on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
                 # TODO: Send hyperspectral data to PiA
         
 
@@ -68,6 +69,9 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
 
 
 # IP = "hsiA.local"
+
+ENABLE_HS = False
+
 IP = "10.42.0.1"
 PORT = 5002
 PATH = "./captures/"
@@ -95,21 +99,26 @@ if __name__ == "__main__":
         cams = setup_cameras()
         logging.debug("Setup cameras.")
         
-        # Setup rotational stage
-        zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
-        logging.debug("Setup rotational stage.")
         
-        # Home rotational stage
-        logging.info("Homing rotational stage.")
-        axis.home(wait_until_idle=True)
-        axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+        if ENABLE_HS:
+            # Setup rotational stage
+            zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
+            logging.debug("Setup rotational stage.")
+    
+            # Home rotational stage
+            logging.info("Homing rotational stage.")
+            axis.home(wait_until_idle=True)
+            axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
 
+            # Setup hyperspectral
+            hs_cam = setup_hyperspectral()
+            logging.info("Setup hyperspectral camera.")
+
+        else:
+            axis = None
+            hs_cam = None
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
-
-        # Setup hyperspectral
-        hs_cam = setup_hyperspectral()
-        logging.info("Setup hyperspectral camera.")
 
         # Make connection with PiA
         client_socket = make_client_connection(IP, PORT)
@@ -135,18 +144,22 @@ if __name__ == "__main__":
     
     except Exception as e:
         logging.error(f"Error in PiB.py: {e}")
-        axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+
+        if ENABLE_HS:
+            axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+            hs_cam.Close()
+            zaber_conn.close()
         client_socket.close()
-        hs_cam.Close()
-        zaber_conn.close()
         logging.info("All connections closed.")
 
     finally:
-        axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+        if ENABLE_HS:
+            axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+            hs_cam.Close()
+            zaber_conn.close()
         client_socket.close()
-        hs_cam.Close()
-        zaber_conn.close()
         logging.info("All connections closed.")
         logging.info("System terminated.")
     
+
 

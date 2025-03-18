@@ -20,7 +20,7 @@ def performPanoramicStitching(images, objects):
             obj[1][3] = y2
 
             images[i][y1:y2, x1:x2, :] = [0, 255, 0]
-    showImage(images[3])
+    # showImage(images[3])
 
     # Commented code below is used for calibration
 
@@ -32,7 +32,7 @@ def performPanoramicStitching(images, objects):
     H1 = np.array([[ 1,  0,  3.10296331e+03], [0, 1, 0]])
     panorama, objects[1] = applyTransform(images[0], images[1], H1, objects[1])
 
-    showImage(panorama)
+    # showImage(panorama)
 
     ### Second Stitch ###
     # src_pts, dst_pts = findKeyPoints(panorama, image3)
@@ -57,7 +57,7 @@ def performPanoramicStitching(images, objects):
             obj[1][0] -= 200
             obj[1][2] -= 200
 
-    return panorama
+    return panorama, objects
 
 
 if __name__ == "__main__":
