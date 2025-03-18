@@ -41,87 +41,6 @@
   overflow: hidden;
 }
 
-.search {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  background-color: white;
-  border-radius: 15px;
-}
-
-.search button {
-  background-color: transparent;
-  border-color: transparent;
-  padding: 5px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.search input {
-  background-color: transparent;
-  border-color: transparent;
-  font-size: 18px;
-}
-
-.button-on {
-  position: absolute;
-  right: 300px;
-  font-size: 18px;
-  top: 20px;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  background-color: white;
-  border-radius: 10px;
-  font-weight: bold;
-}
-
-.button-off {
-  position: absolute;
-  right: 300px;
-  font-size: 18px;
-  top: 20px;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  background-color: transparent;
-  border-radius: 10px;
-  font-weight: bold;
-  color: white;
-}
-
-
-.new-button {
-  position: absolute;
-  right: 345px;
-  font-size: 18px;
-  top: 20px;
-  padding: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  background-color: transparent;
-  border-radius: 10px;
-  font-weight: bold;
-  color: white;
-  border: 2px solid white;
-
-}
-
-.new-input {
-  position: absolute;
-  right: 390px;
-  width: 200px;
-  font-size: 18px;
-  top: 20px;
-  padding: 5px;
-  padding-left: 10px;
-  background-color: transparent;
-  border-radius: 10px; 
-  font-weight: bold;
-  color: white;
-  border: 2px solid white;
-}
-
 .dropdown {
   position: absolute;
   left: 20px;
@@ -144,4 +63,78 @@
   padding: 5px;
   font-size: 18px;
   font-weight: bold;
+}
+
+.upper-right-buttons {
+  display: flex;
+  flex-direction: row;
+  right: 0px;
+  position: absolute;
+}
+
+
+/* .search button {
+  background-color: transparent;
+  border-color: transparent;
+  padding: 5px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.search input {
+  background-color: transparent;
+  border-color: transparent;
+  font-size: 18px;
+} */
+
+.button-on {
+  font-size: 18px;
+  padding: 5px;
+  background-color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  margin: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.button-off {
+  font-size: 18px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: transparent;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+  margin: 5px;
+  border: 2px solid white;
+}
+
+
+.new-button {
+  font-size: 18px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: transparent;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+  border: 2px solid white;
+  margin: 5px;
+}
+
+.new-input {
+  width: 200px;
+  font-size: 18px;
+  top: 20px;
+  padding: 5px;
+  padding-left: 10px;
+  background-color: transparent;
+  border-radius: 10px; 
+  font-weight: bold;
+  color: white;
+  border: 2px solid white;
+  margin: 5px;
 }
