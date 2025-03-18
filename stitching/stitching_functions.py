@@ -180,8 +180,6 @@ def applyTransform(img1, img2, matrix, objects):
             obj[1][2] = x2
             obj[1][3] = y2
 
-            blended[y1:y2, x1:x2, :] = [0, 0, 255]
-
     return blended, objects
 
 

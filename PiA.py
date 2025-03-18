@@ -38,7 +38,6 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     objects_restructured = []
     for frame in objects:
         objects_restructured += frame
-    print(objects_restructured)
     
     # Remove duplicate object detections
     filtered_objects = non_maximum_suppression(objects_restructured)
@@ -47,7 +46,7 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
     for i in range(len(filtered_objects)):
-        filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][j][1], panorama.shape[1], panorama.shape[0], True)
+        filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
 
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
