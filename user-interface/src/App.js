@@ -2,6 +2,7 @@ import './App.css';
 import React, {useState, useEffect} from 'react';
 import { Map } from './components/Map.js';
 import { Panorama } from './components/Panorama.js';
+import { Popup } from './components/Popup.js'
 
 
 function App() {
@@ -13,12 +14,14 @@ function App() {
   const [objects, setObjects] = useState([]) // list of objects in a pin
   const [enviroments, setEnvirorements] = useState(null) // a list of possible enviroments saved on device
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
-
+  const [showHSI, setShowHSI] = useState(false)
+  const [hsiData, setHSIData] = useState({})
+ 
   // DEVICE CONTROL 
   const [platformActive, setPlatformActive] = useState(0) // 1 for active device, 2 for test, 0 for deactive
   const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // press to create new enviroment
   const [newEnviromentName, setNewEnviromentName] = useState('')
-  const [searchText, setSearchText] = useState('') 
+  const [takePhoto, setTakePhoto] = useState(false) 
 
   // Poll for data updates once every second
   const refreshData = async () => {
@@ -129,8 +132,8 @@ function App() {
   }
 
   // If the user types in 'Test', perform a one time capture 
-  const handleSearch = async () => {
-    if (searchText == 'Test') {
+  const handleTakePhoto = async () => {
+      setTakePhoto(true)
       try {
         const resp = await fetch("/updatePlatformActiveStatus", {
           method: "POST",
@@ -141,12 +144,19 @@ function App() {
       } catch (error) {
         console.log(error)
       }
-    }
+
+      const interval = setInterval(() => {
+        setTakePhoto(false);
+      }, 1000);
+    
+      // Cleanup the interval on component unmount
+      return () => clearInterval(interval);
   }
 
   return (
   
     <div className='container'>
+      <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} />
   
       <div className='header'>
 
@@ -160,18 +170,19 @@ function App() {
           
           </select>
           </div>
-        
-        <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
-        <button className='new-button' onClick={handleCreateNewEnviroment}>+</button>
-        <input className='new-input' placeholder='Name New Enviroment' value={newEnviromentName} onChange={(event)=>{setNewEnviromentName(event.target.value)}} style={createNewEnviroment ? {display: 'block'}:{display: 'none'}}/>
 
-        <div className='search'>
-          <button>{'<'}</button>
-          <button>{'>'}</button>
-          <input  value={searchText} onChange={(event)=>{setSearchText(event.target.value)}} placeholder='Search...'/> 
-          <button onClick={handleSearch}>{'↵'}</button>
+
+        <div className='upper-right-buttons'>
+          <div className={false == 1 ? 'button-on' : 'button-off'}>🔗</div>
+          <div className={false == 1 ? 'button-on' : 'button-off'}>⟟</div> 
+          <input className='new-input' placeholder='Name New Enviroment' value={newEnviromentName} onChange={(event)=>{setNewEnviromentName(event.target.value)}} style={createNewEnviroment ? {display: 'block'}:{display: 'none'}}/>
+          <button className={createNewEnviroment == 1 ? 'button-on' : 'button-off'} onClick={handleCreateNewEnviroment}>+</button>
+          <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
+          <button className={takePhoto == 1 ? 'button-on' : 'button-off'} onClick={handleTakePhoto}>[◉"]</button>   
+          
         </div>
-        
+
+
       </div>
       <div className='body'>
         <div className='map-container'>
@@ -179,10 +190,10 @@ function App() {
         </div>
 
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment}/>
+          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} />
         </div>
 
-      </div>
+      </div> 
     </div>
   );
 }

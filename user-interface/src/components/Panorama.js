@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment}) {
+export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData}) {
 
 
     const [showObjects, setShowObjects] = useState(false)
@@ -19,7 +19,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         stateFunction(!state)
     }
 
-    const testObjects = [{RGB_classification: 'dog', x: -3633, y: 237}, {RGB_classification: 'dog', x: 1792, y: 643}]
+    const testObjects = [{RGB_classification: 'dog', x: -3633, y: 237,}, {RGB_classification: 'dog', x: 1792, y: 643}]
 
       
     return (
@@ -42,7 +42,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                         showZoomCtrl={false}
                         orientationOnByDefault={true}
                     >
-                    {objects?.map(({x, y}) => (
+                    {objects?.map(({x, y, width, height}) => (
                 
                         <Pannellum.Hotspot
                             type="custom"
@@ -51,10 +51,11 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                             title="1"
                             tooltip={(hotSpotDiv) => {
                                 hotSpotDiv.classList.add("custom-hotspot");
+                                hotSpotDiv.style.width = width+"px";  // Set custom width
+                                hotSpotDiv.style.height = height+"px"; // Set custom height
                             }}
-                        
-                            
-                            handleClick={() => alert('Clicked!')}
+                    
+                            handleClick={() => setShowHSI(true)}
                         />
     
                 

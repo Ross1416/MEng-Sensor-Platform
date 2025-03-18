@@ -11,6 +11,8 @@
                 {
                     "x": -3633,
                     "y": 237,
+                    "width": 400,
+                    "height": 400,
                     "RGB_classification": "dog",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
@@ -33,6 +35,8 @@
                 {
                     "x": 1792,
                     "y": 643,
+                    "width": 400,
+                    "height": 400,
                     "RGB_classification": "fish",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
@@ -46,6 +50,8 @@
                 {
                     "x": -3633,
                     "y": 237,
+                    "width": 200,
+                    "height": 100,
                     "RGB_classification": "dog",
                     "RGB_confidence": 0.8,
                     "HS_classification": {
