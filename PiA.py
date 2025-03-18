@@ -39,6 +39,12 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     # TODO: Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
+    print(objects[0][0][1])
+    for i in range(len(objects)):
+        for j in range(len(objects[i])):
+            objects[i][j][1] = xyxy_to_xywh(objects[i][j][1], panorama.shape[1], panorama.shape[0], True)
+    print(objects[0][0][1])
+
     updateJSON(uid, lon, lat, objects, panorama, activeFile)
 
 PORT = 5002
