@@ -34,12 +34,21 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
 
     # Perform pano stitching
     panorama, objects = performPanoramicStitching(frames, objects)
-    # TODO: Transform object detection results    
+    # Restructure objects
+    objects_restructured = []
+    for frame in objects:
+        objects_restructured += frame
+    
+    # Remove duplicate object detections
+    filtered_objects = non_maximum_suppression(objects_restructured)
 
     # TODO: Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
-    updateJSON(uid, lon, lat, objects, panorama, activeFile)
+    for i in range(len(filtered_objects)):
+        filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
+
+    updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening

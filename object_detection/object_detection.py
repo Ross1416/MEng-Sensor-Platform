@@ -1,6 +1,7 @@
 from ultralytics import YOLOWorld
 import math                                                        
 import cv2
+import numpy as np
 
 def object_detection(model, frame,conf=0.25):
     """
@@ -92,6 +93,63 @@ def blur_people(frame, detections,blur_size=25):
             roi = cv2.GaussianBlur(roi,(blur_size,blur_size),0)
             frame[y1:y1+roi.shape[0], x1:x1+roi.shape[1]] = roi
     return frame
+
+def calculate_iou(bbA, bbB):
+    xA = max(bbA[0], bbB[0])
+    yA = max(bbA[1], bbB[1])
+    xB = min(bbA[2], bbB[2])
+    yB = min(bbA[3], bbB[3])
+
+    interWidth = max(0, xB - xA)
+    interHeight = max(0, yB - yA)
+    intersection_area = interWidth * interHeight
+
+    bbA_area = (bbA[2] - bbA[0]) * (bbA[3] - bbA[1])
+    bbB_area = (bbB[2] - bbB[0]) * (bbB[3] - bbB[1])
+
+    union_area = bbA_area + bbB_area - intersection_area
+
+    iou = intersection_area / union_area
+    return iou
+
+def non_maximum_suppression(objects, iou_threshold=0.5):
+    """
+    Perform Non-Maximum Suppression to remove duplicate boxes.
+    Inputs:
+        -objects: [[class_name, (x1, y1, x2, y2), confidence], ...]
+        -iou_threshold (float): IoU threshold to consider as duplicate
+    Returns:
+        -list: Filtered list of objects with unique detections
+    """
+    # Sort objects by confidence score in descending order
+    objects = sorted(objects, key=lambda x: x[2], reverse=True)
+
+    selected_objects = []
+
+    # Loop while unfiltered objects remaining
+    while len(objects) > 0:
+        # Select the object with the highest score
+        current_object = objects[0]
+        selected_objects.append(current_object)
+        objects = objects[1:]
+
+        filtered_objects = []
+        for obj in objects:
+            # Check if the current and candidate objects are of the same class
+            if current_object[0] == obj[0]:
+                # Calculate IoU between the selected and remaining boxes
+                iou = calculate_iou(current_object[1], obj[1])
+                # Keep the object if IoU is below the threshold
+                if iou < iou_threshold:
+                    filtered_objects.append(obj)
+            else:
+                # Keep objects of different classes
+                filtered_objects.append(obj)
+
+        objects = filtered_objects
+
+    return selected_objects
+
 
 def split_panorama(image):
     """

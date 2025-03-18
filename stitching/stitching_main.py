@@ -1,4 +1,4 @@
-from stitching_functions import *
+from stitching.stitching_functions import *
 import cv2
 import numpy as np
 
@@ -19,9 +19,6 @@ def performPanoramicStitching(images, objects):
             obj[1][2] = x2
             obj[1][3] = y2
 
-            images[i][y1:y2, x1:x2, :] = [0, 255, 0]
-    showImage(images[3])
-
     # Commented code below is used for calibration
 
     ### First stitch ###
@@ -32,7 +29,7 @@ def performPanoramicStitching(images, objects):
     H1 = np.array([[ 1,  0,  3.10296331e+03], [0, 1, 0]])
     panorama, objects[1] = applyTransform(images[0], images[1], H1, objects[1])
 
-    showImage(panorama)
+    # showImage(panorama)
 
     ### Second Stitch ###
     # src_pts, dst_pts = findKeyPoints(panorama, image3)
@@ -51,13 +48,17 @@ def performPanoramicStitching(images, objects):
     panorama, objects[3] = applyTransform(panorama, images[3], H3, objects[3])
 
     # Crop Image
-    panorama = panorama[200:1900, :, :]
+    height, width, _ = panorama.shape
+    panorama = panorama[200:1900, 200:width-200, :]
     for frame in objects:
         for obj in frame:
             obj[1][0] -= 200
             obj[1][2] -= 200
 
-    return panorama
+            obj[1][1] -= 200
+            obj[1][3] -= 200
+
+    return panorama, objects
 
 
 if __name__ == "__main__":
@@ -72,8 +73,6 @@ if __name__ == "__main__":
     y1 = 1750
     y2 = 2000
     confidence = 0.8
-
-    image4[y1:y2, x1:x2, :] = [255, 0, 0]
 
     objects = [[], [], [], [[label, [x1, y1, x2, y2], confidence]]]
 
