@@ -1,84 +1,91 @@
 import os
 import numpy as np
-import cv2
+from PIL import Image
 
-# Define paths
-images_folder = "images/outdoor_dataset"
 
-# Dictionary to encode class labels
-label_encoder = {}
-label_names = {}  # Stores the mapping from encoded label to class name
-current_label = 0
+def create_label_encoder(
+    images_folder, save_path="label_encoding.npy", min_samples=100
+):
+    """
+    Creates a label encoder mapping original class labels to encoded values and class names.
 
-# Each subfolder contains a labeled image
-for subfolder in os.listdir(images_folder):
-    subfolder_path = os.path.join(images_folder, subfolder)
+    Parameters:
+        images_folder (str): Path to the dataset directory containing subfolders with labeled images.
+        save_path (str): Path to save the label encoding file.
+        min_samples (int): Minimum required pixel samples for a class to be saved.
 
-    # Skip if not a directory
-    if not os.path.isdir(subfolder_path):
-        continue
+    Returns:
+        dict: Label encoder mapping original label -> (encoded label, class name).
+    """
 
-    # Load the label mask
-    label_mask_path = os.path.join(subfolder_path, "label.png")
+    label_encoder = {}  # Maps original label -> (encoded label, class name)
 
-    # Load corresponding .npy file
-    npy_path = os.path.join(images_folder, subfolder + ".npy")
+    # Iterate through dataset subfolders
+    for subfolder in os.listdir(images_folder):
+        subfolder_path = os.path.join(images_folder, subfolder)
+        if not os.path.isdir(subfolder_path):
+            continue  # Skip if not a valid directory
 
-    # Load label names
-    label_names_path = os.path.join(subfolder_path, "label_names.txt")
-    if os.path.exists(label_names_path):
+        # Delete existing class_x.npy files
+        for file in os.listdir(subfolder_path):
+            if file.startswith("class_") and file.endswith(".npy"):
+                file_path = os.path.join(subfolder_path, file)
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+
+        # Load label mask (grayscale) using PIL
+        label_mask_path = os.path.join(subfolder_path, "label.png")
+        label_mask = np.asarray(Image.open(label_mask_path))
+
+        # Load corresponding hyperspectral image
+        npy_path = os.path.join(images_folder, subfolder + ".npy")
+        hyperspectral_image = np.load(npy_path)  # Shape: (H, W, Bands)
+
+        # Load class names if available
+        label_names_path = os.path.join(subfolder_path, "label_names.txt")
         with open(label_names_path, "r") as f:
-            class_name_list = [
-                line.strip() for line in f.readlines()[1:]
-            ]  # Skip first line
-    else:
-        class_name_list = []
+            class_name_list = [line.strip() for line in f.readlines()]
 
-    # The data
-    label_mask = cv2.imread(label_mask_path, cv2.IMREAD_GRAYSCALE)
-    hyperspectral_image = np.load(npy_path)  # Shape: (H, W, Bands)
+        # Get unique labels from mask
+        unique_labels = np.unique(label_mask)
+        for label in unique_labels:
+            if label == 0:
+                continue  # Skip background pixels
 
-    # Get unique labels and encode each of them
-    unique_labels = np.unique(label_mask)
-    for label in unique_labels:
-        if label == 0:
-            continue  # Skip background pixels
-
-        # New label if not already assigned
-        if label not in label_encoder:
-            label_encoder[label] = current_label
-
-            # Assign class name if available
+            # Assign encoded label directly (since the range is already 0-6)
             class_name = (
-                class_name_list[current_label]
-                if current_label < len(class_name_list)
-                else f"Unknown_{current_label}"
+                class_name_list[label]
+                if label < len(class_name_list)
+                else f"Unknown_{label}"
             )
-            label_names[current_label] = class_name
+            label_encoder[label] = (label, class_name)
 
-            current_label += 1
+            # Extract pixels corresponding to this label
+            mask = label_mask == label
+            class_pixels = hyperspectral_image[mask]
 
-        # Get pixels corresponding to this label
-        mask = label_mask == label
-        class_pixels = hyperspectral_image[mask]
+            # Save if enough samples exist
+            if class_pixels.shape[0] >= min_samples:
+                save_class_path = os.path.join(
+                    subfolder_path, f"class_{label}.npy"
+                )
+                np.save(save_class_path, class_pixels)
+                print(
+                    f"Saved: {save_class_path} (Original Label: {label}, Name: {label_encoder[label][1]}, Samples: {class_pixels.shape[0]})"
+                )
+            else:
+                print(
+                    f"Skipped saving class_{label}.npy (Only {class_pixels.shape[0]} samples)"
+                )
 
-        # Only save if there are at least 100 samples
-        if class_pixels.shape[0] >= 100:
-            save_path = os.path.join(
-                subfolder_path, f"class_{label_encoder[label]}.npy"
-            )
-            np.save(save_path, class_pixels)
-            print(
-                f"Saved: {save_path} (Original Label: {label} -> Encoded as: {label_encoder[label]}, Name: {label_names[label_encoder[label]]}, Samples: {class_pixels.shape[0]})"
-            )
-        else:
-            print(
-                f"Skipped saving class_{label_encoder[label]}.npy (Only {class_pixels.shape[0]} samples)"
-            )
+    # Save the label encoding dictionary
+    save_encoding_path = os.path.join(images_folder, save_path)
+    np.save(save_encoding_path, label_encoder)
+    print(f"Label encoding saved at {save_encoding_path}")
 
-# Save label encoding and class names for reference
-encoding_data = label_encoder
+    return label_encoder  # Return the mapping for further use
 
-encoding_path = os.path.join(images_folder, "label_encoding.npy")
-np.save(encoding_path, encoding_data)
-print(f"Label encoding saved at {encoding_path}")
+
+# Example Usage:
+images_folder = "images/outdoor_dataset_limited"
+label_encoder = create_label_encoder(images_folder)
