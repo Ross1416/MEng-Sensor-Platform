@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import joblib
+from PIL import Image
 
 
 def plot_correlation_heatmap(hyperspectral_image, selected_bands=None):
@@ -105,14 +106,14 @@ def apply_smoothing(image, filter_size=10):
     return median_filter(image, size=filter_size)
 
 
+import matplotlib.colors as mcolors
+
+
 def classify_and_visualise(
-    image,
-    labels,
-    model,
-    selected_bands,
-    filter_size=5,
+    image, labels, model, selected_bands, label_encoder, filter_size=5
 ):
-    """Classifies an image, applies filtering, and visualizes the results."""
+    """Classifies an image, applies filtering, and visualizes the results with a legend."""
+
     h, w, _ = image.shape
     image_selected = image[:, :, selected_bands]
 
@@ -122,24 +123,56 @@ def classify_and_visualise(
     )
     predicted_labels = predictions.reshape(h, w)
 
-    # Apply smoothing to the classification results
+    # Apply smoothing to results to reduce speckling noise
     smoothed_labels = apply_smoothing(predicted_labels, filter_size)
+
+    # Extract unique classes
+    unique_classes = np.unique(smoothed_labels)
+
+    # Generate colormap
+    num_classes = len(unique_classes)
+    cmap = plt.get_cmap("gist_rainbow", num_classes)
+    colors = cmap(np.arange(num_classes))
+    custom_cmap = mcolors.ListedColormap(colors)
+
+    # Generate legend mapping from encoded labels to class names
+    legend_labels = {
+        encoded: label_encoder[orig][1]
+        for orig, (encoded, _) in label_encoder.items()
+        if encoded in unique_classes
+    }
 
     # Plot the results
     fig, axes = plt.subplots(1, 3, figsize=(16, 6))
 
-    sns.heatmap(labels, cmap="jet", square=True, cbar=False, ax=axes[0])
+    # Original Labels
+    img0 = axes[0].imshow(labels, cmap=custom_cmap)
     axes[0].set_title("Original Labels")
 
-    sns.heatmap(
-        predicted_labels, cmap="jet", square=True, cbar=False, ax=axes[1]
+    # Raw Predictions
+    img1 = axes[1].imshow(
+        predicted_labels,
+        cmap=custom_cmap,
+        vmin=unique_classes[0],
+        vmax=unique_classes[-1],
     )
     axes[1].set_title("Raw Predicted Labels")
 
-    sns.heatmap(
-        smoothed_labels, cmap="jet", square=True, cbar=False, ax=axes[2]
+    # Smoothed Predictions
+    img2 = axes[2].imshow(
+        smoothed_labels,
+        cmap=custom_cmap,
+        vmin=unique_classes[0],
+        vmax=unique_classes[-1],
     )
     axes[2].set_title("Smoothed Predictions")
+
+    # Add colorbar legend
+    cbar = fig.colorbar(
+        img2, ax=axes, orientation="horizontal", fraction=0.02, pad=0.1
+    )
+    cbar.set_ticks(list(legend_labels.keys()))
+    cbar.set_ticklabels(list(legend_labels.values()))
 
     plt.show()
 
@@ -151,13 +184,13 @@ def test(sample):
 
     if os.path.exists(image_path) and os.path.exists(label_path):
         image = np.load(image_path)
-        labels = plt.imread(label_path)
+        labels = np.asarray(Image.open(label_path))
 
         if len(labels.shape) == 3:
             labels = labels[:, :, 0]
 
         classify_and_visualise(
-            image, labels, clf, selected_bands, filter_size=5
+            image, labels, clf, selected_bands, label_encoder
         )
     else:
         print(f"{sample} not found.")
@@ -166,6 +199,9 @@ def test(sample):
 if __name__ == "__main__":
 
     images_folder = "images/outdoor_dataset_limited"
+
+    label_encoder_path = os.path.join(images_folder, "label_encoding.npy")
+    label_encoder = load_label_encoder(label_encoder_path)
 
     # Select spectral bands
     selected_bands = select_bands()
@@ -202,3 +238,4 @@ if __name__ == "__main__":
             print(f"Processing sample: {sample}")
             # plot_correlation_heatmap(sample)
             test(sample)
+            break
