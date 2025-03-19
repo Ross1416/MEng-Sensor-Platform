@@ -2,10 +2,10 @@ import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData}) {
+export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects}) {
 
 
-    const [showObjects, setShowObjects] = useState(false)
+    const [showObjects, setShowObjects] = useState(true)
     const [showMaterials, setShowMaterials] = useState(false)
     const [showDistances, setShowDistances] = useState(false)
     const [showConfidence, setShowConfidence] = useState(false)
@@ -13,17 +13,61 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     const [reset, setReset] = useState(false)
     const [download, setDownload] = useState(false)
     const [connected, setConnected] = useState(false)
+    const [searchInput, setSearchInput] = useState('')
 
     // Toggle button change
     const toggleButton = (state, stateFunction) => {
         stateFunction(!state)
     }
 
-    const testObjects = [{RGB_classification: 'dog', x: -3633, y: 237,}, {RGB_classification: 'dog', x: 1792, y: 643}]
+    const handleNewSearchObject = async (event) => {
+        if (event.keyCode == 13) {
+            searchObjects.push(searchInput)
+            
+        }
 
+        // console.log(searchInput)
+        // if (event.keyCode == 13) {
+        //     setSearchObjects((prevItems) => [...prevItems, searchInput])
+        //     setSearchInput('')
+        //     console.log(searchObjects)
+        // } 
+
+        // if (event.keyCode == 13) {
+        //     console.log(searchObjects)
+        //     try {
+        //         fetch("/updateObjects", {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify({objects: searchObjects})
+        //     })} catch (err) {
+        //         console.log(err)
+        //     }
+        // }
+    }
+    
+
+
+    const handleDeleteObject = async (index) => {
+        setSearchObjects((prevItems) => prevItems.filter((_, i) => i !== index));
+    }
       
     return (
         <div className='panorama-container'>
+            
+            <text style={{fontWeight: 'bold', position: 'absolute', left: '5px', top: '5px', color: 'white', zIndex: 100}}>Timestamp: </text>
+            <text style={{fontWeight: 'bold', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100}}>Lon/Lat: </text>
+
+            <div style={{position: 'absolute', right: '5px', top: '5px', zIndex: 100,  display: 'flex', flexDirection: 'column'}}>
+                {searchObjects?.map((item, index)=> (
+                    <div key={index} style={{backgroundColor: 'lightgrey', minWidth: '80px', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between'}}>
+                        <text style={{}}>{item}</text>
+                        <button style={{backgroundColor: 'white', opacity: 0.5, fontWeight: 'bold',borderWidth: '0.5px', borderRadius: '5px'}} onClick={()=>handleDeleteObject(index)}>-</button>
+                    </div>
+                ))}
+
+            </div>
+
             {/* <button onClick={changeScene}>PRESS ME</button> */}
             {panorama ? (
                 // <img src={panorama} alt='Dynamic' className='panorama'/>
@@ -42,24 +86,26 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                         showZoomCtrl={false}
                         orientationOnByDefault={true}
                     >
-                    {objects?.map(({x, y, width, height}) => (
-                
+
+                    {showObjects ? (
+                    objects?.map(({ x, y, width, height, RGB_classification }) => (
                         <Pannellum.Hotspot
-                            type="custom"
+                            type="info"
                             pitch={(y/850)*30}
                             yaw={(x/6453)*179}
                             title="1"
-                            tooltip={(hotSpotDiv) => {
-                                hotSpotDiv.classList.add("custom-hotspot");
-                                hotSpotDiv.style.width = width+"px";  // Set custom width
-                                hotSpotDiv.style.height = height+"px"; // Set custom height
-                            }}
+                            text={RGB_classification}
+                            className="custom-hotspot"
+
+                            // tooltip={(hotSpotDiv) => {
+                            //     hotSpotDiv.classList.add("custom-hotspot");
+                            //     // hotSpotDiv.style.width = 15+"px";  // Set custom width
+                            //     // hotSpotDiv.style.height = 15+"px"; // Set custom height
+                            // }}
                     
-                            handleClick={() => setShowHSI(true)}
-                        />
-    
-                
-                    ))}
+                            handleClick={() => setShowHSI(true)}/>
+                    ))
+                    ) : <div/>}
                 </Pannellum>
                 
                 
@@ -90,6 +136,9 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                 <button style={{color: showDistances?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showDistances, setShowDistances)}>
                     Show Distances
                 </button>
+                <input placeholder='Search for...' style={{backgroundColor: 'transparent', borderColor: 'transparent', fontSize: '18px'}} value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}>
+                    
+                </input>
                 {/* <button>
                     <CubeOutline color={showObjects ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}/>
                 </button> */}

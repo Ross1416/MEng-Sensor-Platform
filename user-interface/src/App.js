@@ -16,12 +16,20 @@ function App() {
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
   const [showHSI, setShowHSI] = useState(false)
   const [hsiData, setHSIData] = useState({})
+
  
   // DEVICE CONTROL 
   const [platformActive, setPlatformActive] = useState(0) // 1 for active device, 2 for test, 0 for deactive
   const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // press to create new enviroment
   const [newEnviromentName, setNewEnviromentName] = useState('')
   const [takePhoto, setTakePhoto] = useState(false) 
+  const [statusMessage, setStatusMessage] = useState('')
+  const [statusMessageTimestamp, setStatusMessageTimestamp] = useState('')
+  const [gpsConnected, setGPSConnected] = useState(false)
+  const [piConnected, setPiConnected] = useState(false)
+  const [searchObjects, setSearchObjects] = useState(['person'])
+  
+
 
   // Poll for data updates once every second
   const refreshData = async () => {
@@ -48,8 +56,27 @@ function App() {
       fetch("/getActiveFile").then(resp=>resp.json())
       .then((data) => {
         setSelectedEnviroment(data.activeFile);
+        setSearchObjects(data.searchObjects)
     })
     };
+
+
+    // Poll for sensor platform status
+    try {
+      fetch("/getPlatformStatus").then(resp=>resp.json())
+      .then(resp=> {
+        if (statusMessage != resp[0]) {
+          const d = new Date().toLocaleTimeString()
+          setStatusMessage(resp[0])
+          setStatusMessageTimestamp(d)
+        }
+        setPiConnected(resp[1])
+        setGPSConnected(resp[2])
+    })
+
+    } catch (err) {
+      console.log(err)
+    }
     
     // If user has not selected a panorama yet, set default 
     if (pins && selectedEnviroment && !panorama) {
@@ -159,27 +186,29 @@ function App() {
       <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} />
   
       <div className='header'>
+        <h1>Current Status: {statusMessage} ({statusMessageTimestamp})</h1>
 
-        <div className="dropdown">
-          <label for="options">Choose a map:</label>
-          <select id="options" value={selectedEnviroment} onChange={handleChangeEnviroment}>
+        <div className='upper-left-buttons'>
+          <div className="dropdown">
+            <label for="options">Choose a map:</label>
+            <select id="options" value={selectedEnviroment} onChange={handleChangeEnviroment}>
 
-            {enviroments?.map((item, index) => (
-                <option value={item.filename}>{item.location}</option>
-            ))}
-          
-          </select>
+              {enviroments?.map((item, index) => (
+                  <option value={item.filename}>{item.location}</option>
+              ))}
+            
+            </select>
           </div>
-
+          <button className={createNewEnviroment == 1 ? 'button-on' : 'button-off'} onClick={handleCreateNewEnviroment}>+</button>
+          <input className='new-input' placeholder='Name New Enviroment' value={newEnviromentName} onChange={(event)=>{setNewEnviromentName(event.target.value)}} style={createNewEnviroment ? {display: 'block'}:{display: 'none'}}/>
+        </div>
 
         <div className='upper-right-buttons'>
-          <div className={false == 1 ? 'button-on' : 'button-off'}>🔗</div>
-          <div className={false == 1 ? 'button-on' : 'button-off'}>⟟</div> 
-          <input className='new-input' placeholder='Name New Enviroment' value={newEnviromentName} onChange={(event)=>{setNewEnviromentName(event.target.value)}} style={createNewEnviroment ? {display: 'block'}:{display: 'none'}}/>
-          <button className={createNewEnviroment == 1 ? 'button-on' : 'button-off'} onClick={handleCreateNewEnviroment}>+</button>
+          <div className={piConnected == 1 ? 'text-on' : 'text-off'}>Pi</div>
+          <div className={gpsConnected == 1 ? 'text-on' : 'text-off'}>GPS</div> 
+          
           <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
           <button className={takePhoto == 1 ? 'button-on' : 'button-off'} onClick={handleTakePhoto}>[◉"]</button>   
-          
         </div>
 
 
@@ -190,7 +219,7 @@ function App() {
         </div>
 
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} />
+          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} setSearchObjects={setSearchObjects} searchObjects={searchObjects}/>
         </div>
 
       </div> 
