@@ -123,6 +123,17 @@ def format_results(objects):
 
     return results_dict_arr
 
+def setStatusMessage(msg):
+    file_path = "./user-interface/api/sensorConfiguration.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    # Construct dictionary with new data
+    data["status-message"] = msg
+
+    # Write to file
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
 
 def getPlatformStatus():
     file_path = "./user-interface/api/sensorConfiguration.json"
