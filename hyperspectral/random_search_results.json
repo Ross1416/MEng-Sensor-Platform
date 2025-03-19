@@ -1,0 +1,247 @@
+[
+    {
+        "search_id": 1,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            64,
+            32,
+            64,
+            128
+        ],
+        "dropout_rate": 0.2,
+        "l2_reg": 0.0001,
+        "optimizer": "adam",
+        "learning_rate": 0.0001,
+        "batch_size": 128,
+        "val_loss": 0.0859,
+        "val_accuracy": 0.9737
+    },
+    {
+        "search_id": 2,
+        "num_layers": 3,
+        "neurons_per_layer": [
+            256,
+            128,
+            32
+        ],
+        "dropout_rate": 0.3,
+        "l2_reg": 0.001,
+        "optimizer": "rmsprop",
+        "learning_rate": 0.0001,
+        "batch_size": 64,
+        "val_loss": 0.0914,
+        "val_accuracy": 0.976
+    },
+    {
+        "search_id": 3,
+        "num_layers": 3,
+        "neurons_per_layer": [
+            256,
+            128,
+            256
+        ],
+        "dropout_rate": 0.3,
+        "l2_reg": 0.01,
+        "optimizer": "rmsprop",
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "val_loss": 0.0872,
+        "val_accuracy": 0.9743
+    },
+    {
+        "search_id": 4,
+        "num_layers": 3,
+        "neurons_per_layer": [
+            64,
+            256,
+            32
+        ],
+        "dropout_rate": 0.2,
+        "l2_reg": 0.001,
+        "optimizer": "rmsprop",
+        "learning_rate": 0.0001,
+        "batch_size": 128,
+        "val_loss": 0.0729,
+        "val_accuracy": 0.9808
+    },
+    {
+        "search_id": 5,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            256,
+            256,
+            32,
+            256
+        ],
+        "dropout_rate": 0.3,
+        "l2_reg": 0.0001,
+        "optimizer": "adam",
+        "learning_rate": 0.01,
+        "batch_size": 64,
+        "val_loss": 0.0846,
+        "val_accuracy": 0.9757
+    },
+    {
+        "search_id": 6,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            64,
+            256,
+            128,
+            32
+        ],
+        "dropout_rate": 0.3,
+        "l2_reg": 0.001,
+        "optimizer": "sgd",
+        "learning_rate": 0.01,
+        "batch_size": 32,
+        "val_loss": 0.2303,
+        "val_accuracy": 0.9377
+    },
+    {
+        "search_id": 7,
+        "num_layers": 2,
+        "neurons_per_layer": [
+            128,
+            256
+        ],
+        "dropout_rate": 0.3,
+        "l2_reg": 0.001,
+        "optimizer": "rmsprop",
+        "learning_rate": 0.0001,
+        "batch_size": 32,
+        "val_loss": 0.0946,
+        "val_accuracy": 0.9717
+    },
+    {
+        "search_id": 8,
+        "num_layers": 2,
+        "neurons_per_layer": [
+            256,
+            32
+        ],
+        "dropout_rate": 0.4,
+        "l2_reg": 0.01,
+        "optimizer": "sgd",
+        "learning_rate": 0.0001,
+        "batch_size": 64,
+        "val_loss": 0.2284,
+        "val_accuracy": 0.9237
+    },
+    {
+        "search_id": 9,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            256,
+            256,
+            64,
+            64
+        ],
+        "dropout_rate": 0.2,
+        "l2_reg": 0.01,
+        "optimizer": "sgd",
+        "learning_rate": 0.01,
+        "batch_size": 64,
+        "val_loss": 0.2177,
+        "val_accuracy": 0.9351
+    },
+    {
+        "search_id": 10,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            256,
+            256,
+            32,
+            256
+        ],
+        "dropout_rate": 0.4,
+        "l2_reg": 0.01,
+        "optimizer": "rmsprop",
+        "learning_rate": 0.0001,
+        "batch_size": 128,
+        "val_loss": 0.0867,
+        "val_accuracy": 0.9793
+    },
+    {
+        "search_id": 11,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            64,
+            64,
+            32,
+            128
+        ],
+        "dropout_rate": 0.5,
+        "l2_reg": 0.0001,
+        "optimizer": "adam",
+        "learning_rate": 0.0001,
+        "batch_size": 64,
+        "val_loss": 0.1254,
+        "val_accuracy": 0.9619
+    },
+    {
+        "search_id": 12,
+        "num_layers": 2,
+        "neurons_per_layer": [
+            64,
+            128
+        ],
+        "dropout_rate": 0.2,
+        "l2_reg": 0.0001,
+        "optimizer": "rmsprop",
+        "learning_rate": 0.001,
+        "batch_size": 128,
+        "val_loss": 0.0888,
+        "val_accuracy": 0.9719
+    },
+    {
+        "search_id": 13,
+        "num_layers": 2,
+        "neurons_per_layer": [
+            32,
+            32
+        ],
+        "dropout_rate": 0.5,
+        "l2_reg": 0.001,
+        "optimizer": "sgd",
+        "learning_rate": 0.0001,
+        "batch_size": 128,
+        "val_loss": 0.2379,
+        "val_accuracy": 0.9351
+    },
+    {
+        "search_id": 14,
+        "num_layers": 4,
+        "neurons_per_layer": [
+            256,
+            32,
+            128,
+            256
+        ],
+        "dropout_rate": 0.5,
+        "l2_reg": 0.001,
+        "optimizer": "adam",
+        "learning_rate": 0.0001,
+        "batch_size": 128,
+        "val_loss": 0.1165,
+        "val_accuracy": 0.9662
+    },
+    {
+        "search_id": 15,
+        "num_layers": 5,
+        "neurons_per_layer": [
+            256,
+            64,
+            128,
+            32,
+            256
+        ],
+        "dropout_rate": 0.3,
+        "l2_reg": 0.01,
+        "optimizer": "sgd",
+        "learning_rate": 0.0001,
+        "batch_size": 64,
+        "val_loss": 0.2629,
+        "val_accuracy": 0.9186
+    }
+]

@@ -1,52 +1,14 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import cv2
+import tensorflow as tf
 from scipy.ndimage import median_filter
-from scipy.stats import mode
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-import joblib
-from PIL import Image
+import matplotlib.colors as mcolors
 
 
-def plot_correlation_heatmap(hyperspectral_image, selected_bands=None):
-    """
-    Plots a correlation heatmap for spectral bands in a hyperspectral image.
-
-    Parameters:
-        hyperspectral_image (numpy array): 3D array of shape (height, width, num_bands)
-        selected_bands (list, optional): List of band indices to highlight.
-    """
-    # Reshape to (num_pixels, num_bands) for correlation computation
-    h, w, num_bands = hyperspectral_image.shape
-    reshaped_data = hyperspectral_image.reshape(-1, num_bands)
-
-    # Compute the correlation matrix
-    correlation_matrix = np.corrcoef(reshaped_data, rowvar=False)
-
-    # Plot heatmap
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(
-        correlation_matrix,
-        cmap="coolwarm",
-        annot=False,
-        xticklabels=10,
-        yticklabels=10,
-    )
-    plt.title("Spectral Band Correlation Heatmap")
-    plt.xlabel("Spectral Band Index")
-    plt.ylabel("Spectral Band Index")
-
-    # Highlight selected bands if provided
-    if selected_bands is not None:
-        for band in selected_bands:
-            plt.axvline(x=band, color="black", linestyle="--", alpha=0.5)
-            plt.axhline(y=band, color="black", linestyle="--", alpha=0.5)
-
-    plt.show()
+def select_bands(start=100, end=500, num_bands=30):
+    """Selects a specified number of uniformly distributed spectral bands."""
+    return np.linspace(start, end - 1, num_bands, dtype=int)
 
 
 def load_label_encoder(label_encoding_path):
@@ -56,83 +18,43 @@ def load_label_encoder(label_encoding_path):
     raise FileNotFoundError("Label encoding file not found!")
 
 
-def select_bands(start=100, end=500, num_bands=30):
-    """Selects a specified number of uniformly distributed spectral bands."""
-    return np.linspace(start, end - 1, num_bands, dtype=int)
-
-
-def load_dataset(images_folder, selected_bands):
-    """Loads the dataset from saved class files."""
-    X, y = [], []
-    for subfolder in os.listdir(images_folder):
-        subfolder_path = os.path.join(images_folder, subfolder)
-        if not os.path.isdir(subfolder_path):
-            continue
-
-        for file in os.listdir(subfolder_path):
-
-            if file.startswith("class_") and file.endswith(".npy"):
-                class_label = int(file.split("_")[1].split(".")[0])
-                data = np.load(os.path.join(subfolder_path, file))[
-                    :, selected_bands
-                ]
-                X.append(data)
-                y.append(np.full(len(data), class_label))
-
-    return np.vstack(X), np.hstack(y)
-
-
-def subsample_data(X, y, N=100000):
-    """Subsamples N random samples from the dataset if necessary."""
-    if X.shape[0] > N:
-        idx = np.random.choice(X.shape[0], N, replace=False)
-        return X[idx], y[idx]
-    return X, y
-
-
-def train_random_forest(X_train, y_train, n_estimators=100, random_state=42):
-    """Trains a RandomForest classifier."""
-    clf = RandomForestClassifier(
-        n_estimators=n_estimators, random_state=random_state
-    )
-    clf.fit(X_train, y_train)
-    return clf
-
-
 def apply_smoothing(image, filter_size=10):
-    """
-    Applies median filtering to reduce speckling noise in classification results.
-    """
+    """Applies median filtering to reduce speckling noise in classification results."""
     return median_filter(image, size=filter_size)
 
 
-import matplotlib.colors as mcolors
-
-
-def classify_and_visualise(
-    image, labels, model, selected_bands, label_encoder, filter_size=5
+def classify_and_save(
+    model_path, image_path, label_encoding_path, output_path
 ):
-    """Classifies an image, applies filtering, and visualizes the results with a legend."""
+    """Loads a model and hyperspectral image, classifies it, smooths the results, and saves the output as a PNG with a legend."""
+    # Load model
+    model = tf.keras.models.load_model(model_path)
 
-    h, w, _ = image.shape
-    image_selected = image[:, :, selected_bands]
+    # Load hyperspectral image
+    image = np.load(image_path)
+    image = image_selected = image[:, :, select_bands()]
 
-    # Predict per pixel
-    predictions = model.predict(
-        image_selected.reshape(-1, len(selected_bands))
-    )
-    predicted_labels = predictions.reshape(h, w)
+    h, w, num_bands = image.shape
+    image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
 
-    # Apply smoothing to results to reduce speckling noise
-    smoothed_labels = apply_smoothing(predicted_labels, filter_size)
+    # Classify image
+    predictions = model.predict(image_reshaped)
+    predicted_labels = np.argmax(predictions, axis=1)
+    predictions -= 1
+    classified_image = predicted_labels.reshape(h, w)
+
+    # Apply smoothing
+    smoothed_image = apply_smoothing(classified_image)
+
+    # Load label encoder
+    label_encoder = load_label_encoder(label_encoding_path)
 
     # Extract unique classes
-    unique_classes = np.unique(smoothed_labels)
+    unique_classes = np.unique(smoothed_image)
 
     # Generate colormap
-    num_classes = len(unique_classes)
-    cmap = plt.get_cmap("gist_rainbow", num_classes)
-    colors = cmap(np.arange(num_classes))
+    cmap = plt.get_cmap("gist_rainbow", len(unique_classes))
+    colors = cmap(np.linspace(0, 1, len(unique_classes)))
     custom_cmap = mcolors.ListedColormap(colors)
 
     # Generate legend mapping from encoded labels to class names
@@ -142,100 +64,30 @@ def classify_and_visualise(
         if encoded in unique_classes
     }
 
-    # Plot the results
-    fig, axes = plt.subplots(1, 3, figsize=(16, 6))
-
-    # Original Labels
-    img0 = axes[0].imshow(labels, cmap=custom_cmap)
-    axes[0].set_title("Original Labels")
-
-    # Raw Predictions
-    img1 = axes[1].imshow(
-        predicted_labels,
+    # Plot classification result
+    plt.figure(figsize=(8, 6))
+    img = plt.imshow(
+        smoothed_image,
         cmap=custom_cmap,
         vmin=unique_classes[0],
         vmax=unique_classes[-1],
     )
-    axes[1].set_title("Raw Predicted Labels")
-
-    # Smoothed Predictions
-    img2 = axes[2].imshow(
-        smoothed_labels,
-        cmap=custom_cmap,
-        vmin=unique_classes[0],
-        vmax=unique_classes[-1],
-    )
-    axes[2].set_title("Smoothed Predictions")
+    plt.title("Smoothed Classification Results")
 
     # Add colorbar legend
-    cbar = fig.colorbar(
-        img2, ax=axes, orientation="horizontal", fraction=0.02, pad=0.1
-    )
-    cbar.set_ticks(list(legend_labels.keys()))
+    cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
     cbar.set_ticklabels(list(legend_labels.values()))
+    cbar.set_label("Class Labels")
 
-    plt.show()
-
-
-def test(sample):
-    """Loads a sample hyperspectral image and applies classification."""
-    image_path = os.path.join(images_folder, sample + ".npy")
-    label_path = os.path.join(images_folder, sample, "label.png")
-
-    if os.path.exists(image_path) and os.path.exists(label_path):
-        image = np.load(image_path)
-        labels = np.asarray(Image.open(label_path))
-
-        if len(labels.shape) == 3:
-            labels = labels[:, :, 0]
-
-        classify_and_visualise(
-            image, labels, clf, selected_bands, label_encoder
-        )
-    else:
-        print(f"{sample} not found.")
+    # Save output image
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    print(f"Smoothed classification results saved to {output_path}")
 
 
-if __name__ == "__main__":
+model_path = "NN_18_03_2025.keras"
+image_path = "images/outdoor_dataset_limited/outdoor_dataset_005.npy"
+label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
+output_path = "test.png"
 
-    images_folder = "images/outdoor_dataset_limited"
-
-    label_encoder_path = os.path.join(images_folder, "label_encoding.npy")
-    label_encoder = load_label_encoder(label_encoder_path)
-
-    # Select spectral bands
-    selected_bands = select_bands()
-
-    # Load and preprocess dataset
-    X, y = load_dataset(images_folder, selected_bands)
-    X, y = subsample_data(X, y)
-
-    # Split into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    print(f"Dataset shape: {X.shape}, Labels shape: {y.shape}")
-    print(f"Train size: {X_train.shape}, Test size: {X_test.shape}")
-
-    # Train the model
-    clf = train_random_forest(X_train, y_train)
-
-    # Save the trained model
-    model_path = "RF_model.pkl"
-    joblib.dump(clf, model_path)
-    print(f"Model saved as {model_path}")
-
-    # Evaluate model
-    y_pred = clf.predict(X_test)
-    print(f"Random Forest Accuracy: {accuracy_score(y_test, y_pred):.4f}")
-
-    # **Loop through all subdirectories and test each**
-    for sample in os.listdir(images_folder):
-        sample_path = os.path.join(images_folder, sample)
-        if os.path.isdir(sample_path):  # Only process directories
-
-            print(f"Processing sample: {sample}")
-            # plot_correlation_heatmap(sample)
-            test(sample)
-            break
+classify_and_save(model_path, image_path, label_encoding_path, output_path)
