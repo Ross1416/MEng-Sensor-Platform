@@ -1,6 +1,5 @@
 from object_detection.object_detection import *
-from comms.receive import *
-from comms.send import *
+from comms.comms import *
 from datetime import datetime
 from time import sleep
 from comms.updateJSON import updateJSON, getPlatformStatus, setPlatformStatus

@@ -1,4 +1,4 @@
-from comms.connection_check import *
+from comms.comms import *
 from comms.updateJSON import *
 from time import sleep
 
