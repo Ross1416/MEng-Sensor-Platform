@@ -25,6 +25,7 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     send_object_detection_results(client_socket, objects[2:])  
 
     # Take hyperspectral scan 
+    id = 0 
     for i in range(len(objects)):# For every camera
         if objects[i] != None:
             for j in range(len(objects[i])):# for every object detected in frame
@@ -37,11 +38,21 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
                 logging.debug(f"Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
 
                 if ENABLE_HS:
-                    on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
-                # TODO: Send hyperspectral data to PiA
-        
+                    on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr, id)
+                    
 
-def on_rotate(axis,angles,hs_cam,cal_arr):
+                id += 1
+    # Send processed hyperspectral scans to PiA
+    send_images(client_socket, HSI_SCANS_PATH)            
+    # Send hyperspectral material distribution data to PiA
+    hs_materials = []
+    send_object_detection_results(client_socket, hs_materials)
+    # Remove all old hs scans
+    delete_files_in_dir(HSI_SCANS_PATH)
+    
+                
+
+def on_rotate(axis,angles,hs_cam,cal_arr, id):
     # Rotate rotational stage 
     axis.move_absolute(angles[0],Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True)
     logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
@@ -66,8 +77,12 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
     # )
 
     # plt.imshow(scene[:, :, RGB])
-    # TODO: Process hs data
-    # TODO: return hsi colour image and data
+    output_path = HSI_SCANS_PATH+f"hs_{id}.jpg"
+    classify_and_save(MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path)
+    
+
+
+
 
 
 # IP = "hsiA.local"
@@ -86,6 +101,11 @@ FOV = (102,67)
 
 CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 
+
+MODEL_PATH = "./hyperspectral/NN_18_03_2025.keras"
+LABEL_ENCODING_PATH = "./hyperspectral/label_encoding.npy"
+HSI_SCANS_PATH = "./hsi_scans/"
+
 if __name__ == "__main__":
     # Setup Logging
     logging.basicConfig(
@@ -100,14 +120,7 @@ if __name__ == "__main__":
         # Setup cameras and capture images
         cams = setup_cameras()
         logging.debug("Setup cameras.")
-
-        model_path = './hyperspectral/NN_18_03_2025.keras'
-        image_path = './hyperspectral/outdoor_dataset_005.npy'
-        label_encoding_path = './hyperspectral/label_encoding.npy'
-
-        output_path = 'test.png'
-
-        classify_and_save(model_path, image_path, label_encoding_path, output_path)
+        
         
         
         if ENABLE_HS:

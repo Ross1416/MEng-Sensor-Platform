@@ -31,10 +31,9 @@ def request_client_capture(server_socket, conn):
 
     
 
-def receive_images(save_location, server_socket, conn):
+def receive_images(conn, save_location):
     try:
         os.makedirs(save_location, exist_ok=True)
-        
         
         # Send acknowledgment
         num_images = int(conn.recv(1024).decode())
@@ -68,9 +67,6 @@ def receive_images(save_location, server_socket, conn):
     except Exception as e:
         print(f"Error: {e}")
 
-    finally:
-        server_socket.close()
-        print("Connection ended.")
 
 def receive_image_arrays(conn):
     # Get number of images

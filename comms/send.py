@@ -62,13 +62,12 @@ def list_images(folder_path, client_socket):
         print("All images sent!")
         return
 
-def send_images(folder_path, client_socket):
+def send_images(client_socket, folder_path):
     try:
         # get the path/directory of the photos taken locally on the child Pi
         images = [f for f in os.listdir(folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
         if not images:
             print("No images found")
-            client_socket.close()
             return
 
         print(len(images))
@@ -101,8 +100,6 @@ def send_images(folder_path, client_socket):
     except Exception as e:
         print(f"Error: {e}")
 
-    finally:
-        client_socket.close()
 
 def send_image_arrays(client_socket, frames):
     """Takes in an array of frames and sends them over socekt"""
@@ -151,6 +148,16 @@ def receive_object_detection_results(client_socket):
 
     return objects
 
+def delete_files_in_dir(path):
+    try:
+        files = os.listdir(path)
+        for file in files:
+            file_path = os.path.join(path, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        print("All files deleted successfully.")
+    except OSError:
+        print("Error occurred while deleting files.")
 
 def receive_capture_request(client_socket):
     try:
