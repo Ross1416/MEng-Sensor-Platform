@@ -376,8 +376,6 @@ if __name__ == "__main__":
     X, y = load_dataset(images_folder, selected_bands)
     X, y = subsample_data(X, y)
 
-    y -= np.min(y)
-
     # Split into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -398,15 +396,15 @@ if __name__ == "__main__":
     )
 
     # Save the trained model
-    best_model.save("NN_18_03_2025.keras")
+    best_model.save("NN_19_03_2025.keras")
 
-    # Remove model objects from results so it can be written as json
+    # Remove model object which prevents writing to the jSon file
     results_json = [
         {k: v for k, v in result.items() if k != "model"} for result in results
     ]
 
     # Save results to JSON
-    with open("random_search_results.json", "w") as f:
+    with open("random_search_results_2.json", "w") as f:
         json.dump(results_json, f, indent=4)
 
     print("Results saved to results.json successfully!")

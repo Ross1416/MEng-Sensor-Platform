@@ -24,14 +24,14 @@ def apply_smoothing(image, filter_size=10):
 
 
 def classify_and_save(
-    model_path, image, label_encoding_path, output_path
+    model_path, image_path, label_encoding_path, output_path
 ):
     """Loads a model and hyperspectral image, classifies it, smooths the results, and saves the output as a PNG with a legend."""
     # Load model
     model = tf.keras.models.load_model(model_path)
 
     # Load hyperspectral image
-    # image = np.load(image_path)
+    image = np.load(image_path)
     image = image[:, :, select_bands()]
 
     h, w, num_bands = image.shape
@@ -40,17 +40,23 @@ def classify_and_save(
     # Classify image
     predictions = model.predict(image_reshaped)
     predicted_labels = np.argmax(predictions, axis=1)
-    predictions -= 1
     classified_image = predicted_labels.reshape(h, w)
 
-    # Apply smoothing
+    # Apply smoothing (using median filter)
     smoothed_image = apply_smoothing(classified_image)
 
     # Load label encoder
     label_encoder = load_label_encoder(label_encoding_path)
 
-    # Extract unique classes
-    unique_classes = np.unique(smoothed_image)
+    # Extract unique classes and their counts
+    unique_classes, counts = np.unique(smoothed_image, return_counts=True)
+    total_pixels = smoothed_image.size
+
+    # Compute percentage of each class
+    class_percentages = {
+        label_encoder[orig][1]: (counts[i] / total_pixels) * 100
+        for i, orig in enumerate(unique_classes)
+    }
 
     # Generate colormap
     cmap = plt.get_cmap("gist_rainbow", len(unique_classes))
@@ -84,10 +90,16 @@ def classify_and_save(
     plt.close()
     print(f"Smoothed classification results saved to {output_path}")
 
+    return class_percentages
+
+
 if __name__ == "__main__":
     model_path = "NN_18_03_2025.keras"
-    image_path = "images/outdoor_dataset_limited/outdoor_dataset_005.npy"
+    image_path = "images/outdoor_dataset_limited/outdoor_dataset_035.npy"
     label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
     output_path = "test.png"
 
-    classify_and_save(model_path, image_path, label_encoding_path, output_path)
+    class_distribution = classify_and_save(
+        model_path, image_path, label_encoding_path, output_path
+    )
+    print("Class Distribution (%):", class_distribution)
