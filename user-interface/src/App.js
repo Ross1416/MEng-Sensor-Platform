@@ -16,6 +16,7 @@ function App() {
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
   const [showHSI, setShowHSI] = useState(false)
   const [hsiData, setHSIData] = useState({})
+  const [selectedPinInfo, setSelectedPinInfo] = useState(null)
 
  
   // DEVICE CONTROL 
@@ -83,6 +84,7 @@ function App() {
       try {
         setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pins[0].panorama_ref)
         setObjects(pins[0].objects)
+        setSelectedPinInfo({timestamp: '00:00:00',coords: String(pins[0].geo_coords[0]) + ', ' +String(pins[0].geo_coords[1])})
       } catch (err) {
         console.log(err)
       }
@@ -186,7 +188,6 @@ function App() {
       <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} />
   
       <div className='header'>
-        <h1>Current Status: {statusMessage} ({statusMessageTimestamp})</h1>
 
         <div className='upper-left-buttons'>
           <div className="dropdown">
@@ -203,9 +204,13 @@ function App() {
           <input className='new-input' placeholder='Name New Enviroment' value={newEnviromentName} onChange={(event)=>{setNewEnviromentName(event.target.value)}} style={createNewEnviroment ? {display: 'block'}:{display: 'none'}}/>
         </div>
 
+        <h1>Current Status: {statusMessage} ({statusMessageTimestamp})</h1>
+
+
         <div className='upper-right-buttons'>
-          <div className={piConnected == 1 ? 'text-on' : 'text-off'}>Pi</div>
-          <div className={gpsConnected == 1 ? 'text-on' : 'text-off'}>GPS</div> 
+          <h1 className={gpsConnected == true ? 'text-on' : 'text-off'}>WiFi</h1>
+          <h1 className={piConnected == true ? 'text-on' : 'text-off'}>Pi</h1>
+          <h1 className={gpsConnected == true ? 'text-on' : 'text-off'}>GPS</h1> 
           
           <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
           <button className={takePhoto == 1 ? 'button-on' : 'button-off'} onClick={handleTakePhoto}>[◉"]</button>   
@@ -215,11 +220,11 @@ function App() {
       </div>
       <div className='body'>
         <div className='map-container'>
-          <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} selectedEnviroment={selectedEnviroment} />
+          <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} selectedEnviroment={selectedEnviroment} selectedPinInfo={selectedPinInfo} setSelectedPinInfo={setSelectedPinInfo} />
         </div>
 
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} setSearchObjects={setSearchObjects} searchObjects={searchObjects}/>
+          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPinInfo={selectedPinInfo}/>
         </div>
 
       </div> 

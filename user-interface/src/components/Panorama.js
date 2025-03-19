@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects}) {
+export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects, selectedPinInfo}) {
 
 
     const [showObjects, setShowObjects] = useState(true)
@@ -46,8 +46,6 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         // }
     }
     
-
-
     const handleDeleteObject = async (index) => {
         setSearchObjects((prevItems) => prevItems.filter((_, i) => i !== index));
     }
@@ -55,14 +53,14 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     return (
         <div className='panorama-container'>
             
-            <text style={{fontWeight: 'bold', position: 'absolute', left: '5px', top: '5px', color: 'white', zIndex: 100}}>Timestamp: </text>
-            <text style={{fontWeight: 'bold', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100}}>Lon/Lat: </text>
+            <h1 style={{fontWeight: 'lighter',position: 'absolute', left: '5px', top: '5px', color: 'white', zIndex: 100, fontSize: '16px'}}>Timestamp: {selectedPinInfo ? selectedPinInfo.timestamp : ''}</h1>
+            <h1 style={{fontWeight: 'lighter', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100, fontSize: '16px'}}>Lon/Lat: {selectedPinInfo ? selectedPinInfo.coords[0] : ''} </h1>
 
             <div style={{position: 'absolute', right: '5px', top: '5px', zIndex: 100,  display: 'flex', flexDirection: 'column'}}>
                 {searchObjects?.map((item, index)=> (
-                    <div key={index} style={{backgroundColor: 'lightgrey', minWidth: '80px', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between'}}>
-                        <text style={{}}>{item}</text>
-                        <button style={{backgroundColor: 'white', opacity: 0.5, fontWeight: 'bold',borderWidth: '0.5px', borderRadius: '5px'}} onClick={()=>handleDeleteObject(index)}>-</button>
+                    <div key={index} style={{backgroundColor: 'black', minWidth: '80px', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between'}}>
+                        <text style={{color: 'white', fontWeight: 'lighter'}}>{item}</text>
+                        <button style={{backgroundColor: 'white', opacity: 0.5, fontWeight: 'bold',borderWidth: '0.5px', borderRadius: '5px'}} onClick={()=>handleDeleteObject(index)}>x</button>
                     </div>
                 ))}
 
@@ -90,7 +88,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                     {showObjects ? (
                     objects?.map(({ x, y, width, height, RGB_classification }) => (
                         <Pannellum.Hotspot
-                            type="info"
+                            type="custom"
                             pitch={(y/850)*30}
                             yaw={(x/6453)*179}
                             title="1"
@@ -133,7 +131,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                 <button style={{color: showMaterials?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showMaterials, setShowMaterials)}>
                     Show Materials
                 </button>
-                <button style={{color: showDistances?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showDistances, setShowDistances)}>
+                <button style={{color: showDistances?'white':'grey', fontSize: "18px", fontWeight: 'lighter'}} height="30px" width="30px" onClick={() => toggleButton(showDistances, setShowDistances)}>
                     Show Distances
                 </button>
                 <input placeholder='Search for...' style={{backgroundColor: 'transparent', borderColor: 'transparent', fontSize: '18px'}} value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}>
