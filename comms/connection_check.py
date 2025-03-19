@@ -2,15 +2,12 @@ import requests
 import socket
 
 def check_connection(remote="www.google.com", port=80, timeout=3):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(5)
     try:
-        sock.connect((remote, port))
-        return True
-    except socket.error:
+        with socket.create_connection((remote, port), timeout) as sock:
+            return True
+    except socket.error as e:
+        print(f"Connection failed: {e}")
         return False
-    finally:
-        sock.close()
 
 if __name__ == "__main__":
     if check_connection():
