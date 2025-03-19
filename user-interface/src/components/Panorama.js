@@ -21,35 +21,41 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     }
 
     const handleNewSearchObject = async (event) => {
+
         if (event.keyCode == 13) {
-            searchObjects.push(searchInput)
-            
-        }
-
-        // console.log(searchInput)
-        // if (event.keyCode == 13) {
-        //     setSearchObjects((prevItems) => [...prevItems, searchInput])
-        //     setSearchInput('')
-        //     console.log(searchObjects)
-        // } 
-
-        // if (event.keyCode == 13) {
-        //     console.log(searchObjects)
-        //     try {
-        //         fetch("/updateObjects", {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify({objects: searchObjects})
-        //     })} catch (err) {
-        //         console.log(err)
-        //     }
-        // }
+            setSearchObjects((prevItems) => [...prevItems, searchInput])
+            setSearchInput('')
+        } 
     }
+
     
     const handleDeleteObject = async (index) => {
         setSearchObjects((prevItems) => prevItems.filter((_, i) => i !== index));
     }
-      
+    
+    const updateSearchObjects = () => {
+        if (searchObjects) {
+            try {
+                fetch("/updateObjects", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({objects: searchObjects})
+            })} catch (err) {
+                console.log(err)
+           }
+
+        }
+    }
+
+
+    useEffect(()=> {
+        const interval = setInterval(() => {
+          updateSearchObjects();
+    }, 50);
+        return () => clearInterval(interval);
+    }, [updateSearchObjects])
+
+        
     return (
         <div className='panorama-container'>
             
@@ -134,7 +140,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                 <button style={{color: showDistances?'white':'grey', fontSize: "18px", fontWeight: 'lighter'}} height="30px" width="30px" onClick={() => toggleButton(showDistances, setShowDistances)}>
                     Show Distances
                 </button>
-                <input placeholder='Search for...' style={{backgroundColor: 'transparent', borderColor: 'transparent', fontSize: '18px'}} value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}>
+                <input placeholder='Search for...' style={{backgroundColor: 'transparent', borderColor: 'transparent', fontSize: '18px', color: 'white'}} value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}>
                     
                 </input>
                 {/* <button>
