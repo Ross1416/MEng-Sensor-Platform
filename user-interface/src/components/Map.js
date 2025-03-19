@@ -9,7 +9,7 @@ const UpdateMapCenter = ({ newCenter }) => {
     const map = useMap();
 };
 
-export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment}) {
+export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment, setSelectedPinInfo}) {
     
     const [mapCenter, setMapCenter] = useState([55.88000, -4.31000]) // default to London
 
@@ -31,6 +31,7 @@ export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment}
     const handlePinClick = (pin) => {
       setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pin.panorama_ref)
       setObjects(pin.objects)
+      setSelectedPinInfo({timestamp: '00:00:00',coords: String(pin.geo_coords[0]) + ', ' +String(pin.geo_coords[1])})
     };
     
     return (

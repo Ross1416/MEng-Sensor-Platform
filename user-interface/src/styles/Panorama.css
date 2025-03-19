@@ -17,12 +17,13 @@
 
 .bottomBar {
     position: fixed;
-    background-color: white;
     width: fit-content;
     bottom: 10%;
     align-self: center;
     flex-direction: row;
-    display: flex;background: linear-gradient(to bottom, white, grey);
+    display: flex;
+    background: linear-gradient(black, rgb(65, 63, 63));
+    border: 0.5px solid grey;
     border-radius: 15px;
 }
 
@@ -30,7 +31,7 @@
     background-color: transparent;
     border-color: transparent;
     margin: 5px;
-    
+    font-weight: lighter;
 }
 
 .bottomBar h1 {
@@ -40,6 +41,8 @@
     background: none;
     border: none;
     text-align: center;
+    color: white;
+    font-weight: lighter;
 }
 
 .overlay-square {
