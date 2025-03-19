@@ -9,6 +9,7 @@ from cameras import *
 import logging 
 from stitching.stitching_main import performPanoramicStitching
 import json
+import shutil
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
@@ -42,7 +43,6 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     # Remove duplicate object detections
     filtered_objects = non_maximum_suppression(objects_restructured)
 
-    # TODO: Receive hsi photo and data 
     # Updates json and moves images to correct folder
     uid = str(lon)+str(lat)
     for i in range(len(filtered_objects)):
@@ -50,12 +50,34 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
 
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
+    # Receive processed hyperspectral scans from PiB
+    receive_images(conn, HSI_SCANS_PATH)
+    
+    # Rename with lat, lon and move to correct location
+    hs_scans = []
+    files = os.listdir(HSI_SCANS_PATH)
+    for scan in files:
+        path = os.path.join(path, scan)
+        if os.path.isfile(path) and scan.endswith(".png"):
+            loc = scan.find('_')+1
+            id = scan[loc:loc+2]
+            save_path = f"./user-interface/public/images/{activeFile[:-5]}/hs_{uid}_{id}.jpg"
+            shutil.move(path, save_path)
+            hs_scans.append(f"./images/hs_{uid}_{id}.jpg")
+
+    # Receive hyperspectral material distribution data from PiB
+    hs_materials = receive_object_detection_results(conn)
+    # Update JSON with hyperspectral data
+    updateJSON_HS(hs_scans, hs_materials, lon, lat, activeFile)
+
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
 RESOLUTION = (4608,2592)
 FOV = (102,67)
 PRIVACY = True  #Blur people
 CLASSES = ["person"] 
+
+HSI_SCANS_PATH = "./hsi_scans/"
 
 if __name__ == "__main__":
     # Setup Logging

@@ -24,15 +24,15 @@ def apply_smoothing(image, filter_size=10):
 
 
 def classify_and_save(
-    model_path, image_path, label_encoding_path, output_path
+    model_path, image, label_encoding_path, output_path
 ):
     """Loads a model and hyperspectral image, classifies it, smooths the results, and saves the output as a PNG with a legend."""
     # Load model
     model = tf.keras.models.load_model(model_path)
 
     # Load hyperspectral image
-    image = np.load(image_path)
-    image = image_selected = image[:, :, select_bands()]
+    # image = np.load(image_path)
+    image = image[:, :, select_bands()]
 
     h, w, num_bands = image.shape
     image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
