@@ -7,6 +7,7 @@ import logging
 from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
 from hyperspectral.classification import *
+import time
 
 def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     # Capture images
@@ -66,13 +67,6 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
 
     # plt.imshow(scene[:, :, RGB])
     # TODO: Process hs data
-
-    model_path = 'hyperspectral/NN_18_03_2025.keras'
-    image_path = './hyperspectral/outdoor_dataset_005.npy'
-    label_encoding_path = 'hyperspectral/label_encoding.npy'
-    output_path = 'test.png'
-
-    classify_and_save(model_path, image_path, label_encoding_path, output_path)
     # TODO: return hsi colour image and data
 
 
@@ -106,6 +100,14 @@ if __name__ == "__main__":
         # Setup cameras and capture images
         cams = setup_cameras()
         logging.debug("Setup cameras.")
+
+        model_path = './hyperspectral/NN_18_03_2025.keras'
+        image_path = './hyperspectral/outdoor_dataset_005.npy'
+        label_encoding_path = './hyperspectral/label_encoding.npy'
+
+        output_path = 'test.png'
+
+        classify_and_save(model_path, image_path, label_encoding_path, output_path)
         
         
         if ENABLE_HS:

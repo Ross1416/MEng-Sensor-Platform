@@ -84,10 +84,10 @@ def classify_and_save(
     plt.close()
     print(f"Smoothed classification results saved to {output_path}")
 
+if __name__ == "__main__":
+    model_path = "NN_18_03_2025.keras"
+    image_path = "images/outdoor_dataset_limited/outdoor_dataset_005.npy"
+    label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
+    output_path = "test.png"
 
-model_path = "NN_18_03_2025.keras"
-image_path = "images/outdoor_dataset_limited/outdoor_dataset_005.npy"
-label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
-output_path = "test.png"
-
-classify_and_save(model_path, image_path, label_encoding_path, output_path)
+    classify_and_save(model_path, image_path, label_encoding_path, output_path)
