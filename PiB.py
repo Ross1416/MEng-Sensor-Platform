@@ -6,6 +6,7 @@ from time import sleep
 import logging
 from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
+from hyperspectral.classification import *
 
 def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     # Capture images
@@ -54,17 +55,24 @@ def on_rotate(axis,angles,hs_cam,cal_arr):
     axis.move_absolute(angles[1],Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=False) # temporarily blocking
     scene = grab_hyperspectral_scene(hs_cam, nframes, None, None,"test",calibrate=False)
     # Plot RGB image for test
-    print("Plotting RGB Image...")
-    plt.figure()
+    # print("Plotting RGB Image...")
+    # plt.figure()
     # Get indices of RGB bands from calibration file
-    RGB = (
-        get_wavelength_index(cal_arr, 690, 2),
-        get_wavelength_index(cal_arr, 535, 2),
-        get_wavelength_index(cal_arr, 470, 2),
-    )
+    # RGB = (
+    #     get_wavelength_index(cal_arr, 690, 2),
+    #     get_wavelength_index(cal_arr, 535, 2),
+    #     get_wavelength_index(cal_arr, 470, 2),
+    # )
 
-    plt.imshow(scene[:, :, RGB])
+    # plt.imshow(scene[:, :, RGB])
     # TODO: Process hs data
+
+    model_path = 'hyperspectral/NN_18_03_2025.keras'
+    image_path = './hyperspectral/outdoor_dataset_005.npy'
+    label_encoding_path = 'hyperspectral/label_encoding.npy'
+    output_path = 'test.png'
+
+    classify_and_save(model_path, image_path, label_encoding_path, output_path)
     # TODO: return hsi colour image and data
 
 
