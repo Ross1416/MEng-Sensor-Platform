@@ -28,7 +28,8 @@ function App() {
   const [statusMessageTimestamp, setStatusMessageTimestamp] = useState('')
   const [gpsConnected, setGPSConnected] = useState(false)
   const [piConnected, setPiConnected] = useState(false)
-  const [searchObjects, setSearchObjects] = useState(['person'])
+  const [WIFIConnected, setWIFIConnected] = useState(false)
+  const [searchObjects, setSearchObjects] = useState(null)
   
 
 
@@ -73,6 +74,7 @@ function App() {
         }
         setPiConnected(resp[1])
         setGPSConnected(resp[2])
+        setWIFIConnected(resp[3])
     })
 
     } catch (err) {
@@ -208,9 +210,9 @@ function App() {
 
 
         <div className='upper-right-buttons'>
-          <h1 className={gpsConnected == true ? 'text-on' : 'text-off'}>WiFi</h1>
-          <h1 className={piConnected == true ? 'text-on' : 'text-off'}>Pi</h1>
-          <h1 className={gpsConnected == true ? 'text-on' : 'text-off'}>GPS</h1> 
+          <h1 style={{color: WIFIConnected ? 'white':'grey', margin: '5px'}}>WiFi</h1>
+          <h1 style={{color: piConnected ? 'white':'grey', margin: '5px'}}>Pi</h1>
+          <h1 style={{color: gpsConnected ? 'white':'grey', margin: '5px'}}>GPS</h1> 
           
           <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
           <button className={takePhoto == 1 ? 'button-on' : 'button-off'} onClick={handleTakePhoto}>[◉"]</button>   

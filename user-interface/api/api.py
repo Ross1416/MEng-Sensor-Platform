@@ -134,7 +134,7 @@ def getPlatformStatus():
     with open(filePath, "r") as file:
         data = json.load(file)
 
-    return [data['status-message'], data['pi-connection'], data['gps-connection']]
+    return [data['status-message'], data['pi-connection'], data['gps-connection'], data['wifi-connection']]
 
 
 ### Update the active enviroment ###

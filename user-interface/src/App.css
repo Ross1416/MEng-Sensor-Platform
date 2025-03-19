@@ -101,8 +101,6 @@
   flex-direction: row;
   position: relative;
   top: 0px;
-  color: white;
-  
 }
 
 
@@ -161,7 +159,7 @@
 
 .text-off {
   font-size: 20px;
-  color: grey;
+  color: red;
   justify-self: center;
   align-self: center;
   margin-right: 10px;
