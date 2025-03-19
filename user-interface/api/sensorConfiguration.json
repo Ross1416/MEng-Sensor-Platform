@@ -1,4 +1,16 @@
 {
     "activeFile": "e89c9584-eb23-4e1b-aa13-0c1af972ba44.json",
-    "status": 2
+    "status": 1,
+    "status-message": "setting up",
+    "pi-connection": true,
+    "gps-connection": false,
+    "search-objects": [
+        "Dynamite",
+        "hello",
+        "Test1",
+        "person1",
+        "person2 ",
+        "fish1",
+        "cat"
+    ]
 }

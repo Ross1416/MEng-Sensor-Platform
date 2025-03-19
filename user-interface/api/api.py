@@ -51,7 +51,7 @@ def getActiveFile():
         filePath = "./sensorConfiguration.json"
         with open(filePath, "r") as file:
             data = json.load(file)
-        return {'activeFile': data['activeFile']}
+        return {'activeFile': data['activeFile'], 'searchObjects': data['search-objects']}
     except Exception as e: 
         return -1
 
@@ -124,6 +124,39 @@ def updateActiveEnviroment():
         json.dump(data, file, indent=4)
 
     return 'Succesful update'
+
+
+### Update the active enviroment ###
+@app.route("/getPlatformStatus", methods=["GET"])
+def getPlatformStatus():
+    # Specify the save path
+    filePath = "./sensorConfiguration.json"
+    with open(filePath, "r") as file:
+        data = json.load(file)
+
+    return [data['status-message'], data['pi-connection'], data['gps-connection']]
+
+
+### Update the active enviroment ###
+@app.route("/updateObjects", methods=["POST"])
+def updateObjects():
+    data = request.json
+    objects = data.get("objects")
+
+    print('test: ', objects)
+
+    filePath = "./sensorConfiguration.json"
+    with open(filePath, "r") as file:
+        data = json.load(file)
+
+    # Update current active file, so backend knows where to save
+    data["search-objects"] = objects
+
+    # Write to file
+    with open(filePath, "w") as file:
+        json.dump(data, file, indent=4)
+
+    return 'Success'
 
 
 if __name__ == "__main__":
