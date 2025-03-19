@@ -3,7 +3,7 @@ from comms.updateJSON import *
 from time import sleep
 
 ### TO RUN ON PI A ###
-PIB_IP = "10.42.0.61"
+PIB_IP = "10.42.0.60"
 if __name__ == "__main__":
     try: 
         while True:
@@ -14,7 +14,7 @@ if __name__ == "__main__":
                 updateInternetconnection(CONFIGURATION_FILE_PATH,"Disconnected")
 
             # Check and update connection to PiB 
-            if check_connection(PIB_IP):
+            if check_connection(PIB_IP, port=22):
                 updateProcessingUnitInterconnection(CONFIGURATION_FILE_PATH, "Connected")
             else:
                 updateProcessingUnitInterconnection(CONFIGURATION_FILE_PATH, "Disconnected")
