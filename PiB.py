@@ -26,6 +26,7 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
 
     # Take hyperspectral scan 
     id = 0 
+    hs_materials = []
     for i in range(len(objects)):# For every camera
         if objects[i] != None:
             for j in range(len(objects[i])):# for every object detected in frame
@@ -38,14 +39,14 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
                 logging.debug(f"Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
 
                 if ENABLE_HS:
-                    on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr, id)
+                    mats = on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr, id)
+                    hs_materials.append(mats)
                     
 
                 id += 1
     # Send processed hyperspectral scans to PiA
     send_images(client_socket, HSI_SCANS_PATH)            
     # Send hyperspectral material distribution data to PiA
-    hs_materials = []
     send_object_detection_results(client_socket, hs_materials)
     # Remove all old hs scans
     delete_files_in_dir(HSI_SCANS_PATH)
@@ -78,9 +79,10 @@ def on_rotate(axis,angles,hs_cam,cal_arr, id):
 
     # plt.imshow(scene[:, :, RGB])
     output_path = HSI_SCANS_PATH+f"hs_{id}.jpg"
-    classify_and_save(MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path)
-    
+    mats = classify_and_save(MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path)
+    print(mats)
 
+    return mats
 
 
 
