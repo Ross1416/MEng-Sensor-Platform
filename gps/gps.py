@@ -4,7 +4,7 @@ import math
 import time
 import numpy as np
 
-class Neo6M:
+class Neo8T:
     def __init__(self, port="/dev/ttyAMA0", baudrate=9600, timeout=1, distance_threshold=10, movement_callback=None):
         self.port = port
         self.baudrate = baudrate
@@ -35,7 +35,7 @@ class Neo6M:
         count = 0
         while True:
             raw_data = self.read_raw_data()
-            if raw_data and raw_data.startswith("$GPGGA"):  # GGA contains location data
+            if raw_data and raw_data.startswith("$GNGGA"):  # GGA contains location data
                 try:
                     msg = pynmea2.parse(raw_data)
                     if msg.latitude and msg.longitude:
@@ -101,17 +101,23 @@ def callback(loc):
     print(f"Trigger @ {loc}")
 
 if __name__ == "__main__":
-    gps = Neo6M(port="/dev/ttyAMA0",distance_threshold=10, movement_callback=callback)
+    gps = Neo8T(port="/dev/ttyACM0",baudrate=115200, distance_threshold=10, movement_callback=callback)
 
-    location = gps.get_location()
-    if location:
-        print(
-            f"Latitude: {location['latitude']}, Longitude: {location['longitude']}, Altitude: {location['altitude']}m, Fix Quality: {location['fix_quality']}"
-        )
-    else:
-        print("No GPS fix.")
+    fix = False
+    while not fix:
+        location = gps.get_location()
+        if location:
+            print(
+                f"Latitude: {location['latitude']}, Longitude: {location['longitude']}, Altitude: {location['altitude']}m, Fix Quality: {location['fix_quality']}"
+            )
+            fix = True
+        else:
+            print("No GPS fix.")
 
-    while True:
-        gps.wait_for_movement()
-
-    gps.close()
+    try:
+        while True:
+            gps.wait_for_movement()
+    except KeyboardInterrupt:
+        print("Keyboard Interrrupt")
+        print("Closing GPS")
+        gps.close()
