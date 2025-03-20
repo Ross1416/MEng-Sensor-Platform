@@ -75,10 +75,11 @@ class Neo8T:
         while distance_moved < self.distance_threshold:
             location = self.get_location()
             if location:
-                distance_moved = self.haversine(location, self.last_location)
+                pos1 = (location["latitude"], location["longitude"])
+                distance_moved = self.haversine(pos1, self.last_location)
                 
                 if distance_moved >= self.distance_threshold:
-                    self.last_location - location
+                    self.last_location = (location["latitude"], location["longitude"])
                     if self.movement_callback:
                         self.movement_callback(location)
                 
@@ -102,7 +103,7 @@ def callback(loc):
 
 if __name__ == "__main__":
     gps = Neo8T(port="/dev/ttyACM0",baudrate=115200, distance_threshold=10, movement_callback=callback)
-
+    print("Setup GPS")
     fix = False
     while not fix:
         location = gps.get_location()
@@ -113,7 +114,7 @@ if __name__ == "__main__":
             fix = True
         else:
             print("No GPS fix.")
-
+    print("Found fix")
     try:
         while True:
             gps.wait_for_movement()
