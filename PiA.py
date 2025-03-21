@@ -1,6 +1,7 @@
 from object_detection.object_detection import *
 from comms.receive import *
 from comms.send import *
+from gps.gps import Neo8T
 from datetime import datetime
 from time import sleep
 from comms.updateJSON import *
@@ -64,6 +65,11 @@ FOV = (102,67)
 PRIVACY = True  #Blur people
 CLASSES = ["person"] 
 
+# GPS
+GPS_PORT = "/dev/ttyACM0" # USB Port (check automatically?)
+GPS_BAUDRATE = 115200
+DISTANCE_THRESHOLD = 10
+
 if __name__ == "__main__":
     setStatusMessage("setting up")
     # Setup Logging
@@ -78,6 +84,9 @@ if __name__ == "__main__":
     # Setup cameras and GPIO
     cams = setup_cameras()
     logging.debug("Setup cameras.")
+    # Setup GPS 
+    gps = Neo8T(port=GPS_PORT, baudrate=GPS_BAUDRATE,timeout=1,distance_threshold=DISTANCE_THRESHOLD)
+    logging.debug("Setup GPS")
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
     logging.debug("Connected to PiB")
@@ -91,19 +100,25 @@ if __name__ == "__main__":
     
     #Mainloop
     while True:
-        # TODO: Check for location change
         # Update save location
         try:
             status, activeFile = getPlatformStatus()
         except json.decoder.JSONDecodeError:
-            logging.error("Error accessing JSON configuration file.")    
-        GPS_coordinate_change = True
+            logging.error("Error accessing JSON configuration file.")  
 
+        # Update GPS status
+        gps_status = gps.check_if_gps_locaiton()
+        updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
+
+        GPS_coordinate_change = gps.check_for_movement()
         if status == 2 or (status == 1 and GPS_coordinate_change):
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
 
-            new_scan(rgb_model,activeFile, privacy=PRIVACY)       
+            # Get current location 
+            location = gps.get_location()
+            # Trigger new scan 
+            new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], privacy=PRIVACY)       
         
             logging.info("Completed scan.")
 

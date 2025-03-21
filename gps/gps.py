@@ -11,7 +11,19 @@ class Neo8T:
         self.timeout = timeout
         self.connection = serial.Serial(port, baudrate, timeout=timeout)
         self.distance_threshold = distance_threshold
-        self.last_location = (0,0)
+
+        self.location = {
+                            "latitude": 0,
+                            "longitude": 0,
+                            "altitude": 0,
+                            "fix_quality": 0,
+                        }
+        self.last_location = {
+                            "latitude": 0,
+                            "longitude": 0,
+                            "altitude": 0,
+                            "fix_quality": 0,
+                        }
         self.movement_callback = movement_callback
 
         #TO REMOVE
@@ -73,17 +85,43 @@ class Neo8T:
         """Holds until distance moved > {distance_threshold} and triggers callback function if provided and exits."""
         distance_moved = -99
         while distance_moved < self.distance_threshold:
-            location = self.get_location()
-            if location:
-                pos1 = (location["latitude"], location["longitude"])
-                distance_moved = self.haversine(pos1, self.last_location)
+            self.location = self.get_location()
+            if self.location:
+                pos1 = (self.location["latitude"], self.location["longitude"])
+                pos2 = (self.last_location["latitude"], self.last_location["longitude"])
+                distance_moved = self.haversine(pos1, pos2)
                 
                 if distance_moved >= self.distance_threshold:
-                    self.last_location = (location["latitude"], location["longitude"])
+                    self.last_location = self.location
                     if self.movement_callback:
-                        self.movement_callback(location)
+                        self.movement_callback(self.location)
                 
             time.sleep(1)
+
+    def check_for_movement(self):
+        location = self.get_location()
+        if location:
+            pos1 = (location["latitude"], location["longitude"])
+            pos2 = (self.last_location["latitude"], self.last_location["longitude"])
+            distance_moved = self.haversine(pos1, pos2)
+            
+            if distance_moved >= self.distance_threshold:
+                self.last_location = location
+                return True
+
+        return False
+    
+    def check_if_gps_locaiton(self):
+        if self.location:
+            return True
+        else:
+            return 
+        
+    def get_location(self):
+        return location
+        
+    def set_distance_threshold(self, distance):
+        self.distance_threshold = distance
 
     def get_dummy_gps_coords(self):
         self._dummy_coords_index += 1
