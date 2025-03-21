@@ -64,6 +64,10 @@ RESOLUTION = (4608,2592)
 FOV = (102,67)
 PRIVACY = True  #Blur people
 CLASSES = ["person"] 
+
+# GPS
+GPS_PORT = "/dev/ttyACM0" # USB Port (check automatically?)
+GPS_BAUDRATE = 115200
 DISTANCE_THRESHOLD = 10
 
 if __name__ == "__main__":
@@ -81,7 +85,7 @@ if __name__ == "__main__":
     cams = setup_cameras()
     logging.debug("Setup cameras.")
     # Setup GPS 
-    gps = Neo8T(port="/dev/ttyACM0", baudrate=115200,timeout=1,distance_threshold=DISTANCE_THRESHOLD)
+    gps = Neo8T(port=GPS_PORT, baudrate=GPS_BAUDRATE,timeout=1,distance_threshold=DISTANCE_THRESHOLD)
     logging.debug("Setup GPS")
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
@@ -96,7 +100,6 @@ if __name__ == "__main__":
     
     #Mainloop
     while True:
-        # TODO: Check for location change
         # Update save location
         try:
             status, activeFile = getPlatformStatus()
@@ -112,7 +115,10 @@ if __name__ == "__main__":
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
 
-            new_scan(rgb_model,activeFile, privacy=PRIVACY)       
+            # Get current location 
+            location = gps.get_location()
+            # Trigger new scan 
+            new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], privacy=PRIVACY)       
         
             logging.info("Completed scan.")
 
