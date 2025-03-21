@@ -164,7 +164,7 @@ def updateInternetconnection(file_path, status):
             data = json.load(file)
 
         # Construct dictionary with new data
-        data["internet-connection"] = status
+        data["wifi-connection"] = status
 
         # Write to file
         with open(file_path, "w") as file:
@@ -173,13 +173,13 @@ def updateInternetconnection(file_path, status):
     except (OSError, PermissionError) as e:
         print(f"Failed to update file: {e}")
 
-def updateProcessingUnitInterconnection(file_path, status):
+def updatePiConnection(file_path, status):
     try:
         with open(file_path, "r") as file:
             data = json.load(file)
 
         # Construct dictionary with new data
-        data["processing-unit-interconnection"] = status
+        data["pi-connection"] = status
 
         # Write to file
         with open(file_path, "w") as file:
