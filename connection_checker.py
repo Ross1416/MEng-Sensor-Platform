@@ -9,15 +9,15 @@ if __name__ == "__main__":
         while True:
             # Check and update internet connection
             if check_connection():
-                updateInternetconnection(CONFIGURATION_FILE_PATH,"Connected")
+                updateInternetconnection(CONFIGURATION_FILE_PATH,True)
             else:
-                updateInternetconnection(CONFIGURATION_FILE_PATH,"Disconnected")
+                updateInternetconnection(CONFIGURATION_FILE_PATH,False)
 
             # Check and update connection to PiB 
             if check_connection(PIB_IP, port=22):
-                updateProcessingUnitInterconnection(CONFIGURATION_FILE_PATH, "Connected")
+                updatePiConnection(CONFIGURATION_FILE_PATH, True)
             else:
-                updateProcessingUnitInterconnection(CONFIGURATION_FILE_PATH, "Disconnected")
+                updatePiConnection(CONFIGURATION_FILE_PATH, False)
 
             sleep(3)
     except KeyboardInterrupt:
