@@ -1,0 +1,4 @@
+object: bottle
+1st dist: 30cm 
+2nd dist: 45cm
+dist moved: 15cm
