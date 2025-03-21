@@ -172,6 +172,8 @@ def updateInternetconnection(file_path, status):
 
     except (OSError, PermissionError) as e:
         print(f"Failed to update file: {e}")
+    except Exception as e:
+        print(f"Failed to update file: {e}")
 
 def updatePiConnection(file_path, status):
     try:
@@ -186,6 +188,8 @@ def updatePiConnection(file_path, status):
             json.dump(data, file, indent=4)
 
     except (OSError, PermissionError) as e:
+        print(f"Failed to update file: {e}")
+    except Exception as e:
         print(f"Failed to update file: {e}")
 
 def updateGPSConnection(file_path, status):
@@ -202,6 +206,9 @@ def updateGPSConnection(file_path, status):
 
     except (OSError, PermissionError) as e:
         print(f"Failed to update file: {e}")
+    except Exception as e:
+        print(f"Failed to update file: {e}")
+
 
 CONFIGURATION_FILE_PATH = "./user-interface/api/sensorConfiguration.json"
 if __name__ == "__main__":
