@@ -117,9 +117,9 @@ def format_results(objects):
                             "h":obj[1][3],
                             "RGB_classification":obj[0],
                             "RGB_confidence":obj[2],
-                            "HS_classification":{"wood":0.4,"stone":0.3,"metal":0.3},
-                            "HS_confidence":0.7,
-                                "distance":10})
+                            "HS_classification":{},
+                            "HS_ref":None,
+                            "distance":obj[3]})
 
     return results_dict_arr
 

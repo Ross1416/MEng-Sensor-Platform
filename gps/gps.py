@@ -24,6 +24,8 @@ class Neo8T:
                             "altitude": 0,
                             "fix_quality": 0,
                         }
+        self.distance_moved = None
+
         self.movement_callback = movement_callback
 
         #TO REMOVE
@@ -83,19 +85,18 @@ class Neo8T:
 
     def wait_for_movement(self):
         """Holds until distance moved > {distance_threshold} and triggers callback function if provided and exits."""
-        distance_moved = -99
-        while distance_moved < self.distance_threshold:
+        self.distance_moved = -99
+        while self.distance_moved < self.distance_threshold:
             self.location = self.get_location()
             if self.location:
                 pos1 = (self.location["latitude"], self.location["longitude"])
                 pos2 = (self.last_location["latitude"], self.last_location["longitude"])
-                distance_moved = self.haversine(pos1, pos2)
+                self.distance_moved = self.haversine(pos1, pos2)
                 
-                if distance_moved >= self.distance_threshold:
+                if self.distance_moved >= self.distance_threshold:
                     self.last_location = self.location
                     if self.movement_callback:
                         self.movement_callback(self.location)
-                
             time.sleep(1)
 
     def check_for_movement(self):
@@ -103,11 +104,13 @@ class Neo8T:
         if location:
             pos1 = (location["latitude"], location["longitude"])
             pos2 = (self.last_location["latitude"], self.last_location["longitude"])
-            distance_moved = self.haversine(pos1, pos2)
+            self.distance_moved = self.haversine(pos1, pos2)
             
-            if distance_moved >= self.distance_threshold:
+            if self.distance_moved >= self.distance_threshold:
                 self.last_location = location
                 return True
+        else:
+            self.distance_moved = 0
 
         return False
     
@@ -118,7 +121,10 @@ class Neo8T:
             return 
         
     def get_location(self):
-        return location
+        return self.location
+    
+    def get_distance_moved(self):
+        return self.distance_moved
         
     def set_distance_threshold(self, distance):
         self.distance_threshold = distance

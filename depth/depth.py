@@ -23,6 +23,39 @@ def lateral_depth(B,d,width=4608,xFOV=102):
     f = (width * 0.5) / np.tan(xFOV*0.5*np.pi/180)
     return (B*f)/d
 
+
+def calculate_distance(objects, distance_moved):
+    """ Calculates distances to objects for each frame.
+    -objects: array of objects of length 4 (one for each camera)
+
+    returns: updated object array with distances to objects append
+            resulting in new format: [label,[x1,y1,x2,y2],conf,distance]"""
+
+    # Loop through every object in every current frame
+    for i, camera in enumerate(objects):                       
+        for j, obj in enumerate(camera):
+            # For all previous objects in the current camera
+            for k, last_obj in enumerate(last_objects[i]):
+                if obj[0] == last_obj[0]:
+                    # TODO: Check if the same object as currently only checking if same type in same camera
+                    # TODO: Combine both lateral and longitudinal distance calculation and apply for all cameras
+                    # Calculate distance to object
+                    # Assuming FORWARD directional travel
+                    # Calculate longitudinal distance for forwards/backwards distance
+                    if i%2 == 0:
+                        last_height = abs(last_obj[1][1]-last_obj[1][3])
+                        height = abs(obj[1][1]-obj[1][3])
+                        distance = longitudinal_depth(distance_moved, last_height, height)
+                        obj.append(distance)
+                    # Calculate lateral distance for side camera distance
+                    else:
+                        last_x = ((last_obj[1][0]+last_obj[1][2])/2)
+                        x = ((obj[1][0]+obj[1][2])/2)
+                        distance = lateral_depth(distance_moved, abs(last_x-x))
+                        obj.append(distance)
+    
+    return objects
+
 if __name__ == "__main__":
     from ultralytics import YOLOWorld
     import math

@@ -2,6 +2,7 @@ from object_detection.object_detection import *
 from comms.receive import *
 from comms.send import *
 from gps.gps import Neo8T
+from depth.depth import *
 from datetime import datetime
 from time import sleep
 from comms.updateJSON import *
@@ -12,7 +13,8 @@ from stitching.stitching_main import performPanoramicStitching
 import json
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
+def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
+    global last_objects
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
@@ -29,6 +31,10 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     send_object_detection_results(conn, objects)  
     # Receive object detection data
     objects += receive_object_detection_results(conn)
+
+    # Calculate distance estimation to objects
+    objects = calculate_distance(objects, distance_moved)
+    last_objects = objects # Update last objects
 
     # Blur people if privacy 
     setStatusMessage("blurring people")
@@ -69,6 +75,10 @@ CLASSES = ["person"]
 GPS_PORT = "/dev/ttyACM0" # USB Port (check automatically?)
 GPS_BAUDRATE = 115200
 DISTANCE_THRESHOLD = 10
+
+# Globals
+last_objects = []
+
 
 if __name__ == "__main__":
     setStatusMessage("setting up")
@@ -117,8 +127,10 @@ if __name__ == "__main__":
 
             # Get current location 
             location = gps.get_location()
+            distance_moved = gps.get_distance_moved()
             # Trigger new scan 
-            new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], privacy=PRIVACY)       
+            if location:
+                new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], distance_moved=distance_moved, privacy=PRIVACY)       
         
             logging.info("Completed scan.")
 
