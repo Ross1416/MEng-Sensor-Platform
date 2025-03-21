@@ -1,0 +1,2 @@
+distance moved: 80cm
+distance from object: 130cm

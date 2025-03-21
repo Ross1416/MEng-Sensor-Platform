@@ -1,0 +1,4 @@
+object: road sign
+dist 1: 190
+dist 2: 95
+dist moved: 95
