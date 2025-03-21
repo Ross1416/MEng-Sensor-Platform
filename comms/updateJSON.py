@@ -213,5 +213,5 @@ def updateGPSConnection(file_path, status):
 CONFIGURATION_FILE_PATH = "./user-interface/api/sensorConfiguration.json"
 if __name__ == "__main__":
     # dummydataJSON()
-    updateInternetconnection(FILE_PATH, "Connected")
-    updateProcessingUnitInterconnection(FILE_PATH, "Disconnected")
+    updateInternetconnection(CONFIGURATION_FILE_PATH, "Connected")
+    updatePiConnection(CONFIGURATION_FILE_PATH, "Disconnected")
