@@ -188,6 +188,20 @@ def updatePiConnection(file_path, status):
     except (OSError, PermissionError) as e:
         print(f"Failed to update file: {e}")
 
+def updateGPSConnection(file_path, status):
+    try:
+        with open(file_path, "r") as file:
+            data = json.load(file)
+
+        # Construct dictionary with new data
+        data["gps-connection"] = status
+
+        # Write to file
+        with open(file_path, "w") as file:
+            json.dump(data, file, indent=4)
+
+    except (OSError, PermissionError) as e:
+        print(f"Failed to update file: {e}")
 
 CONFIGURATION_FILE_PATH = "./user-interface/api/sensorConfiguration.json"
 if __name__ == "__main__":
