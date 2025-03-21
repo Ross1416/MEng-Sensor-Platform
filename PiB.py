@@ -139,6 +139,10 @@ if __name__ == "__main__":
                 on_trigger(rgb_model,axis,hs_cam,cal_arr)
                 capture_triggered = True
             
+            if not client_socket.recv(1024).decode():
+                logging.info("PiA has disconnected.")  
+                break
+
             sleep(1)
     
     except Exception as e:

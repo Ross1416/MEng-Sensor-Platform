@@ -100,3 +100,7 @@ if __name__ == "__main__":
 
             if status == 2:
                 setPlatformStatus(0)
+
+        if not conn.recv(1024).decode():
+            logging.info("Connection lost with PiB.")
+            break  
