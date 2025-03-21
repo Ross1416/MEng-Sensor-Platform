@@ -115,7 +115,10 @@ class Neo8T:
         if self.location:
             return True
         else:
-            return False
+            return 
+        
+    def set_distance_threshold(self, distance):
+        self.distance_threshold = distance
 
     def get_dummy_gps_coords(self):
         self._dummy_coords_index += 1
