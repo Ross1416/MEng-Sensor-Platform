@@ -345,7 +345,7 @@ if __name__ == "__main__":
         style="{",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
-            logging.FileHandler("piA.log"),
+            logging.FileHandler("commshandler.log"),
             logging.StreamHandler()
         ]
     )

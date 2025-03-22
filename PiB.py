@@ -87,31 +87,35 @@ if __name__ == "__main__":
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
-        format="{asctime} - {levelname} - {name}: {message}",style="{",datefmt="%Y-%m-%d %H:%M",
+        format="{asctime} - {levelname} - {name}: {message}",
+        style="{",
+        datefmt="%Y-%m-%d %H:%M",
         handlers=[
-        logging.FileHandler("piB.log"),
-        logging.StreamHandler()
-        ])
+            logging.FileHandler("piB.log"),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger("PiB")
     logging.info("##### Start up new sesson. #####")
     try:
         # Setup cameras and capture images
         cams = setup_cameras()
-        logging.debug("Setup cameras.")
+        logger.debug("Setup cameras.")
         
         
         if ENABLE_HS:
             # Setup rotational stage
             zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
-            logging.debug("Setup rotational stage.")
+            logger.debug("Setup rotational stage.")
     
             # Home rotational stage
-            logging.info("Homing rotational stage.")
+            logger.info("Homing rotational stage.")
             axis.home(wait_until_idle=True)
             axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
 
             # Setup hyperspectral
             hs_cam = setup_hyperspectral()
-            logging.info("Setup hyperspectral camera.")
+            logger.info("Setup hyperspectral camera.")
 
         else:
             axis = None
@@ -121,16 +125,16 @@ if __name__ == "__main__":
 
         # Make connection with PiA
         client_socket = make_client_connection(IP, PORT)
-        logging.debug("Connected to PiA")
+        logger.debug("Connected to PiA")
         
         # Setup object detection modelx
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
-        logging.debug("Loaded RGB object detection model.")
+        logger.debug("Loaded RGB object detection model.")
         # TODO send search classes to PiB
         rgb_model.set_classes(CLASSES)
-        logging.info(f"Set YOLO classes to {CLASSES}.")
+        logger.info(f"Set YOLO classes to {CLASSES}.")
         
-        logging.info("Setup complete. Waiting to start capture...")
+        logger.info("Setup complete. Waiting to start capture...")
 
         # Poll for trigger capture signal
         while True:
@@ -140,20 +144,20 @@ if __name__ == "__main__":
                 capture_triggered = True
             
             if not client_socket.recv(1024).decode():
-                logging.info("PiA has disconnected.")  
+                logger.info("PiA has disconnected.")  
                 break
 
             sleep(1)
     
     except Exception as e:
-        logging.error(f"Error in PiB.py: {e}")
+        logger.error(f"Error in PiB.py: {e}")
 
         if ENABLE_HS:
             axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()
-        logging.info("All connections closed.")
+        logger.info("All connections closed.")
 
     finally:
         if ENABLE_HS:
@@ -161,8 +165,8 @@ if __name__ == "__main__":
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()
-        logging.info("All connections closed.")
-        logging.info("System terminated.")
+        logger.info("All connections closed.")
+        logger.info("System terminated.")
     
 
 

@@ -60,25 +60,29 @@ if __name__ == "__main__":
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
-        format="{asctime} - {levelname} - {name}: {message}",style="{",datefmt="%Y-%m-%d %H:%M",
+        format="{asctime} - {levelname} - {name}: {message}",
+        style="{",
+        datefmt="%Y-%m-%d %H:%M",
         handlers=[
-        logging.FileHandler("piA.log"),
-        logging.StreamHandler()
-        ])
-    logging.info("##### Start up new sesson. #####")
+            logging.FileHandler("piA.log"),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger("PiA")
+    logger.info("##### Start up new sesson. #####")
     # Setup cameras and GPIO
     cams = setup_cameras()
-    logging.debug("Setup cameras.")
+    logger.debug("Setup cameras.")
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
-    logging.debug("Connected to PiB")
+    logger.debug("Connected to PiB")
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
-    logging.debug("Loaded RGB object detection model.")
+    logger.debug("Loaded RGB object detection model.")
     rgb_model.set_classes(CLASSES)
-    logging.info(f"Set YOLO classes to {CLASSES}.")
-    logging.info(f"Privacy set {PRIVACY}.")
-    logging.info(f"Waiting for trigger...")
+    logger.info(f"Set YOLO classes to {CLASSES}.")
+    logger.info(f"Privacy set {PRIVACY}.")
+    logger.info(f"Waiting for trigger...")
     
     #Mainloop
     while True:
@@ -87,7 +91,7 @@ if __name__ == "__main__":
         try:
             status, activeFile = getPlatformStatus()
         except json.decoder.JSONDecodeError:
-            logging.error("Error accessing JSON configuration file.")    
+            logger.error("Error accessing JSON configuration file.")    
         GPS_coordinate_change = True
 
         if status == 2 or (status == 1 and GPS_coordinate_change):
@@ -96,11 +100,11 @@ if __name__ == "__main__":
 
             new_scan(rgb_model,activeFile, privacy=PRIVACY)       
         
-            logging.info("Completed scan.")
+            logger.info("Completed scan.")
 
             if status == 2:
                 setPlatformStatus(0)
 
         if not conn.recv(1024).decode():
-            logging.info("Connection lost with PiB.")
+            logger.info("Connection lost with PiB.")
             break  
