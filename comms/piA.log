@@ -1,0 +1,146 @@
+2025-03-22 11:26 - INFO - Comms Handler: Logger online!
+2025-03-22 11:27 - INFO - CommsHandler: Logger online!
+2025-03-22 11:27 - ERROR - CommsHandler: Error while starting parent server: 'CommsHandler' object has no attribute 'socket'
+2025-03-22 11:27 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:28 - INFO - CommsHandler: Logger online!
+2025-03-22 11:28 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:28 - ERROR - CommsHandler: Error while starting parent server: 'CommsHandler' object has no attribute '_accept_connections'
+2025-03-22 11:28 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:29 - INFO - CommsHandler: Logger online!
+2025-03-22 11:29 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:29 - ERROR - CommsHandler: Error while starting parent server: 'CommsHandler' object has no attribute '_accept_connections'
+2025-03-22 11:29 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:29 - INFO - CommsHandler: Logger online!
+2025-03-22 11:29 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:29 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:32 - INFO - CommsHandler: Logger online!
+2025-03-22 11:32 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:32 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:33 - INFO - CommsHandler: Logger online!
+2025-03-22 11:33 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:33 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:34 - INFO - CommsHandler: Logger online!
+2025-03-22 11:34 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:34 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:34 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 11:35 - INFO - CommsHandler: Logger online!
+2025-03-22 11:35 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:35 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:35 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 11:36 - INFO - CommsHandler: Logger online!
+2025-03-22 11:36 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 11:36 - INFO - CommsHandler: Logger online!
+2025-03-22 11:36 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:36 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:36 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 11:36 - INFO - CommsHandler: Logger online!
+2025-03-22 11:36 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 11:38 - INFO - CommsHandler: Logger online!
+2025-03-22 11:38 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 11:38 - INFO - CommsHandler: Logger online!
+2025-03-22 11:38 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 11:38 - WARNING - CommsHandler: Connection refused, retrying in 5 seconds...
+2025-03-22 11:38 - WARNING - CommsHandler: Connection refused, retrying in 5 seconds...
+2025-03-22 11:38 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 11:39 - INFO - CommsHandler: Logger online!
+2025-03-22 11:39 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:39 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:40 - INFO - CommsHandler: Logger online!
+2025-03-22 11:40 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:40 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:40 - INFO - CommsHandler: Logger online!
+2025-03-22 11:40 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 11:40 - INFO - CommsHandler: Connected to 10.12.104.65:5002
+2025-03-22 11:55 - INFO - CommsHandler: Logger online!
+2025-03-22 11:55 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:55 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:55 - INFO - CommsHandler: Logger online!
+2025-03-22 11:55 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 11:55 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 11:55 - INFO - CommsHandler: Logger online!
+2025-03-22 11:55 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 11:55 - INFO - CommsHandler: Connected to 10.12.104.65:5002
+2025-03-22 11:55 - INFO - CommsHandler: Connection established with ('10.12.104.65', 51808)
+2025-03-22 12:19 - INFO - CommsHandler: Logger online!
+2025-03-22 12:19 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 12:19 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 12:20 - INFO - CommsHandler: Logger online!
+2025-03-22 12:20 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 12:20 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 12:20 - INFO - CommsHandler: Logger online!
+2025-03-22 12:20 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 12:20 - INFO - CommsHandler: Connected to 10.12.104.65:5002
+2025-03-22 12:20 - INFO - CommsHandler: Connection established with ('10.12.104.65', 52185)
+2025-03-22 12:20 - ERROR - CommsHandler: Error receiving message: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-03-22 12:20 - WARNING - CommsHandler: Connection reset by peer
+2025-03-22 12:20 - WARNING - CommsHandler: Connection refused, retrying in 5 seconds...
+2025-03-22 12:29:10 - INFO - CommsHandler: Logger online!
+2025-03-22 12:29:10 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 12:29:10 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 12:29:54 - INFO - CommsHandler: Logger online!
+2025-03-22 12:29:54 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 12:29:54 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 12:29:56 - INFO - CommsHandler: Logger online!
+2025-03-22 12:29:56 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 12:32:05 - INFO - CommsHandler: Logger online!
+2025-03-22 12:32:05 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 12:32:05 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 12:32:08 - INFO - CommsHandler: Logger online!
+2025-03-22 12:32:08 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 12:32:08 - INFO - CommsHandler: Connection established with ('10.12.104.65', 52306)
+2025-03-22 12:32:23 - ERROR - CommsHandler: Error receiving message: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-03-22 12:32:23 - WARNING - CommsHandler: Connection reset by peer
+2025-03-22 12:47:28 - INFO - CommsHandler: Logger online!
+2025-03-22 12:47:28 - INFO - CommsHandler: Server listening on 10.12.104.65:5002
+2025-03-22 12:47:28 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 12:47:32 - INFO - CommsHandler: Logger online!
+2025-03-22 12:47:32 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 12:47:32 - INFO - CommsHandler: Connected to 10.12.104.65:5002
+2025-03-22 12:47:32 - INFO - CommsHandler: Connection established with ('10.12.104.65', 52432)
+2025-03-22 12:47:47 - ERROR - CommsHandler: Error receiving message: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-03-22 12:47:47 - WARNING - CommsHandler: Connection reset by peer
+2025-03-22 16:47:14 - INFO - CommsHandler: Logger online!
+2025-03-22 16:47:14 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:47:14 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 16:47:45 - INFO - CommsHandler: Logger online!
+2025-03-22 16:47:45 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:47:45 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 16:48:12 - INFO - CommsHandler: Logger online!
+2025-03-22 16:48:12 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:48:12 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 16:48:19 - INFO - CommsHandler: Logger online!
+2025-03-22 16:48:19 - INFO - CommsHandler: CommsHandler started as child
+2025-03-22 16:48:21 - WARNING - CommsHandler: Connection refused, retrying in 5 seconds...
+2025-03-22 16:50:56 - INFO - CommsHandler: Logger online!
+2025-03-22 16:50:56 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:50:56 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 16:53:19 - INFO - CommsHandler: Logger online!
+2025-03-22 16:53:19 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:53:19 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 16:54:51 - INFO - CommsHandler: Logger online!
+2025-03-22 16:54:51 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:54:51 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 16:55:52 - INFO - CommsHandler: Logger online!
+2025-03-22 16:55:52 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 16:55:52 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 17:00:27 - INFO - CommsHandler: Logger online!
+2025-03-22 17:00:27 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 17:00:27 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 17:02:26 - ERROR - CommsHandler: Error accepting connection: {e}
+2025-03-22 17:02:26 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 17:03:09 - INFO - CommsHandler: Logger online!
+2025-03-22 17:03:09 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 17:03:09 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 17:04:14 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 17:05:28 - INFO - CommsHandler: Logger online!
+2025-03-22 17:05:28 - INFO - CommsHandler: Server listening on 169.254.46.161:5002
+2025-03-22 17:05:28 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 17:14:49 - INFO - CommsHandler: CommsHandler stopped
+2025-03-22 17:17:41 - INFO - CommsHandler: Logger online!
+2025-03-22 17:17:41 - INFO - CommsHandler: Server listening on 0.0.0.0:5050
+2025-03-22 17:17:41 - INFO - CommsHandler: CommsHandler started as parent
+2025-03-22 17:17:46 - INFO - CommsHandler: Connection established with ('192.168.1.162', 35272)
+2025-03-22 17:18:02 - ERROR - CommsHandler: Error receiving message: Connection closed
+2025-03-22 17:18:02 - WARNING - CommsHandler: Connection reset by peer
+2025-03-22 17:18:08 - INFO - CommsHandler: Connection established with ('192.168.1.162', 46348)
+2025-03-22 17:18:15 - INFO - CommsHandler: CommsHandler stopped
