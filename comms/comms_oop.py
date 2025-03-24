@@ -8,7 +8,7 @@ import threading
 from enum import Enum, auto
 from time import sleep #for testing only in the __name__ == '__main__'
 import argparse
-
+import cv2
 
 HOST = "0.0.0.0" # i.e. listening
 # HOST = socket.gethostbyname(socket.gethostname())
@@ -196,6 +196,7 @@ class CommsHandler():
                 # Get message from queue with timeout
                 try:
                     message_type, payload = self.send_queue.get(timeout=1)
+                    self.logger.info(f"Sending message of type {message_type}")
                     self._send_message(message_type, payload)
                     self.send_queue.task_done()
                 except queue.Empty:
@@ -219,21 +220,30 @@ class CommsHandler():
         """Low-level send message"""
         if not self.connected or not self.conn:
             return False
-            
+
         try:
             # Format: [1 byte message type][4 bytes payload size][payload bytes]
             message_header = message_type.value.to_bytes(1, byteorder='big')
-            
+
             if payload is None:
                 # No payload, just send header with 0 size
                 size_header = (0).to_bytes(4, byteorder='big')
                 self.conn.sendall(message_header + size_header)
             else:
                 # Serialize payload
-                serialized_payload = pickle.dumps(payload)
-                size_header = len(serialized_payload).to_bytes(4, byteorder='big')
-                self.conn.sendall(message_header + size_header + serialized_payload)
-                
+                if message_type == MessageType.IMAGE_FRAMES:
+                    for img in payload:
+                        img = cv2.imencode('.jpg', img)[1] # Compress image
+                        data = pickle.dumps(img)
+                        self.logger.debug(f"Sending frame of size {len(data)}")
+                        self.conn.send(len(data).to_bytes(8, byteorder='big'))
+                        self.conn.sendall(data)
+                        self.logger.debug(f"Frame sent.")
+                else:
+                    serialized_payload = pickle.dumps(payload)
+                    size_header = len(serialized_payload).to_bytes(4, byteorder='big')
+                    self.conn.sendall(message_header + size_header + serialized_payload)
+                    
             return True
         except Exception as e:
             self.logger.error(f"Error sending message: {e}")
@@ -252,7 +262,7 @@ class CommsHandler():
                 raise ConnectionResetError("Connection closed")
                 
             message_type = MessageType(int.from_bytes(header, byteorder='big'))
-            
+
             # Read payload size
             size_header = self.conn.recv(4)
             if not size_header:
@@ -286,6 +296,7 @@ class CommsHandler():
 
     def send_message(self, message_type, payload):
         """Add message to send queue"""
+        print("Location 2")
         self.send_queue.put((message_type, payload))
 
     def get_message(self, block=True, timeout=None):
@@ -316,7 +327,8 @@ class CommsHandler():
 
     def send_image_frames(self, frames):
         """Send image frames"""
-        self.send_message(MessageType.IMAGE_DATA, frames)
+        print("Location 1")
+        self.send_message(MessageType.IMAGE_FRAMES, frames)
         self.logger.info(f"Sending {len(frames)} frames")
 
     def send_object_detection_results(self, objects):
@@ -327,7 +339,6 @@ class CommsHandler():
     def is_connected(self):
         """Check if connected"""
         return self.connected
-
 
 
 if __name__ == "__main__":
