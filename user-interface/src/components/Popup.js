@@ -9,7 +9,7 @@ export function Popup({showHSI, setShowHSI, hsiData}) {
                 <text></text> 
                 <button onClick={()=>setShowHSI(false)}>X</button>  
             </div>
-            <img src={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img1.jpg'} alt='Dynamic' className='panorama'/>
+            <img src={'./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/hsi.JPG'} alt='Dynamic' className='panorama'/>
         </div>
     );
 }
