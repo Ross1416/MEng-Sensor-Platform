@@ -24,7 +24,7 @@ def lateral_depth(B,d,width=4608,xFOV=102):
     return (B*f)/d
 
 
-def calculate_distance(objects, distance_moved):
+def calculate_distance(objects, distance_moved, last_objects):
     """ Calculates distances to objects for each frame.
     -objects: array of objects of length 4 (one for each camera)
 
@@ -36,6 +36,7 @@ def calculate_distance(objects, distance_moved):
         for j, obj in enumerate(camera):
             # For all previous objects in the current camera
             for k, last_obj in enumerate(last_objects[i]):
+                obj.append(None)
                 if obj[0] == last_obj[0]:
                     # TODO: Check if the same object as currently only checking if same type in same camera
                     # TODO: Combine both lateral and longitudinal distance calculation and apply for all cameras
@@ -46,13 +47,13 @@ def calculate_distance(objects, distance_moved):
                         last_height = abs(last_obj[1][1]-last_obj[1][3])
                         height = abs(obj[1][1]-obj[1][3])
                         distance = longitudinal_depth(distance_moved, last_height, height)
-                        obj.append(distance)
+                        obj[3] = distance
                     # Calculate lateral distance for side camera distance
                     else:
                         last_x = ((last_obj[1][0]+last_obj[1][2])/2)
                         x = ((obj[1][0]+obj[1][2])/2)
                         distance = lateral_depth(distance_moved, abs(last_x-x))
-                        obj.append(distance)
+                        obj[3] = distance
     
     return objects
 

@@ -6,13 +6,8 @@
     "gps-connection": false,
     "wifi-connection": false,
     "search-objects": [
-        {
-            "object": "Human",
-            "hsi": true
-        },
-        {
-            "object": "Person",
-            "hsi": false
-        }
+        {"hsi": true, "object": "car"},
+        {"hsi": false, "object": "fish"},
+        {"hsi": true, "object": "person"}
     ]
 }

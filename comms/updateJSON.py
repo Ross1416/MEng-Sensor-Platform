@@ -257,8 +257,20 @@ def updateGPSConnection(file_path, status):
         print(f"Failed to update file: {e}")
 
 
+def getUserRequestedClasses():
+    file_path = "./user-interface/api/sensorConfiguration.json"
+    with open(file_path, "r") as file:
+        data = json.load(file)
+
+    # Construct dictionary with new data
+    data = data['search-objects']
+    classes = {item['object']: item['hsi'] for item in data}
+
+    return classes
+
 CONFIGURATION_FILE_PATH = "./user-interface/api/sensorConfiguration.json"
 if __name__ == "__main__":
     # dummydataJSON()
     updateInternetconnection(CONFIGURATION_FILE_PATH, "Connected")
     updatePiConnection(CONFIGURATION_FILE_PATH, "Disconnected")
+
