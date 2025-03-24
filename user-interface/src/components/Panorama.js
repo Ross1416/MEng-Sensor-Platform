@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects, selectedPinInfo}) {
+export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects, selectedPinInfo, setTargetObject}) {
 
 
     const [showObjects, setShowObjects] = useState(true)
@@ -55,6 +55,11 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         return () => clearInterval(interval);
     }, [updateSearchObjects])
 
+
+    const handleHotspot = (obj) => {
+        setShowHSI(true)
+        setTargetObject(obj)
+    }
         
     return (
         <div className='panorama-container'>
@@ -92,22 +97,23 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                     >
 
                     {showObjects ? (
-                    objects?.map(({ x, y, width, height, RGB_classification }) => (
-                        <Pannellum.Hotspot
+                    // objects?.map(({ x, y, width, height, RGB_classification }) => (
+                        objects?.map((obj) => (
+                            <Pannellum.Hotspot
                             type="custom"
-                            pitch={(y/850)*30}
-                            yaw={(x/6453)*179}
+                            pitch={(obj.y/850)*30}
+                            yaw={(obj.x/6453)*179}
                             title="1"
-                            text={RGB_classification}
-                            className="custom-hotspot"
-
-                            // tooltip={(hotSpotDiv) => {
-                            //     hotSpotDiv.classList.add("custom-hotspot");
-                            //     // hotSpotDiv.style.width = 15+"px";  // Set custom width
-                            //     // hotSpotDiv.style.height = 15+"px"; // Set custom height
-                            // }}
+                            text={obj.RGB_classification}
+                            tooltip={(hotSpotDiv) => {
+                                hotSpotDiv.classList.add("custom-hotspot");
+                                // hotSpotDiv.classList.add("custom-hotspot-inner");
+                                hotSpotDiv.innerHTML = `<div class="custom-hotspot-inner"/>
+                                <h1 class="hotspot-text">${obj.RGB_classification}<h1/>`;
+                              }}
                     
-                            handleClick={() => setShowHSI(true)}/>
+                            handleClick={() => handleHotspot(obj)}/> 
+                            
                     ))
                     ) : <div/>}
                 </Pannellum>
@@ -134,12 +140,12 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                 <button style={{color: showObjects?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}>
                     Show Objects
                 </button>
-                <button style={{color: showMaterials?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showMaterials, setShowMaterials)}>
+                {/* <button style={{color: showMaterials?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showMaterials, setShowMaterials)}>
                     Show Materials
                 </button>
                 <button style={{color: showDistances?'white':'grey', fontSize: "18px", fontWeight: 'lighter'}} height="30px" width="30px" onClick={() => toggleButton(showDistances, setShowDistances)}>
                     Show Distances
-                </button>
+                </button> */}
                 <input placeholder='Search for...' style={{backgroundColor: 'transparent', borderColor: 'transparent', fontSize: '18px', color: 'white'}} value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}>
                     
                 </input>

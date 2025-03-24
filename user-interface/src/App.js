@@ -17,6 +17,7 @@ function App() {
   const [showHSI, setShowHSI] = useState(false)
   const [hsiData, setHSIData] = useState({})
   const [selectedPinInfo, setSelectedPinInfo] = useState(null)
+  const [targetObject, setTargetObject] = useState({})
 
  
   // DEVICE CONTROL 
@@ -187,7 +188,7 @@ function App() {
   return (
   
     <div className='container'>
-      <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} />
+      <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} targetObject={targetObject} />
   
       <div className='header'>
 
@@ -226,7 +227,7 @@ function App() {
         </div>
 
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPinInfo={selectedPinInfo}/>
+          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPinInfo={selectedPinInfo} setTargetObject={setTargetObject}/>
         </div>
 
       </div> 

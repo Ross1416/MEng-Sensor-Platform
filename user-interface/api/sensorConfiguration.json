@@ -6,6 +6,7 @@
     "gps-connection": false,
     "wifi-connection": true,
     "search-objects": [
-        "Computer"
+        "Person",
+        "Fish"
     ]
 }
