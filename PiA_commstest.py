@@ -9,41 +9,38 @@ import logging
 from stitching.stitching_main import performPanoramicStitching
 import json
 
-# Triggers when change in GPS location
-def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4,privacy=False):
-    # Captures two images
+def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4, privacy=False):
+    # Capture two images on PiA
     frames = capture(cams, "PiA")
-    # Triggers capture on PiB
+    
+    # Trigger capture on PiB
     commsHandler.request_capture()
+    
+    # Wait for child frames
+    child_frames = []
+    start_time = datetime.now()
+    while len(child_frames) == 0 and (datetime.now() - start_time).seconds < 10:
+        message_type, payload = commsHandler.get_message(block=False)
+        if message_type == MessageType.IMAGE_FRAMES:
+            child_frames = payload
+            logging.info(f"Received {len(child_frames)} frames from child")
+    
+    # Combine frames from both platforms
+    frames.extend(child_frames)
+    
     # Perform object detection
     objects = []
     for f in frames:
-        objects.append(object_detection(rgb_model,f))
-
-    # Retrieve slave images and data
-    # frames += receive_image_arrays(conn)
-
-    # Send object detection results to PiB
-    # send_object_detection_results(conn, objects)
-    # commsHandler.send_object_detection_results(objects)
-
-    # Receive object detection data
-    # objects += receive_object_detection_results(conn)
-    # message_type, payload = None, None
-    # while message_type != MessageType.OBJECT_DETECTION:
-    #     message_type, payload = commsHandler.get_message(timeout=10)
-    #     if message_type == MessageType.OBJECT_DETECTION:
-    #         remote_objects = payload  # Access payload with detection results
-    #         objects += remote_objects
-
-
+        objects.append(object_detection(rgb_model, f))
+    
     # Blur people if privacy 
     if privacy:
         for i in range(len(frames)):
-            frames[i] = blur_people(frames[i],objects[i],255)
+            frames[i] = blur_people(frames[i], objects[i], 255)
 
     # Perform pano stitching
     panorama, objects = performPanoramicStitching(frames, objects)
+    
     # Restructure objects
     objects_restructured = []
     for frame in objects:
@@ -52,19 +49,15 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4,privacy=False
     # Remove duplicate object detections
     filtered_objects = non_maximum_suppression(objects_restructured)
 
-    # TODO: Receive hsi photo and data 
-    # Updates json and moves images to correct folder
-    uid = str(lon)+str(lat)
+    # Update json and move images
+    uid = str(lon) + str(lat)
     for i in range(len(filtered_objects)):
         filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
 
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
-
-# Usage in PiA (parent)
 def parent_message_handler(message_type, payload):
-    """Handle messages in parent (PiA)"""
-    print("In the case statement!")
+    print(f"Received message type: {message_type}")
     match message_type:
         case MessageType.CONNECT:
             logging.info("Child connected")
@@ -73,23 +66,13 @@ def parent_message_handler(message_type, payload):
             logging.info("Child disconnected")
             return True
         case MessageType.HEARTBEAT:
-            # Just acknowledge heartbeat
-            print("bloop")
+            print("Heartbeat received")
             return True
         case MessageType.IMAGE_FRAMES:
-            frames_from_child = payload
-            logging.info(f"Received {len(frames_from_child)} frames from child")
-            # # Process frames
-            for i, img in enumerate(frames_from_child):
-                cv2.imwrite(f"./test_captures/{i}.jpg", img)
-            # img = cv2.imdecode(frames, cv2.IMREAD_COLOR)
-            frames += frames_from_child
+            logging.info(f"Received {len(payload)} frames from child")
             return True        
         case MessageType.OBJECT_DETECTION:
-            objects = payload
             logging.info(f"Received object detection data from child")
-            # Process objects
-
             return True
         case MessageType.ERROR:
             logging.error(f"Communication error: {payload}")
