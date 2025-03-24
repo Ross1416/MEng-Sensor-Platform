@@ -78,11 +78,15 @@ def classify_and_save(
 
     # Saving the image
     output_path = output_name + "_ndvi.png"
-    plt.figure(figsize=(8, 6))
-    plt.imshow(ndvi, cmap="RdYlGn", vmin=-1, vmax=1)
-    plt.colorbar(label="NDVI")
-    plt.title("NDVI Across Entire Image")
-    plt.savefig(output_path, dpi=300)
+    plt.figure(figsize=(8, 6), facecolor="black")
+    ax = plt.gca()
+    ax.set_facecolor("black")
+    im = plt.imshow(ndvi, cmap="RdYlGn", vmin=-1, vmax=1)
+    cbar = plt.colorbar(im, label="NDVI")
+    cbar.ax.yaxis.label.set_color("white")
+    cbar.ax.tick_params(color="white", labelcolor="white")
+    plt.title("NDVI Across Entire Image", color="white")
+    plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="black")
     plt.close()
     print(f"NDVI image saved as {output_path}")
 
@@ -109,23 +113,26 @@ def classify_and_save(
     }
 
     # Plot classification result
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 6), facecolor="black")
+    ax = plt.gca()
+    ax.set_facecolor("black")
     img = plt.imshow(
         smoothed_image,
         cmap=custom_cmap,
         vmin=unique_classes[0],
         vmax=unique_classes[-1],
     )
-    plt.title("Smoothed Classification Results")
+    plt.title("Smoothed Classification Results", color="white")
 
     # Add colorbar legend
     cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
     cbar.set_ticklabels(list(legend_labels.values()))
-    cbar.set_label("Class Labels")
+    cbar.set_label("Class Labels", color="white")
+    cbar.ax.tick_params(color="white", labelcolor="white")
 
     # Save output image
     output_path = output_name + "_classification.png"
-    plt.savefig(output_path, dpi=300)
+    plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="black")
     plt.close()
     print(f"Smoothed classification results saved to {output_path}")
 
