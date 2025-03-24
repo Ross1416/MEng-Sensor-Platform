@@ -80,11 +80,12 @@ if __name__ == "__main__":
     # General parameters
     CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
     PORT = "COM7"  # CHANGE PER USER
-    NFRAMES = 800
     ANGLE = 27
 
     # Camera parameters
+    NFRAMES = 1600
     pixel_binning = 2
+    NFRAMES = 1600 / pixel_binning
     exposure_time = 10000
     cam_gain = 500
 
