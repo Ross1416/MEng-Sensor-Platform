@@ -17,6 +17,14 @@ import shutil
 # Triggers when change in GPS location
 def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     global last_objects
+    
+    classes = getUserRequestedClasses()
+
+    rgb_model.set_classes(classes.keys())
+    
+    logging.info(f"Set YOLO classes to {classes}.")
+    
+
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
@@ -43,8 +51,8 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     # Receive object detection data
     objects += receive_object_detection_results(conn)
 
-    # Calculate distance estimation to objects
-    objects = calculate_distance(objects, distance_moved)
+    # Calculate distance estimation to objects - append distance to object array
+    objects = calculate_distance(objects, distance_moved, last_objects)
     last_objects = objects # Update last objects
     # Assign IDs to objects
     objects = assign_id(objects)
@@ -168,8 +176,6 @@ if __name__ == "__main__":
     # Setup object detection model
     rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
     logging.debug("Loaded RGB object detection model.")
-    rgb_model.set_classes(CLASSES)
-    logging.info(f"Set YOLO classes to {CLASSES}.")
     logging.info(f"Privacy set {PRIVACY}.")
     logging.info(f"Waiting for trigger...")
 
