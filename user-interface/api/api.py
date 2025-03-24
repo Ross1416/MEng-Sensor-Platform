@@ -51,6 +51,7 @@ def getActiveFile():
         filePath = "./sensorConfiguration.json"
         with open(filePath, "r") as file:
             data = json.load(file)
+        print('Search Objects:', data['search-objects'])
         return {'activeFile': data['activeFile'], 'searchObjects': data['search-objects']}
     except Exception as e: 
         return -1
