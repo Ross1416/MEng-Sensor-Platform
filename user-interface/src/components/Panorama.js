@@ -14,6 +14,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     const [download, setDownload] = useState(false)
     const [connected, setConnected] = useState(false)
     const [searchInput, setSearchInput] = useState('')
+    const [hsiScan, setHsiScan] = useState(false)
 
     // Toggle button change
     const toggleButton = (state, stateFunction) => {
@@ -21,10 +22,15 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     }
 
     const handleNewSearchObject = async (event) => {
+        const newEntry = {
+            object: searchInput,
+            hsi: hsiScan
+        }
 
         if (event.keyCode == 13) {
-            setSearchObjects((prevItems) => [...prevItems, searchInput])
+            setSearchObjects((prevItems) => [...prevItems,  newEntry])
             setSearchInput('')
+            setHsiScan(false)
         } 
     }
 
@@ -67,10 +73,11 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
             <h1 style={{fontWeight: 'lighter',position: 'absolute', left: '5px', top: '5px', color: 'white', zIndex: 100, fontSize: '16px'}}>Timestamp: {selectedPinInfo ? selectedPinInfo.timestamp : ''}</h1>
             <h1 style={{fontWeight: 'lighter', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100, fontSize: '16px'}}>Lon/Lat: {selectedPinInfo ? selectedPinInfo.coords[0] : ''} </h1>
 
-            <div style={{position: 'absolute', right: '5px', top: '5px', zIndex: 100,  display: 'flex', flexDirection: 'column'}}>
+            <div style={{position: 'absolute', right: '5px', top: '5px', zIndex: 100, display: 'flex', flexDirection: 'column'}}>
                 {searchObjects?.map((item, index)=> (
-                    <div key={index} style={{backgroundColor: 'black', minWidth: '80px', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between'}}>
-                        <text style={{color: 'white', fontWeight: 'lighter'}}>{item}</text>
+                    <div key={index} style={{backgroundColor: 'black', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between', }}>
+                         <input type="checkbox" disabled={true} checked={item.hsi} style={{width: '15px', height: '15px', accentColor: 'grey', alignSelf: 'center'}}/>
+                        <text style={{color: 'white', fontWeight: 'lighter', marginLeft: '15px', marginRight: '15px',}}>{item.object}</text>
                         <button style={{backgroundColor: 'white', opacity: 0.5, fontWeight: 'bold',borderWidth: '0.5px', borderRadius: '5px'}} onClick={()=>handleDeleteObject(index)}>x</button>
                     </div>
                 ))}
@@ -136,44 +143,14 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
             
             <div className='bottomBar'>
                 <h1>{locationName}</h1>
-                {/* https://react-ionicons.netlify.app/ */}
-                <button style={{color: showObjects?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}>
-                    Show Objects
-                </button>
-                {/* <button style={{color: showMaterials?'white':'grey', fontSize: "18px"}} height="30px" width="30px" onClick={() => toggleButton(showMaterials, setShowMaterials)}>
-                    Show Materials
-                </button>
-                <button style={{color: showDistances?'white':'grey', fontSize: "18px", fontWeight: 'lighter'}} height="30px" width="30px" onClick={() => toggleButton(showDistances, setShowDistances)}>
-                    Show Distances
-                </button> */}
-                <input placeholder='Search for...' style={{backgroundColor: 'transparent', borderColor: 'transparent', fontSize: '18px', color: 'white'}} value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}>
-                    
-                </input>
-                {/* <button>
-                    <CubeOutline color={showObjects ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(showObjects, setShowObjects)}/>
-                </button> */}
-                {/* <button>
-                    <LayersOutline color={showMaterials ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(showMaterials, setShowMaterials)}/>
-                </button>
-                <button>
-                    <PinOutline color={showDistances ? 'white' : '#00000'} height="30px" width="30px"onClick={() => toggleButton(showDistances, setShowDistances)}/>
-                </button>
-                <button>
-                    <ThermometerOutline color={showConfidence ? 'white' : '#00000'} height="30px" width="30px"onClick={() => toggleButton(showConfidence, setShowConfidence)} />
-                </button>
-                <button>
-                    <BrushOutline color={edit ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(edit, setEdit)}/>
-                </button>
-                <button>
-                    <ArrowDownCircleOutline color={download ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(download, setDownload)}/>
-                </button>
-                <button>
-                    <RefreshOutline color={reset ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(reset, setReset)} />
-                </button>
-                <button>
-                    <RadioOutline color={connected ? 'white' : '#00000'} height="30px" width="30px" onClick={() => toggleButton(connected, setConnected)} />
-                </button> */}
-
+                <h2 style={{color: showObjects?'white':'grey'}} onClick={() => toggleButton(showObjects, setShowObjects)}>Show Objects</h2>
+                <div className='search-input'>
+                    <input style={{width: '100%', backgroundColor: 'transparent', color: 'white', fontSize: '20px', fontWeight: 'lighter', borderColor: 'transparent', fontFamily: 'inherit', left: '5px'}} placeholder='Search for...' value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}/>
+                    <div style={{display: 'flex', flexDirection: 'row', position: 'absolute', right: '20px', height: '100%'}}> 
+                        <h1 style={{color: 'white', fontSize: '16px'}}>HSI Scan?</h1>
+                        <input type="checkbox" onClick={()=>{setHsiScan(!hsiScan)}} checked={hsiScan} style={{width: '15px', height: '15px', accentColor: 'grey', alignSelf: 'center'}}/>
+                    </div>  
+                </div>
             </div>
         </div>
     );

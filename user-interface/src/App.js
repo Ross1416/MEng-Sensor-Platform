@@ -36,6 +36,7 @@ function App() {
 
   // Poll for data updates once every second
   const refreshData = async () => {
+
     // If the user has selected an enviroment...
     if (selectedEnviroment) {
       try {
@@ -105,7 +106,7 @@ function App() {
   useEffect(()=> {
     const interval = setInterval(() => {
       refreshData();
-    }, 50);
+    }, 2000);
   
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
