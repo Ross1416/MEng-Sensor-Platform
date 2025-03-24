@@ -8,6 +8,9 @@ from cameras import *
 import logging 
 from stitching.stitching_main import performPanoramicStitching
 import json
+import queue
+
+IMAGES_RECEIVED_FLAG = False
 
 def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4, privacy=False):
     # Capture two images on PiA
@@ -20,10 +23,20 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4, privacy=Fals
     child_frames = []
     start_time = datetime.now()
     while len(child_frames) == 0 and (datetime.now() - start_time).seconds < 10:
-        message_type, payload = commsHandler.get_message(block=False)
-        if message_type == MessageType.IMAGE_FRAMES:
-            child_frames = payload
-            logging.info(f"Received {len(child_frames)} frames from child")
+        while not commsHandler.receive_queue.empty():
+            message_type, payload = commsHandler.receive_queue.get()
+            logging.info(f"Processing message: {message_type}")
+            
+            if message_type == MessageType.IMAGE_FRAMES:
+                child_frames = payload
+                logging.info(f"Extracted {len(child_frames)} frames from payload")
+                # Debug: Save received child frames
+                for i, img in enumerate(child_frames):
+                    cv2.imwrite(f"./debug_child_frames/child_frame_{i}.jpg", img)
+            
+            commsHandler.receive_queue.task_done()  
+    
+    sleep(0.5)
     
     # Combine frames from both platforms
     frames.extend(child_frames)
@@ -69,6 +82,7 @@ def parent_message_handler(message_type, payload):
             print("Heartbeat received")
             return True
         case MessageType.IMAGE_FRAMES:
+            IMAGES_RECEIVED_FLAG = True
             logging.info(f"Received {len(payload)} frames from child")
             return True        
         case MessageType.OBJECT_DETECTION:
@@ -128,37 +142,64 @@ if __name__ == "__main__":
     #     if message_type == MessageType.CONNECT:
     #         continue
 
-    if commsHandlerInstance.is_connected():
-        logger.info("Entering Main Loop now")
-        #Mainloop
-        try:
-            while True:
-                print("Processing messages...")
-                commsHandlerInstance.process_messages(parent_message_handler)
-                # TODO: Check for location change
-                # Update save location
-                try:
-                    status, activeFile = getPlatformStatus()
-                except json.decoder.JSONDecodeError:
-                    logger.error("Error accessing JSON configuration file.")    
-                GPS_coordinate_change = True
+    # if commsHandlerInstance.is_connected():
+    #     logger.info("Entering Main Loop now")
+    #     #Mainloop
+    #     try:
+    #         while True:
+    #             print("Processing messages...")
+    #             commsHandlerInstance.process_messages(parent_message_handler)
+    #             # TODO: Check for location change
+    #             # Update save location
+    #             try:
+    #                 status, activeFile = getPlatformStatus()
+    #             except json.decoder.JSONDecodeError:
+    #                 logger.error("Error accessing JSON configuration file.")    
+    #             GPS_coordinate_change = True
 
-                if status == 2 or (status == 1 and GPS_coordinate_change):
-                    timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-                    save_location = f"./capture/{timestamp}-capture/"
+    #             if status == 2 or (status == 1 and GPS_coordinate_change):
+    #                 timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    #                 save_location = f"./capture/{timestamp}-capture/"
                     
-                    new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)       
+    #                 new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)       
 
-                    logger.info("Completed scan.")
+    #                 logger.info("Completed scan.")
     
-                    print("Processing messages...")
-                    commsHandlerInstance.process_messages(parent_message_handler)
+    #                 print("Processing messages...")
+    #                 commsHandlerInstance.process_messages(parent_message_handler)
 
-                    if status == 2:
-                        setPlatformStatus(0)
+    #                 if status == 2:
+    #                     setPlatformStatus(0)
 
-        except KeyboardInterrupt:
-            logger.info("Shutting down")
-            commsHandlerInstance.stop()
-        # finally:
-        #     commsHandlerInstance.stop()
+    #     except KeyboardInterrupt:
+    #         logger.info("Shutting down")
+    #         commsHandlerInstance.stop()
+    #     # finally:
+    #     #     commsHandlerInstance.stop()
+
+    frames = capture(cams, "PiA")
+    # Trigger capture on PiB
+    commsHandlerInstance.request_capture()
+    try:
+        while True:
+            print(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
+            # Process incoming messages 
+            commsHandlerInstance.process_messages(parent_message_handler)  
+            sleep(1)
+        
+    except Exception as e:
+        logger.error(f"Error in PiA.py: {e}")
+        # if commsHandlerInstance.is_connected:
+        #     print("Connected!")
+        # if IMAGES_RECEIVED_FLAG:
+        #     message_type, payload = commsHandler.receive_queue.get()
+        #     logging.info(f"Processing message: {message_type}")
+        #     child_frames = payload
+        #     logging.info(f"Extracted {len(child_frames)} frames from payload")
+        #     # Debug: Save received child frames
+        #     for i, img in enumerate(child_frames):
+        #         cv2.imwrite(f"./debug_child_frames/child_frame_{i}.jpg", img)
+
+        #     frames.extend(child_frames)
+
+        # sleep(10)

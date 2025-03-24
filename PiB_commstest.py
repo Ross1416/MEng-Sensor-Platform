@@ -3,6 +3,7 @@ from comms.comms_oop import *
 from cameras import *
 from time import sleep
 import logging
+import queue
 from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
 
@@ -17,8 +18,14 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     for f in frames:
         objects.append(object_detection(rgb_model,f))
     # Send images to PiA
+    compressed_frames = []
+    for img in frames:
+        img = cv2.imencode('.jpg', img)[1] # Compress image
+        compressed_frames.extend(img)
+    
+
     logging.info("Sending image frames to Parent.")
-    commsHandler.send_image_frames(frames)
+    commsHandler.send_image_frames(compressed_frames)
 
     # # Receive object detection data
     # detection_data = receive_object_detection_results(client_socket)
@@ -188,6 +195,7 @@ if __name__ == "__main__":
 
         # Poll for trigger capture signal
         while True:
+            print(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
             # Process incoming messages 
             commsHandlerInstance.process_messages(child_message_handler)
 
@@ -217,8 +225,6 @@ if __name__ == "__main__":
             axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
             hs_cam.Close()
             zaber_conn.close()
-        commsHandlerInstance.stop()
-        logger.info("All connections closed.")
 
     finally:
         if ENABLE_HS:

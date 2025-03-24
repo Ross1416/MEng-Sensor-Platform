@@ -143,7 +143,7 @@ class CommsHandler():
         while self.running:
             try:
                 self.conn, addr = self.socket.accept()
-                self.conn.settimeout(5)  # Set timeout for operations
+                self.conn.settimeout(20)  # Set timeout for operations
                 self.connected = True
                 self.logger.info(f"Connection established with {addr}")
             except socket.timeout:
@@ -167,6 +167,7 @@ class CommsHandler():
                 # Check if there's data to read
                 message_type, payload = self._receive_message()
                 if message_type:
+                    print(f"Added {message_type} to the queue")
                     self.receive_queue.put((message_type, payload))
             except socket.timeout:
                 # This is expected with the timeout we set
@@ -183,7 +184,8 @@ class CommsHandler():
                 self.connected = False
                 self.receive_queue.put((MessageType.ERROR, str(e)))
                 
-            sleep(0.01)  # Small sleep to prevent CPU hogging
+            sleep(2)  # Small sleep to prevent CPU hogging
+            
 
     def _sender_worker(self):
         """Worker thread to send messages from queue"""
@@ -291,22 +293,52 @@ class CommsHandler():
             
             # No payload
             if payload_size == 0:
+                self.logger.debug(f"Message of type {MessageType(message_type_value)} has no value.")
                 return message_type, None
                 
             # Read payload
-            payload_data = b""
-            while len(payload_data) < payload_size:
-                chunk = self.conn.recv(min(4096, payload_size - len(payload_data)))
-                if not chunk:
-                    raise ConnectionResetError("Connection closed during payload transfer")
-                payload_data += chunk
-                
-            # Deserialize payload
-            payload = pickle.loads(payload_data)
-            return message_type, payload
+            payload_data = bytearray()
+            chunk_size = 65536  
+
+            self.logger.debug(f"Expecting {payload_size} bytes for payload.")
+            while len(payload_data) < payload_size and self.running:
+                try:
+                    remaining = payload_size - len(payload_data)
+                    chunk = self.conn.recv(min(chunk_size, remaining))
+                    if not chunk:
+                        self.logger.error(f"Connection closed while reading payload. Read {len(payload_data)} bytes so far.")
+                        raise ConnectionResetError("Connection closed during payload transfer")
+                    payload_data += chunk
+
+                    if (payload_size > 1024*1024) and (len(payload_data) % (1024*1024) == 0):
+                        self.logger.debug(f"Received chunk: {len(chunk) / (1024*1024):.1f} MB. Total so far: {len(payload_data) / (1024*1024):.1f}/{payload_size / (1024*1024):.1f} MB")
+
+                    self.logger.debug(f"Received chunk: {len(chunk)} bytes. Total so far: {len(payload_data)}/{payload_size}")       
+
+                except socket.timeout:
+                    self.logger.error(f"Timeout while receiving payload ({len(payload_data)}/{payload_size} bytes)")
+                    continue #continue trying to receive more data
+            # payload_data = b""
+            # self.logger.debug(f"Reading the payload of message with type {MessageType(message_type_value)}.")
+            # while len(payload_data) < payload_size:
+            #     chunk = self.conn.recv(min(4096, payload_size - len(payload_data)))
+            #     if not chunk:
+            #         raise ConnectionResetError("Connection closed during payload transfer")
+            #     payload_data += chunk
             
+            self.logger.debug(f"Payload of message with type {MessageType(message_type_value)} read successfully.")
+            
+            # Deserialize payload
+            try:
+                payload = pickle.loads(payload_data)
+                self.logger.debug(f"Payload deserialized successfully: {type(payload)}")
+            except pickle.UnpicklingError as e:
+                self.logger.error(f"Failed to deserialize payload: {e}")
+                return message_type, None
+                        
         except socket.timeout:
             # This is expected with the timeout we set
+            self.logger.debug(f"Message of type {MessageType(message_type_value)} caused a timeout!")
             return None, None
         except Exception as e:
             self.logger.error(f"Error receiving message: {e}")
