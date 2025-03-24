@@ -27,7 +27,6 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     objects = assign_id(objects)
 
     # Take hyperspectral scan 
-    hs_materials = []
     for i in range(len(objects)):# For every camera
         if objects[i] != None:
             for j in range(len(objects[i])):# for every object detected in frame
@@ -41,10 +40,9 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
 
                 if ENABLE_HS:
                     mats = on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr, id)
-                    hs_materials.append(mats)
-                    # TODO: Send hyperspectral classification, plant health etc.
-                    # TODO: Send Hyperspectral materials
-                    # TODO: Delete files in path 
+                    send_images(client_socket, HSI_SCANS_PATH)
+                    send_object_detection_results(client_socket, mats)
+                    delete_files_in_dir(HSI_SCANS_PATH)
 
                     
     # # Send processed hyperspectral scans to PiA
