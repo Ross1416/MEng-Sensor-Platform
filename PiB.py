@@ -23,9 +23,10 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
     objects = detection_data + objects
     # Send object detection results to PiA
     send_object_detection_results(client_socket, objects[2:])  
+    # Assign IDs to objects
+    objects = assign_id(objects)
 
     # Take hyperspectral scan 
-    id = 0 
     hs_materials = []
     for i in range(len(objects)):# For every camera
         if objects[i] != None:
@@ -33,17 +34,15 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
                 # Get corner pixels of objects detected and convert to angle
                 px_1,px_2 = objects[i][j][1][:2],objects[i][j][1][2:]
                 xoffset = i*90
-                angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET # To remove rotation offset 
+                angle_x1 = pixel_to_angle(px_1,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET 
                 angle_x2 = pixel_to_angle(px_2,RESOLUTION,FOV)[0] + xoffset + ROTATION_OFFSET
-
-                logging.debug(f"Camera {i}, object {j}: X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
+                id = objects[i][j][3]
+                logging.debug(f"Camera {i}, object {j}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}")
 
                 if ENABLE_HS:
                     mats = on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr, id)
                     hs_materials.append(mats)
                     
-
-                id += 1
     # Send processed hyperspectral scans to PiA
     send_images(client_socket, HSI_SCANS_PATH)            
     # Send hyperspectral material distribution data to PiA
