@@ -25,6 +25,14 @@ def object_detection(model, frame,conf=0.25):
     print(f"Object detection results:\n{results}")
     return results
 
+def assign_id(objects):
+    id = 0
+    for camera in objects:
+        for obj in camera:
+            obj = obj + id
+            id += 1
+    return objects
+
 def xyxy_to_xywh(coords, img_width=None, img_height=None, centre_relative=False):
     """
     Convert bounding box coordinates from [x1, y1, x2, y2] to [x, y, w, h].
