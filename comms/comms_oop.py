@@ -232,13 +232,19 @@ class CommsHandler():
             else:
                 # Serialize payload
                 if message_type == MessageType.IMAGE_FRAMES:
-                    for img in payload:
-                        img = cv2.imencode('.jpg', img)[1] # Compress image
-                        data = pickle.dumps(img)
-                        self.logger.debug(f"Sending frame of size {len(data)}")
-                        self.conn.send(len(data).to_bytes(8, byteorder='big'))
-                        self.conn.sendall(data)
-                        self.logger.debug(f"Frame sent.")
+                    # Serialize all frames at once instead of individual frames
+                    serialised_payload = pickle.dumps(payload)  # payload is the list of frames
+                    size_header = len(serialised_payload).to_bytes(4, byteorder='big')
+                    self.conn.sendall(message_header + size_header + serialised_payload)
+                    self.logger.debug(f"Frames sent, total size: {len(serialised_payload)}")
+                    # for img in payload:
+                        # img = cv2.imencode('.jpg', img)[1] # Compress image
+                        # serialized_payload = pickle.dumps(img)
+                        # size_header = len(serialized_payload).to_bytes(4, byteorder='big')
+                        # self.logger.debug(f"Sending frame of size {len(serialized_payload)}")
+                        # # self.conn.send(len(serialized_payload).to_bytes(8, byteorder='big'))
+                        # self.conn.sendall(message_header + size_header + serialized_payload)
+                        # self.logger.debug(f"Frame sent.")
                 else:
                     serialized_payload = pickle.dumps(payload)
                     size_header = len(serialized_payload).to_bytes(4, byteorder='big')
@@ -251,7 +257,7 @@ class CommsHandler():
             return False
 
     def _receive_message(self):
-        """Low-level receive message"""
+        """Low-level receive message with additional debugging"""
         if not self.connected or not self.conn:
             return None, None
             
@@ -261,7 +267,20 @@ class CommsHandler():
             if not header:
                 raise ConnectionResetError("Connection closed")
                 
-            message_type = MessageType(int.from_bytes(header, byteorder='big'))
+            # Convert byte to int and log it
+            message_type_value = int.from_bytes(header, byteorder='big')
+            self.logger.debug(f"Received message type value: {message_type_value}, raw bytes: {header.hex()}")
+            
+            # Check if the value is valid
+            try:
+                message_type = MessageType(message_type_value)
+                self.logger.debug(f"Matched to enum: {message_type}")
+            except ValueError:
+                self.logger.error(f"Received invalid MessageType value: {message_type_value}")
+                # Option 1: Skip this message and continue
+                return None, None
+                # Option 2 (alternative): Force a specific message type for debugging
+                # message_type = MessageType.ERROR
 
             # Read payload size
             size_header = self.conn.recv(4)
@@ -296,7 +315,6 @@ class CommsHandler():
 
     def send_message(self, message_type, payload):
         """Add message to send queue"""
-        print("Location 2")
         self.send_queue.put((message_type, payload))
 
     def get_message(self, block=True, timeout=None):
@@ -327,7 +345,6 @@ class CommsHandler():
 
     def send_image_frames(self, frames):
         """Send image frames"""
-        print("Location 1")
         self.send_message(MessageType.IMAGE_FRAMES, frames)
         self.logger.info(f"Sending {len(frames)} frames")
 

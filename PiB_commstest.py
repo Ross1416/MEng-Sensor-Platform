@@ -6,6 +6,9 @@ import logging
 from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
 
+# REMOTE_HOST = "10.42.0.1"
+REMOTE_HOST = "192.168.1.211"
+
 def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     # Capture images
     frames = capture(cams, "PiB", PATH)
@@ -20,13 +23,13 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     # # Receive object detection data
     # detection_data = receive_object_detection_results(client_socket)
     # objects = detection_data + objects
-    logging.info("Waiting to receive object detection data.")
-    message_type, payload = None, None
-    while message_type != MessageType.OBJECT_DETECTION:
-        message_type, payload = commsHandler.get_message(timeout=10)
-        if message_type == MessageType.OBJECT_DETECTION:
-            remote_objects = payload  # Access payload with detection results
-            objects += remote_objects
+    # logging.info("Waiting to receive object detection data.")
+    # message_type, payload = None, None
+    # while message_type != MessageType.OBJECT_DETECTION:
+    #     message_type, payload = commsHandler.get_message(timeout=10)
+    #     if message_type == MessageType.OBJECT_DETECTION:
+    #         remote_objects = payload  # Access payload with detection results
+    #         objects += remote_objects
 
     logging.info("Sending object detection data to Parent.")
     # Send object detection results to PiA
@@ -141,7 +144,7 @@ if __name__ == "__main__":
     logging.info("##### Start up new sesson. #####")
 
     # Setup comms handler instance
-    commsHandlerInstance = CommsHandler(is_parent=False, host=HOST, port=PORT, remote_host="10.42.0.1")
+    commsHandlerInstance = CommsHandler(is_parent=False, host=HOST, port=PORT, remote_host=REMOTE_HOST)
     commsHandlerInstance.start()
 
     try:

@@ -22,27 +22,19 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4,privacy=False
 
     # Retrieve slave images and data
     # frames += receive_image_arrays(conn)
-    
-    # Wait for and retrieve frames from PiB
-    message_type, payload = None, None
-    while message_type != MessageType.IMAGE_FRAMES:
-        message_type, payload = commsHandler.get_message(timeout=10)  # Wait up to 10 seconds
-        if message_type == MessageType.IMAGE_FRAMES:
-            remote_frames = payload  # Access the payload directly
-            frames += remote_frames
 
     # Send object detection results to PiB
     # send_object_detection_results(conn, objects)
-    commsHandler.send_object_detection_results(objects)
+    # commsHandler.send_object_detection_results(objects)
 
     # Receive object detection data
     # objects += receive_object_detection_results(conn)
-    message_type, payload = None, None
-    while message_type != MessageType.OBJECT_DETECTION:
-        message_type, payload = commsHandler.get_message(timeout=10)
-        if message_type == MessageType.OBJECT_DETECTION:
-            remote_objects = payload  # Access payload with detection results
-            objects += remote_objects
+    # message_type, payload = None, None
+    # while message_type != MessageType.OBJECT_DETECTION:
+    #     message_type, payload = commsHandler.get_message(timeout=10)
+    #     if message_type == MessageType.OBJECT_DETECTION:
+    #         remote_objects = payload  # Access payload with detection results
+    #         objects += remote_objects
 
 
     # Blur people if privacy 
@@ -72,6 +64,7 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4,privacy=False
 # Usage in PiA (parent)
 def parent_message_handler(message_type, payload):
     """Handle messages in parent (PiA)"""
+    print("In the case statement!")
     match message_type:
         case MessageType.CONNECT:
             logging.info("Child connected")
@@ -81,19 +74,21 @@ def parent_message_handler(message_type, payload):
             return True
         case MessageType.HEARTBEAT:
             # Just acknowledge heartbeat
+            print("bloop")
             return True
         case MessageType.IMAGE_FRAMES:
-            frames = payload
-            logging.info(f"Received {len(frames)} frames from child")
-            # Process frames
-            img = cv2.imdecode(frames, cv2.IMREAD_COLOR)
-            frames.append(img)
+            frames_from_child = payload
+            logging.info(f"Received {len(frames_from_child)} frames from child")
+            # # Process frames
+            for i, img in enumerate(frames_from_child):
+                cv2.imwrite(f"./test_captures/{i}.jpg", img)
+            # img = cv2.imdecode(frames, cv2.IMREAD_COLOR)
+            frames += frames_from_child
             return True        
         case MessageType.OBJECT_DETECTION:
             objects = payload
             logging.info(f"Received object detection data from child")
             # Process objects
-
 
             return True
         case MessageType.ERROR:
@@ -155,6 +150,7 @@ if __name__ == "__main__":
         #Mainloop
         try:
             while True:
+                print("Processing messages...")
                 commsHandlerInstance.process_messages(parent_message_handler)
                 # TODO: Check for location change
                 # Update save location
@@ -169,12 +165,17 @@ if __name__ == "__main__":
                     save_location = f"./capture/{timestamp}-capture/"
                     
                     new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)       
-                
+
                     logger.info("Completed scan.")
+    
+                    print("Processing messages...")
+                    commsHandlerInstance.process_messages(parent_message_handler)
 
                     if status == 2:
-                        setPlatformStatus(0)           
+                        setPlatformStatus(0)
+
         except KeyboardInterrupt:
             logger.info("Shutting down")
-        finally:
             commsHandlerInstance.stop()
+        # finally:
+        #     commsHandlerInstance.stop()
