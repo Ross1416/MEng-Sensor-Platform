@@ -30,7 +30,9 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4,privacy=False):
     send_object_detection_results(conn, objects)  
     # Receive object detection data
     objects += receive_object_detection_results(conn)
-
+    # Assign IDs to objects
+    objects = assign_id(objects)
+    
     # Blur people if privacy 
     setStatusMessage("blurring people")
     if privacy:
