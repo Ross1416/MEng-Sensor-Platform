@@ -5,7 +5,7 @@ from time import time
 import matplotlib.pyplot as plt
 
 
-def setup_hyperspectral():
+def setup_hyperspectral(exposure_time, cam_gain, pixel_binning):
     """Sets up hyperspectral camera and opens connection"""
 
     cam = pylon.InstantCamera(
@@ -18,17 +18,19 @@ def setup_hyperspectral():
     cam.UserSetLoad.Execute()
 
     # 2x2 pixel binning
-    cam.BinningVertical = 2
-    cam.BinningHorizontal = 2
+    cam.BinningVertical = pixel_binning
+    cam.BinningHorizontal = pixel_binning
 
     # Set exposure time and gain
-    cam.ExposureTimeAbs.Value = 60000  # (cam.ExposureTimeAbs.Max)
-    cam.GainRaw.SetValue(200)  # Set gain to max value
+    cam.ExposureTimeAbs.Value = exposure_time
+    cam.GainRaw.SetValue(cam_gain)
 
     return cam
 
+
 def get_nframes(angle):
-    return round((angle/27)*800)
+    return round((angle / 27) * 800)
+
 
 def grab_hyperspectral_scene(
     cam, nframes, white_image, dark_image, class_name, calibrate=True
