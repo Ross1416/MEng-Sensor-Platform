@@ -386,6 +386,8 @@ if __name__ == "__main__":
 
     # Train the model
     num_classes = len(np.unique(y))  # Number of unique classes
+
+    print(np.max(X_train))
     best_model, results = train_neural_network(
         X_train,
         y_train,

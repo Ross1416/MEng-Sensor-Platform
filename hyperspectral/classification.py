@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from scipy.ndimage import median_filter
 import matplotlib.colors as mcolors
+from hyperspectral_driver import get_wavelength_index, get_calibration_array
 
 
 def select_bands(start=100, end=500, num_bands=30):
@@ -23,16 +24,40 @@ def apply_smoothing(image, filter_size=10):
     return median_filter(image, size=filter_size)
 
 
+def calculated_ndvi(full_image):
+    """Calculated NDVI for all pixels in the image"""
+
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 800, 2)
+
+    # Extract Red and NIR bands
+    red_band = (full_image[:, :, red_idx]).astype(np.float32)
+    nir_band = (full_image[:, :, nir_idx]).astype(np.float32)
+
+    # Avoid divide-by-zero
+    denominator = nir_band + red_band
+
+    # Compute NDVI
+    ndvi = (nir_band - red_band) / denominator
+
+    return ndvi
+
+
 def classify_and_save(
     model_path, image_path, label_encoding_path, output_path
 ):
-    """Loads a model and hyperspectral image, classifies it, smooths the results, and saves the output as a PNG with a legend."""
+
+    output_name, _ = os.path.splitext(output_path)
+
     # Load model
     model = tf.keras.models.load_model(model_path)
 
-    # Load hyperspectral image
-    image = np.load(image_path)
-    image = image[:, :, select_bands()]
+    # Load hyperspectral image (full image for NDVI)
+    full_image = np.load(image_path)
+
+    # Keep the reduced image for classification
+    selected_band_indices = select_bands()
+    image = full_image[:, :, selected_band_indices]  # reduced image
 
     h, w, num_bands = image.shape
     image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
@@ -47,6 +72,19 @@ def classify_and_save(
 
     # Load label encoder
     label_encoder = load_label_encoder(label_encoding_path)
+
+    # Calculate NDVI
+    ndvi = calculated_ndvi(full_image)
+
+    # Saving the image
+    output_path = output_name + "_ndvi.png"
+    plt.figure(figsize=(8, 6))
+    plt.imshow(ndvi, cmap="RdYlGn", vmin=-1, vmax=1)
+    plt.colorbar(label="NDVI")
+    plt.title("NDVI Across Entire Image")
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    print(f"NDVI image saved as {output_path}")
 
     # Extract unique classes and their counts
     unique_classes, counts = np.unique(smoothed_image, return_counts=True)
@@ -86,6 +124,7 @@ def classify_and_save(
     cbar.set_label("Class Labels")
 
     # Save output image
+    output_path = output_name + "_classification.png"
     plt.savefig(output_path, dpi=300)
     plt.close()
     print(f"Smoothed classification results saved to {output_path}")
@@ -94,12 +133,16 @@ def classify_and_save(
 
 
 if __name__ == "__main__":
+
+    CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
+    cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
+
     model_path = "NN_18_03_2025.keras"
-    image_path = "images/outdoor_dataset_limited/outdoor_dataset_035.npy"
+    image_path = "images/outdoor_dataset_limited/outdoor_dataset_005.npy"
     label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
-    output_path = "test.png"
+    output_name = "test.png"
 
     class_distribution = classify_and_save(
-        model_path, image_path, label_encoding_path, output_path
+        model_path, image_path, label_encoding_path, output_name
     )
     print("Class Distribution (%):", class_distribution)
