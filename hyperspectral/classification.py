@@ -85,7 +85,7 @@ def classify_and_save(
     cbar = plt.colorbar(im, label="NDVI")
     cbar.ax.yaxis.label.set_color("white")
     cbar.ax.tick_params(color="white", labelcolor="white")
-    plt.title("NDVI Across Entire Image", color="white")
+    plt.title("NDVI", color="white")
     plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="black")
     plt.close()
     print(f"NDVI image saved as {output_path}")
@@ -122,7 +122,7 @@ def classify_and_save(
         vmin=unique_classes[0],
         vmax=unique_classes[-1],
     )
-    plt.title("Smoothed Classification Results", color="white")
+    plt.title("Material Classification", color="white")
 
     # Add colorbar legend
     cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
