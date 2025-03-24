@@ -42,14 +42,17 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr):
                 if ENABLE_HS:
                     mats = on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr, id)
                     hs_materials.append(mats)
+                    # TODO: Send hyperspectral classification, plant health etc.
+                    # TODO: Send Hyperspectral materials
+                    # TODO: Delete files in path 
+
                     
-    # Send processed hyperspectral scans to PiA
-    send_images(client_socket, HSI_SCANS_PATH)            
-    # Send hyperspectral material distribution data to PiA
-    send_object_detection_results(client_socket, hs_materials)
-    # Remove all old hs scans
-    delete_files_in_dir(HSI_SCANS_PATH)
-    
+    # # Send processed hyperspectral scans to PiA
+    # send_images(client_socket, HSI_SCANS_PATH)            
+    # # Send hyperspectral material distribution data to PiA
+    # send_object_detection_results(client_socket, hs_materials)
+    # # Remove all old hs scans
+    # delete_files_in_dir(HSI_SCANS_PATH)
                 
 
 def on_rotate(axis,angles,hs_cam,cal_arr, id):
@@ -60,7 +63,7 @@ def on_rotate(axis,angles,hs_cam,cal_arr, id):
     fps = hs_cam.ResultingFrameRateAbs.Value
     logging.debug(f"Calculated FPS: {fps}")
     # Calculate number of frames
-    nframes = get_nframes(abs(angles[1]-angles[0]))
+    nframes = get_nframes(abs(angles[1]-angles[0]), HS_PIXEL_BINNING)
     logging.debug(f"Will grab {nframes} frames.")
     speed = get_rotation_speed(nframes,fps,abs(angles[1]-angles[0]))
     logging.info("Grabbing hyperspectral scan...")
@@ -107,6 +110,10 @@ MODEL_PATH = "./hyperspectral/NN_18_03_2025.keras"
 LABEL_ENCODING_PATH = "./hyperspectral/label_encoding.npy"
 HSI_SCANS_PATH = "./hsi_scans/"
 
+HS_EXPOSURE_TIME = 10000
+HS_PIXEL_BINNING = 2
+HS_GAIN = 200 
+
 if __name__ == "__main__":
     # Setup Logging
     logging.basicConfig(
@@ -123,7 +130,6 @@ if __name__ == "__main__":
         logging.debug("Setup cameras.")
         
         
-        
         if ENABLE_HS:
             # Setup rotational stage
             zaber_conn, axis = setup_zaber(ROTATIONAL_STAGE_PORT)
@@ -135,7 +141,7 @@ if __name__ == "__main__":
             axis.move_absolute(ROTATION_OFFSET,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
 
             # Setup hyperspectral
-            hs_cam = setup_hyperspectral()
+            hs_cam = setup_hyperspectral(HS_EXPOSURE_TIME, HS_GAIN, HS_PIXEL_BINNING)
             logging.info("Setup hyperspectral camera.")
 
         else:

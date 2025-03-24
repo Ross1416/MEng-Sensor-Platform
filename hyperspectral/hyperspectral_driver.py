@@ -28,8 +28,8 @@ def setup_hyperspectral(exposure_time, cam_gain, pixel_binning):
     return cam
 
 
-def get_nframes(angle):
-    return round((angle / 27) * 800)
+def get_nframes(angle, pixel_binning):
+    return round((angle / 27) * 1600/pixel_binning)
 
 
 def grab_hyperspectral_scene(
