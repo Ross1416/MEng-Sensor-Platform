@@ -260,6 +260,7 @@ class CommsHandler():
             return False
 
     def _receive_message(self):
+        print("Receiving a message!")
         """Low-level receive message with additional debugging"""
         if not self.connected or not self.conn:
             return None, None
@@ -314,7 +315,7 @@ class CommsHandler():
                     if (payload_size > 1024*1024) and (len(payload_data) % (1024*1024) == 0):
                         self.logger.debug(f"Received chunk: {len(chunk) / (1024*1024):.1f} MB. Total so far: {len(payload_data) / (1024*1024):.1f}/{payload_size / (1024*1024):.1f} MB")
 
-                    # self.logger.debug(f"Received chunk: {len(chunk)} bytes. Total so far: {len(payload_data)}/{payload_size}")       
+                    self.logger.debug(f"Received chunk: {len(chunk)} bytes. Total so far: {len(payload_data)}/{payload_size}")       
 
                 except socket.timeout:
                     self.logger.error(f"Timeout while receiving payload ({len(payload_data)}/{payload_size} bytes)")
