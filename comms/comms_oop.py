@@ -272,7 +272,7 @@ class CommsHandler():
                 
             # Convert byte to int and log it
             message_type_value = int.from_bytes(header, byteorder='big')
-            # self.logger.debug(f"Received message type value: {message_type_value}, raw bytes: {header.hex()}")
+            self.logger.debug(f"Received message type value: {message_type_value}, raw bytes: {header.hex()}")
             
             # Check if the value is valid
             try:

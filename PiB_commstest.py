@@ -98,10 +98,12 @@ FOV = (102,67)
 CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 
 received_objects = []
+objects = []
 # Usage in PiB (child)
 def child_message_handler(message_type, payload):
     """Handle messages in child (PiB)"""
     global received_objects
+    global objects
 
     match message_type:
         case MessageType.CONNECT:
@@ -117,7 +119,7 @@ def child_message_handler(message_type, payload):
             logging.info("Capture request received")
             # Trigger capture sequence
             logging.info("Triggered Capture.")
-            on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandlerInstance)
+            objects = on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandlerInstance)
             # capture_triggered = True
             return True
         case MessageType.OBJECT_DETECTION:
