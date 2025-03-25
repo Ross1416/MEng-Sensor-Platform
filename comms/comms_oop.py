@@ -167,7 +167,7 @@ class CommsHandler():
                 # Check if there's data to read
                 message_type, payload = self._receive_message()
                 if message_type:
-                    print(f"Added {message_type} to the queue")
+                    # self.logger.info(f"Added {message_type} to the queue")
                     self.receive_queue.put((message_type, payload))
             except socket.timeout:
                 # This is expected with the timeout we set
@@ -216,7 +216,7 @@ class CommsHandler():
                     self.send_message(MessageType.HEARTBEAT, None)
                 except Exception as e:
                     self.logger.error(f"Error sending heartbeat: {e}")
-            sleep(5)  # Send heartbeat every 5 seconds
+            sleep(15)  # Send heartbeat every 15 seconds
 
     def _send_message(self, message_type, payload):
         """Low-level send message"""
@@ -271,12 +271,12 @@ class CommsHandler():
                 
             # Convert byte to int and log it
             message_type_value = int.from_bytes(header, byteorder='big')
-            self.logger.debug(f"Received message type value: {message_type_value}, raw bytes: {header.hex()}")
+            # self.logger.debug(f"Received message type value: {message_type_value}, raw bytes: {header.hex()}")
             
             # Check if the value is valid
             try:
                 message_type = MessageType(message_type_value)
-                self.logger.debug(f"Matched to enum: {message_type}")
+                self.logger.debug(f"Message type received: {message_type}")
             except ValueError:
                 self.logger.error(f"Received invalid MessageType value: {message_type_value}")
                 # Option 1: Skip this message and continue
@@ -293,7 +293,7 @@ class CommsHandler():
             
             # No payload
             if payload_size == 0:
-                self.logger.debug(f"Message of type {MessageType(message_type_value)} has no value.")
+                # self.logger.debug(f"Message of type {MessageType(message_type_value)} has no value.")
                 return message_type, None
                 
             # Read payload
@@ -313,7 +313,7 @@ class CommsHandler():
                     if (payload_size > 1024*1024) and (len(payload_data) % (1024*1024) == 0):
                         self.logger.debug(f"Received chunk: {len(chunk) / (1024*1024):.1f} MB. Total so far: {len(payload_data) / (1024*1024):.1f}/{payload_size / (1024*1024):.1f} MB")
 
-                    self.logger.debug(f"Received chunk: {len(chunk)} bytes. Total so far: {len(payload_data)}/{payload_size}")       
+                    # self.logger.debug(f"Received chunk: {len(chunk)} bytes. Total so far: {len(payload_data)}/{payload_size}")       
 
                 except socket.timeout:
                     self.logger.error(f"Timeout while receiving payload ({len(payload_data)}/{payload_size} bytes)")
@@ -326,14 +326,14 @@ class CommsHandler():
             #         raise ConnectionResetError("Connection closed during payload transfer")
             #     payload_data += chunk
             
-            self.logger.debug(f"Payload of message with type {MessageType(message_type_value)} read successfully.")
+            # self.logger.debug(f"Payload of message with type {MessageType(message_type_value)} read successfully.")
             
             # Deserialize payload
             try:
                 payload = pickle.loads(payload_data)
-                self.logger.debug(f"Payload deserialized successfully: {type(payload)}")
+                # self.logger.debug(f"Payload deserialized successfully: {type(payload)}")
                 return message_type, payload
-                
+
             except pickle.UnpicklingError as e:
                 self.logger.error(f"Failed to deserialize payload: {e}")
                 return message_type, None

@@ -28,8 +28,8 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     
     logging.info(f"Sending {len(compressed_frames)} compressed frames")
     commsHandler.send_image_frames(compressed_frames)
-    logging.info("Sending image frames to Parent.")
-    commsHandler.send_image_frames(compressed_frames)
+    # logging.info("Sending image frames to Parent.")
+    # commsHandler.send_image_frames(compressed_frames)
 
     # # Receive object detection data
     # detection_data = receive_object_detection_results(client_socket)
@@ -44,7 +44,7 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
 
     logging.info("Sending object detection data to Parent.")
     # Send object detection results to PiA
-    commsHandler.send_object_detection_results(objects[2:])  
+    commsHandler.send_object_detection_results(objects)  
 
     # Take hyperspectral scan 
     for i in range(len(objects)):# For every camera
@@ -108,9 +108,12 @@ FOV = (102,67)
 
 CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 
+received_object = []
 # Usage in PiB (child)
 def child_message_handler(message_type, payload):
     """Handle messages in child (PiB)"""
+    global received_objects
+
     match message_type:
         case MessageType.CONNECT:
             logging.info("Connected to parent")
@@ -129,7 +132,7 @@ def child_message_handler(message_type, payload):
             # capture_triggered = True
             return True
         case MessageType.OBJECT_DETECTION:
-            objects = payload
+            received_objects = payload
             logging.info(f"Received object detection data from parent")
             # Process objects
             return True
@@ -199,7 +202,7 @@ if __name__ == "__main__":
 
         # Poll for trigger capture signal
         while True:
-            print(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
+            # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
             # Process incoming messages 
             commsHandlerInstance.process_messages(child_message_handler)
 

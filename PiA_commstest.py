@@ -19,25 +19,20 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4, privacy=Fals
     frames = capture(cams, "PiA")
     
     # Trigger capture on PiB
-    commsHandler.request_capture()
+    commsHandlerInstance.request_capture()
     sleep(30)
+
+        # Perform object detection
+    objects = []
+    for f in frames:
+        objects.append(object_detection(rgb_model,f))
+
+    logging.info("Sending object detection results...")
+    commsHandlerInstance.send_object_detection_results(objects)
+
+    print(objects)
     
-    # Wait for child frames
-    child_frames = []
-    # while len(child_frames) == 0 and (datetime.now() - start_time).seconds < 10:
-    #     while not commsHandler.receive_queue.empty():
-    #         message_type, payload = commsHandler.receive_queue.get()
-    #         logging.info(f"Processing message: {message_type}")
-            
-    #         if message_type == MessageType.IMAGE_FRAMES:
-    #             child_frames = payload
-    #             logging.info(f"Extracted {len(child_frames)} frames from payload")
-    #             # Debug: Save received child frames
-    #             for i, img in enumerate(child_frames):
-    #                 cv2.imwrite(f"./debug_child_frames/child_frame_{i}.jpg", img)
-            
-    #         commsHandler.receive_queue.task_done()  
-    
+    return frames, objects
 
     # # Combine frames from both platforms
     # frames.extend(child_frames)
@@ -72,9 +67,10 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4, privacy=Fals
 
 
 received_frames = []
+received_objects = []
 def parent_message_handler(message_type, payload):
     global received_frames
-    print(f"Received message type: {message_type}")
+    global received_objects
     match message_type:
         case MessageType.CONNECT:
             logging.info("Child connected")
@@ -86,12 +82,10 @@ def parent_message_handler(message_type, payload):
             return True
         case MessageType.IMAGE_FRAMES:
             logging.info(f"Received image frames payload of type {type(payload)}")
-            
             try:
                 # The payload should be a list of compressed frames
                 if not isinstance(payload, list):
                     payload = [payload]
-                
                 # Decode each frame
                 decoded_frames = []
                 for i, compressed_frame in enumerate(payload):
@@ -113,12 +107,14 @@ def parent_message_handler(message_type, payload):
                 received_frames.extend(decoded_frames)
                 logging.info(f"Successfully decoded {len(decoded_frames)} frames")
                 return True
-                
             except Exception as e:
                 logging.error(f"Error processing frames: {e}")
                 return False
+
         case MessageType.OBJECT_DETECTION:
+            received_objects = payload
             logging.info(f"Received object detection data from child")
+            logging.info(f"{received_objects}")
             return True
         case MessageType.ERROR:
             logging.error(f"Communication error: {payload}")
@@ -135,10 +131,10 @@ RESOLUTION = (4608,2592)
 FOV = (102,67)
 PRIVACY = True  #Blur people
 CLASSES = ["person"] 
+lon=55.3
+lat=-4
 
 if __name__ == "__main__":
-    IMAGES_RECEIVED_FLAG = False
-
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -217,35 +213,50 @@ if __name__ == "__main__":
     # Trigger capture on PiB
     # commsHandlerInstance.request_capture()
     status, activeFile = getPlatformStatus()
-    new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)
+    frames, objects = new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)
     try:
         while True:
-            logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
+            # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
             # Process incoming messages 
             commsHandlerInstance.process_messages(parent_message_handler)  
             sleep(1)
-
-        if received_frames:
-            logging.info(f"Processing {len(received_frames)} received frames")
             
-            # panorama, objects = performPanoramicStitching(received_frames, [])
-            received_frames = [] # Clear the frames
+            logger.info(f"Current state - Frames: {len(received_frames)}, Objects: {len(received_objects)}")
 
-        #     frames.extend(child_frames)
-        
-    except Exception as e:
-        logger.error(f"Error in PiA.py: {e}")
-        # if commsHandlerInstance.is_connected:
-        #     print("Connected!")
-        # if IMAGES_RECEIVED_FLAG:
-        #     message_type, payload = commsHandler.receive_queue.get()
-        #     logging.info(f"Processing message: {message_type}")
-        #     child_frames = payload
-        #     logging.info(f"Extracted {len(child_frames)} frames from payload")
-        #     # Debug: Save received child frames
-        #     for i, img in enumerate(child_frames):
-        #         cv2.imwrite(f"./debug_child_frames/child_frame_{i}.jpg", img)
+            if received_frames and received_objects:
+                logging.info(f"Processing {len(received_frames)} received frames")
+                frames +=  received_frames
+                objects += received_objects
+                panorama, objects = performPanoramicStitching(frames, objects)
 
-        #     frames.extend(child_frames)
+                # Do stuff
+                # Blur people if privacy 
+                if PRIVACY:
+                    for i in range(len(received_frames)):
+                        frames[i] = blur_people(received_frames[i],objects[i],255)
 
-        # sleep(10)
+                # Perform pano stitching
+                panorama, objects = performPanoramicStitching(received_frames, objects)
+                # Restructure objects
+                objects_restructured = []
+                for frame in objects:
+                    objects_restructured += frame
+                
+                # Remove duplicate object detections
+                filtered_objects = non_maximum_suppression(objects_restructured)
+
+                # TODO: Receive hsi photo and data 
+                # Updates json and moves images to correct folder
+                uid = str(lon)+str(lat)
+                for i in range(len(filtered_objects)):
+                    filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
+
+                updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
+
+                received_frames = [] # Clear the frames
+                received_objects = [] # Clear objects
+                print("Finished!")
+
+    except KeyboardInterrupt:
+        logger.info("Shutting down")
+        commsHandlerInstance.stop()
