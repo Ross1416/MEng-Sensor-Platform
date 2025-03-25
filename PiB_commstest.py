@@ -7,8 +7,8 @@ import queue
 from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
 
-# REMOTE_HOST = "10.42.0.1"
-REMOTE_HOST = "192.168.1.211"
+REMOTE_HOST = "10.42.0.1"
+# REMOTE_HOST = "192.168.1.211"
 
 def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     # Capture images

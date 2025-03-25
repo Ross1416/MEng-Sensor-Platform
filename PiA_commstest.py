@@ -34,38 +34,6 @@ def new_scan(rgb_model, activeFile, commsHandler, lon=55.3, lat=-4, privacy=Fals
     
     return frames, objects
 
-    # # Combine frames from both platforms
-    # frames.extend(child_frames)
-    
-    # # Perform object detection
-    # objects = []
-    # for f in frames:
-    #     objects.append(object_detection(rgb_model, f))
-    
-    # # Blur people if privacy 
-    # if privacy:
-    #     for i in range(len(frames)):
-    #         frames[i] = blur_people(frames[i], objects[i], 255)
-
-    # # Perform pano stitching
-    # panorama, objects = performPanoramicStitching(frames, objects)
-    
-    # # Restructure objects
-    # objects_restructured = []
-    # for frame in objects:
-    #     objects_restructured += frame
-    
-    # # Remove duplicate object detections
-    # filtered_objects = non_maximum_suppression(objects_restructured)
-
-    # # Update json and move images
-    # uid = str(lon) + str(lat)
-    # for i in range(len(filtered_objects)):
-    #     filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
-
-    # updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
-
-
 received_frames = []
 received_objects = []
 def parent_message_handler(message_type, payload):
@@ -166,47 +134,6 @@ if __name__ == "__main__":
     logger.info(f"Waiting for trigger...")
     sleep(0.5)
 
-
-    # if commsHandlerInstance.is_connected():
-    #     logger.info("Entering Main Loop now")
-    #     #Mainloop
-    #     try:
-    #         while True:
-    #             print("Processing messages...")
-    #             commsHandlerInstance.process_messages(parent_message_handler)
-    #             # TODO: Check for location change
-    #             # Update save location
-    #             try:
-    #                 status, activeFile = getPlatformStatus()
-    #             except json.decoder.JSONDecodeError:
-    #                 logger.error("Error accessing JSON configuration file.")    
-    #             GPS_coordinate_change = True
-
-    #             if status == 2 or (status == 1 and GPS_coordinate_change):
-    #                 timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-    #                 save_location = f"./capture/{timestamp}-capture/"
-                    
-    #                 new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)       
-
-    #                 logger.info("Completed scan.")
-    
-    #                 print("Processing messages...")
-    #                 commsHandlerInstance.process_messages(parent_message_handler)
-
-    #                 if status == 2:
-    #                     setPlatformStatus(0)
-
-    #     except KeyboardInterrupt:
-    #         logger.info("Shutting down")
-    #         commsHandlerInstance.stop()
-    #     # finally:
-    #     #     commsHandlerInstance.stop()
-
-    # frames = capture(cams, "PiA")
-    # Trigger capture on PiB
-    # commsHandlerInstance.request_capture()
-    # status, activeFile = getPlatformStatus()
-    # frames, objects = new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)
     try:
         while commsHandlerInstance.is_connected():
             # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
