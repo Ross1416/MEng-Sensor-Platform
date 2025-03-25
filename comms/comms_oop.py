@@ -260,6 +260,7 @@ class CommsHandler():
             return False
 
     def _receive_message(self):
+        print("Receiving a message!")
         """Low-level receive message with additional debugging"""
         if not self.connected or not self.conn:
             return None, None
