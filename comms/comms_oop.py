@@ -264,7 +264,7 @@ class CommsHandler():
         """Low-level receive message with additional debugging"""
         if not self.connected or not self.conn:
             return None, None
-        message_type_value = None
+        
         try:
             # Read message type
             header = self.conn.recv(1)

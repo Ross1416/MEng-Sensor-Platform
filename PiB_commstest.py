@@ -192,14 +192,13 @@ if __name__ == "__main__":
         while commsHandlerInstance.is_connected():
             # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
             
-            # Process incoming messages 
+            # Process incoming messages
             commsHandlerInstance.process_messages(child_message_handler)
             sleep(1)
 
             if received_objects:
                 objects += received_objects
-
-            received_objects = [] # Clear objects
+                received_objects = [] # Clear objects
 
     
     except Exception as e:
