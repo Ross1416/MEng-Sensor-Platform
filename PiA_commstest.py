@@ -214,6 +214,8 @@ if __name__ == "__main__":
             try:
                 status, activeFile = getPlatformStatus()
 
+                # TODO: Check for location change
+                # Update save location
                 GPS_coordinate_change = True
 
                 if status == 2 or (status == 1 and GPS_coordinate_change):
@@ -271,23 +273,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Shutting down")
         commsHandlerInstance.stop()
-
-
-        # TODO: Check for location change
-        # Update save location
-        # try:
-            # status, activeFile = getPlatformStatus()
-        # except json.decoder.JSONDecodeError:
-        #     logger.error("Error accessing JSON configuration file.")
-        GPS_coordinate_change = True
-
-        if status == 2 or (status == 1 and GPS_coordinate_change):
-            timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-            save_location = f"./capture/{timestamp}-capture/"
-
-            new_scan(rgb_model,activeFile, privacy=PRIVACY)       
-        
-            logger.info("Completed scan.")
-
-            if status == 2:
-                setPlatformStatus(0)

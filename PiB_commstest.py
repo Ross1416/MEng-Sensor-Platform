@@ -48,6 +48,8 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
                 if ENABLE_HS:
                     on_rotate(axis,(angle_x1,angle_x2),hs_cam,cal_arr)
                 # TODO: Send hyperspectral data to PiA
+
+    return objects
         
 
 def on_rotate(axis,angles,hs_cam,cal_arr):
@@ -95,7 +97,7 @@ FOV = (102,67)
 
 CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 
-received_object = []
+received_objects = []
 # Usage in PiB (child)
 def child_message_handler(message_type, payload):
     """Handle messages in child (PiB)"""
@@ -191,6 +193,12 @@ if __name__ == "__main__":
             # Process incoming messages 
             commsHandlerInstance.process_messages(child_message_handler)
             sleep(1)
+
+            if received_objects:
+                objects += received_objects
+
+            received_objects = [] # Clear objects
+
     
     except Exception as e:
         logger.error(f"Error in PiB.py: {e}")
