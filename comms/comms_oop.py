@@ -332,6 +332,8 @@ class CommsHandler():
             try:
                 payload = pickle.loads(payload_data)
                 self.logger.debug(f"Payload deserialized successfully: {type(payload)}")
+                return message_type, payload
+                
             except pickle.UnpicklingError as e:
                 self.logger.error(f"Failed to deserialize payload: {e}")
                 return message_type, None
