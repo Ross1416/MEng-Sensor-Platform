@@ -123,13 +123,11 @@ def parent_message_handler(message_type, payload):
             return False
 
 
-
-
 PORT = 5002
 HOST = "0.0.0.0" # i.e. listening
 RESOLUTION = (4608,2592)
 FOV = (102,67)
-PRIVACY = True  #Blur people
+PRIVACY = False  #Blur people
 CLASSES = ["person"] 
 lon=55.3
 lat=-4
@@ -167,12 +165,7 @@ if __name__ == "__main__":
     logger.info(f"Privacy set {PRIVACY}.")
     logger.info(f"Waiting for trigger...")
     sleep(0.5)
-    
-    # message_type, payload = None, None
-    # while message_type != MessageType.CONNECT:
-    #     message_type, payload = commsHandlerInstance.get_message(timeout=10)
-    #     if message_type == MessageType.CONNECT:
-    #         continue
+
 
     # if commsHandlerInstance.is_connected():
     #     logger.info("Entering Main Loop now")
@@ -212,51 +205,89 @@ if __name__ == "__main__":
     # frames = capture(cams, "PiA")
     # Trigger capture on PiB
     # commsHandlerInstance.request_capture()
-    status, activeFile = getPlatformStatus()
-    frames, objects = new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)
+    # status, activeFile = getPlatformStatus()
+    # frames, objects = new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY)
     try:
-        while True:
+        while commsHandlerInstance.is_connected():
             # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
             # Process incoming messages 
-            commsHandlerInstance.process_messages(parent_message_handler)  
-            sleep(1)
+            try:
+                status, activeFile = getPlatformStatus()
+
+                GPS_coordinate_change = True
+
+                if status == 2 or (status == 1 and GPS_coordinate_change):
+                    timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+                    save_location = f"./capture/{timestamp}-capture/"
+
+                    frames, objects = new_scan(rgb_model, activeFile, commsHandlerInstance, privacy=PRIVACY) # new_scan(rgb_model,activeFile, privacy=PRIVACY)       
             
-            logger.info(f"Current state - Frames: {len(received_frames)}, Objects: {len(received_objects)}")
+                    logger.info("Completed scan.")
 
-            if received_frames and received_objects:
-                logging.info(f"Processing {len(received_frames)} received frames")
-                frames +=  received_frames
-                objects += received_objects
-                panorama, objects = performPanoramicStitching(frames, objects)
+                if status == 2:
+                    setPlatformStatus(0)
 
-                # Do stuff
-                # Blur people if privacy 
-                if PRIVACY:
-                    for i in range(len(received_frames)):
-                        frames[i] = blur_people(received_frames[i],objects[i],255)
-
-                # Perform pano stitching
-                panorama, objects = performPanoramicStitching(received_frames, objects)
-                # Restructure objects
-                objects_restructured = []
-                for frame in objects:
-                    objects_restructured += frame
+                    
+                commsHandlerInstance.process_messages(parent_message_handler)  
+                sleep(1)
                 
-                # Remove duplicate object detections
-                filtered_objects = non_maximum_suppression(objects_restructured)
+                # logger.info(f"Current state - Frames: {len(received_frames)}, Objects: {len(received_objects)}")
 
-                # TODO: Receive hsi photo and data 
-                # Updates json and moves images to correct folder
-                uid = str(lon)+str(lat)
-                for i in range(len(filtered_objects)):
-                    filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
+                if received_frames and received_objects:
+                    logging.info(f"Processing {len(received_frames)} received frames")
+                    frames +=  received_frames
+                    objects += received_objects
+                    panorama, objects = performPanoramicStitching(frames, objects)
 
-                updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
+                    # Do stuff
+                    # Blur people if privacy 
+                    if PRIVACY:
+                        for i in range(len(received_frames)):
+                            frames[i] = blur_people(received_frames[i],objects[i],255)
 
-                received_frames = [] # Clear the frames
-                received_objects = [] # Clear objects
-                print("Finished!")
+                    # Restructure objects
+                    objects_restructured = []
+                    for frame in objects:
+                        objects_restructured += frame
+                    
+                    # Remove duplicate object detections
+                    filtered_objects = non_maximum_suppression(objects_restructured)
+
+                    # TODO: Receive hsi photo and data 
+                    # Updates json and moves images to correct folder
+                    uid = str(lon)+str(lat)
+                    for i in range(len(filtered_objects)):
+                        filtered_objects[i][1] = xyxy_to_xywh(filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True)
+
+                    updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
+
+                    received_frames = [] # Clear the frames
+                    received_objects = [] # Clear objects
+                    print("Finished!")
+
+            except json.decoder.JSONDecodeError:
+                logger.error("Error accessing JSON configuration file.")    
 
     except KeyboardInterrupt:
         logger.info("Shutting down")
         commsHandlerInstance.stop()
+
+
+        # TODO: Check for location change
+        # Update save location
+        # try:
+            # status, activeFile = getPlatformStatus()
+        # except json.decoder.JSONDecodeError:
+        #     logger.error("Error accessing JSON configuration file.")
+        GPS_coordinate_change = True
+
+        if status == 2 or (status == 1 and GPS_coordinate_change):
+            timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+            save_location = f"./capture/{timestamp}-capture/"
+
+            new_scan(rgb_model,activeFile, privacy=PRIVACY)       
+        
+            logger.info("Completed scan.")
+
+            if status == 2:
+                setPlatformStatus(0)

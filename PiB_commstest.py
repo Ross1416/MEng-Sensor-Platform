@@ -28,19 +28,6 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     
     logging.info(f"Sending {len(compressed_frames)} compressed frames")
     commsHandler.send_image_frames(compressed_frames)
-    # logging.info("Sending image frames to Parent.")
-    # commsHandler.send_image_frames(compressed_frames)
-
-    # # Receive object detection data
-    # detection_data = receive_object_detection_results(client_socket)
-    # objects = detection_data + objects
-    # logging.info("Waiting to receive object detection data.")
-    # message_type, payload = None, None
-    # while message_type != MessageType.OBJECT_DETECTION:
-    #     message_type, payload = commsHandler.get_message(timeout=10)
-    #     if message_type == MessageType.OBJECT_DETECTION:
-    #         remote_objects = payload  # Access payload with detection results
-    #         objects += remote_objects
 
     logging.info("Sending object detection data to Parent.")
     # Send object detection results to PiA
@@ -187,10 +174,7 @@ if __name__ == "__main__":
         # Get Hyperspectral Calibration
         cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
-        # Make connection with PiA
-        # client_socket = make_client_connection(IP, PORT)
-        # logger.debug("Connected to PiA")
-        
+
         # Setup object detection modelx
         rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
         logger.debug("Loaded RGB object detection model.")
@@ -201,28 +185,11 @@ if __name__ == "__main__":
         logger.info("Setup complete. Waiting to start capture...")
 
         # Poll for trigger capture signal
-        while True:
+        while commsHandlerInstance.is_connected():
             # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
+            
             # Process incoming messages 
             commsHandlerInstance.process_messages(child_message_handler)
-
-            # if receive_capture_request(client_socket) == 1:
-                # logging.info("Triggered Capture.")
-                # on_trigger(rgb_model,axis,hs_cam,cal_arr)
-                # capture_triggered = True
-            
-            # if not client_socket.recv(1024).decode():
-            #     logger.info("PiA has disconnected.")  
-            #     break
-
-            # message_type, payload = None, None
-            # while message_type != MessageType.CAPTURE_REQUEST:
-            #     message_type, payload = commsHandlerInstance.get_message(timeout=10)
-            #     if message_type == MessageType.CAPTURE_REQUEST:
-            #         logging.info("Triggered Capture.")
-            #         on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandlerInstance)
-            #         capture_triggered = True
-
             sleep(1)
     
     except Exception as e:
@@ -233,14 +200,18 @@ if __name__ == "__main__":
             hs_cam.Close()
             zaber_conn.close()
 
-    finally:
-        if ENABLE_HS:
-            axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
-            hs_cam.Close()
-            zaber_conn.close()
+    except KeyboardInterrupt:
+        logger.info("Shutting down")
         commsHandlerInstance.stop()
-        logger.info("All connections closed.")
-        logger.info("System terminated.")
+
+    # finally:
+    #     if ENABLE_HS:
+    #         axis.move_absolute(2,Units.ANGLE_DEGREES,velocity=80,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=True) # temporarily blocking
+    #         hs_cam.Close()
+    #         zaber_conn.close()
+    #     commsHandlerInstance.stop()
+    #     logger.info("All connections closed.")
+    #     logger.info("System terminated.")
     
 
 

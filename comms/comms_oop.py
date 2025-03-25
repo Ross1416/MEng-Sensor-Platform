@@ -22,6 +22,7 @@ class MessageType(Enum):
     OBJECT_DETECTION = auto()   # Sending/receiving object detection results data
     HEARTBEAT = auto()
     ERROR = auto()
+    # HYPERSPECTRAL_DATA = auto()
 
 class CommsHandler():
     def __init__(self, is_parent=True, host=HOST, port=PORT, remote_host=None):
