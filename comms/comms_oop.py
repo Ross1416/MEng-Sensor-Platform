@@ -159,6 +159,8 @@ class CommsHandler():
 
     def _listener_worker(self):
         """Worker thread to listen for incoming messages"""
+        print("Entering _listener_worker")
+
         while self.running:
             if not self.connected:
                 sleep(1)
@@ -168,7 +170,7 @@ class CommsHandler():
                 # Check if there's data to read
                 message_type, payload = self._receive_message()
                 if message_type:
-                    # self.logger.info(f"Added {message_type} to the queue")
+                    self.logger.info(f"Added {message_type} to the queue")
                     self.receive_queue.put((message_type, payload))
             except socket.timeout:
                 # This is expected with the timeout we set
@@ -187,7 +189,6 @@ class CommsHandler():
                 
             sleep(2)  # Small sleep to prevent CPU hogging
             
-
     def _sender_worker(self):
         """Worker thread to send messages from queue"""
         while self.running:
@@ -264,8 +265,9 @@ class CommsHandler():
         """Low-level receive message with additional debugging"""
         if not self.connected or not self.conn:
             return None, None
-        
+            
         try:
+            print(f"Trying to receive message")
             # Read message type
             header = self.conn.recv(1)
             if not header:
@@ -281,7 +283,7 @@ class CommsHandler():
                 self.logger.debug(f"Message type received: {message_type}")
             except ValueError:
                 self.logger.error(f"Received invalid MessageType value: {message_type_value}")
-                # Option 1: Skip this message and continue
+            #     # Option 1: Skip this message and continue
                 return None, None
                 # Option 2 (alternative): Force a specific message type for debugging
                 # message_type = MessageType.ERROR
@@ -342,7 +344,7 @@ class CommsHandler():
                         
         except socket.timeout:
             # This is expected with the timeout we set
-            self.logger.debug(f"Message of type {MessageType(message_type_value)} caused a timeout!")
+            # self.logger.debug(f"Message of type {MessageType(message_type_value)} caused a timeout!")
             return None, None
         except Exception as e:
             self.logger.error(f"Error receiving message: {e}")
