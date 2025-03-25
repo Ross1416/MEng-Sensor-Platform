@@ -20,10 +20,14 @@ def on_trigger(rgb_model,axis,hs_cam,cal_arr,commsHandler):
     # Send images to PiA
     compressed_frames = []
     for img in frames:
-        img = cv2.imencode('.jpg', img)[1] # Compress image
-        compressed_frames.extend(img)
+        success, encoded_img = cv2.imencode('.jpg', img)
+        if success:
+            compressed_frames.append(encoded_img.tobytes())
+        else:
+            logging.error("Failed to compress frame")
     
-
+    logging.info(f"Sending {len(compressed_frames)} compressed frames")
+    commsHandler.send_image_frames(compressed_frames)
     logging.info("Sending image frames to Parent.")
     commsHandler.send_image_frames(compressed_frames)
 
