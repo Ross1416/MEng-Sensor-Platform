@@ -115,7 +115,7 @@ class Neo8T:
         if self.location:
             return True
         else:
-            return 
+            return False
         
     def get_location(self):
         return location

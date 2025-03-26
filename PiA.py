@@ -83,11 +83,14 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     hs_materials = []
     for i in range(len(objects_restructured)):
         receive_images(conn, HSI_SCANS_PATH)
-        mats = receive_object_detection_results(conn)
+        # mats = receive_object_detection_results(conn)
+        mats={"nothing",0.1}
         hs_materials.append(mats)
 
     # Extract filtered IDs
-    ids = filtered_objects[:][0]
+    ids = []
+    for obj in filtered_objects:
+        ids.append(int(obj[3]))
 
     # Remove unneeded hs_materals where objects are removed with NMS
     filtered_hs_materials = []
@@ -100,26 +103,26 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     hs_ndvi = []
     files = os.listdir(HSI_SCANS_PATH)
     for scan in files:
-        path = os.path.join(path, scan)
+        path = os.path.join(HSI_SCANS_PATH, scan)
         if os.path.isfile(path) and scan.endswith(".png"):
             loc = scan.find("_") + 1
-            id = scan[loc : loc + 2]
+            id = int(scan[loc : loc + 1])
             # Check if id of hyperspectral scan is in filtered objects
             if id in ids:
                 if "ndvi" in path:
-                    save_path = f"./user-interface/public/images/{activeFile[:-5]}/{uid}/hs_{uid}_{id}.jpg"
+                    save_path = f"./user-interface/public/images/{activeFile[:-5]}/hs_{uid}_{id}_ndvi.jpg"
                     shutil.move(path, save_path)
-                    hs_classification.append(f"./{uid}/hs_{uid}_{id}.jpg")
+                    hs_classification.append(f"./hs_{uid}_{id}_ndvi.jpg")
                 else:
-                    save_path = f"./user-interface/public/images/{activeFile[:-5]}/{uid}/hs_{uid}_{id}_ndvi.jpg"
+                    save_path = f"./user-interface/public/images/{activeFile[:-5]}/hs_{uid}_{id}.jpg"
                     shutil.move(path, save_path)
-                    hs_ndvi.append(f"./{uid}/hs_{uid}_{id}_ndvi.jpg")
+                    hs_ndvi.append(f"./hs_{uid}_{id}.jpg")
 
     # Remove all unmoved (unnecessary HS scans)
     delete_files_in_dir(HSI_SCANS_PATH)
 
     # Update JSON with hyperspectral data
-    updateJSON_HS(
+    updateJSON_HS(filtered_objects, 
         hs_classification, hs_ndvi, hs_materials, lon, lat, activeFile
     )
 
@@ -128,8 +131,8 @@ PORT = 5002
 HOST = "0.0.0.0"  # i.e. listening
 RESOLUTION = (4608, 2592)
 FOV = (102, 67)
-PRIVACY = True  # Blur people
-CLASSES = ["person"]
+PRIVACY = False  # Blur people
+CLASSES = ["plant"]
 
 ENABLE_DEBUG = False
 
@@ -187,9 +190,13 @@ if __name__ == "__main__":
 
             # Get current location 
             location = gps.get_location()
-            # Trigger new scan 
-            new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], privacy=PRIVACY)       
-        
+            if location:
+                # Trigger new scan 
+                new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], privacy=PRIVACY)       
+            else:
+                logging.debug("No location => using default Lat and long")
+                new_scan(rgb_model,activeFile, privacy=PRIVACY)       
+
             logging.info("Completed scan.")
 
             if status == 2:

@@ -77,7 +77,7 @@ def updateJSON(uid, lon, lat, objects,image, activeFile):
         json.dump(data, file, indent=4)
     print("JSON file updated successfully.")
 
-def updateJSON_HS(class_ref, ndvi_ref, materials, lon, lat, activeFile):
+def updateJSON_HS(filtered_objects, class_ref, ndvi_ref, materials, lon, lat, activeFile):
     file_path = "./user-interface/api/scans/"+activeFile
     with open(file_path, "r") as file:
         data = json.load(file)
@@ -86,9 +86,11 @@ def updateJSON_HS(class_ref, ndvi_ref, materials, lon, lat, activeFile):
     for pin in data["pins"]:
         if pin["geo_coords"] == [lon, lat]:
             for j, obj in enumerate(pin["objects"]):
-                obj["HS_classification_ref"] = class_ref[j]
-                obj["HS_ndvi_ref"] = ndvi_ref[j]
-                obj["HS_materials"] = materials[j]
+                for i, detection in enumerate(filtered_objects):
+                    if obj["id"] == detection[3]:
+                        obj["HS_classification_ref"] = class_ref[i]
+                        obj["HS_ndvi_ref"] = ndvi_ref[i]
+                        # obj["HS_materials"] = materials[j]
 
     # Write to file
     with open(file_path, "w") as file:
@@ -134,6 +136,7 @@ def format_results(objects):
                             "h":obj[1][3],
                             "RGB_classification":obj[0],
                             "RGB_confidence":obj[2],
+                            "id":obj[3],
                             "HS_classification":{},
                             "HS_ref":"",
                                 "distance":10})
