@@ -27,9 +27,9 @@ def object_detection(model, frame,conf=0.25):
 
 def assign_id(objects):
     id = 0
-    for camera in objects:
-        for obj in camera:
-            obj = obj + id
+    for i in range(len(objects)):
+        for j in range(len(objects[i])):
+            objects[i][j] += [id]
             id += 1
     return objects
 

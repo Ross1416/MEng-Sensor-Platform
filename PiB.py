@@ -8,6 +8,7 @@ from hyperspectral.zaber_driver import *
 from hyperspectral.hyperspectral_driver import *
 from hyperspectral.classification import *
 import time
+import traceback
 
 
 def on_trigger(rgb_model, axis, hs_cam, cal_arr):
@@ -227,8 +228,11 @@ if __name__ == "__main__":
             sleep(1)
 
     except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        filename, line, func, text = tb[-1]
         logging.error(f"Error in PiB.py: {e}")
-
+        logging.error(f"Occurred in file:{filename}, line {line}")
+        
         if ENABLE_HS:
             axis.move_absolute(
                 2,
@@ -243,16 +247,4 @@ if __name__ == "__main__":
         logging.info("All connections closed.")
 
     finally:
-        if ENABLE_HS:
-            axis.move_absolute(
-                2,
-                Units.ANGLE_DEGREES,
-                velocity=80,
-                velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
-                wait_until_idle=True,
-            )  # temporarily blocking
-            hs_cam.Close()
-            zaber_conn.close()
-        client_socket.close()
-        logging.info("All connections closed.")
         logging.info("System terminated.")
