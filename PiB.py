@@ -125,7 +125,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
 
     output_path = HSI_SCANS_PATH + f"hs_{id}.jpg"
     mats = classify_and_save(
-        MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path
+        MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr
     )
     print(mats)
 
@@ -134,7 +134,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
 
 # IP = "hsiA.local"
 
-ENABLE_HS = False
+ENABLE_HS = True
 ENABLE_DEBUG = False
 
 IP = "10.42.0.1"
@@ -142,7 +142,7 @@ PORT = 5002
 PATH = "./captures/"
 CLASSES = ["person"]
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
-ROTATION_OFFSET = 20  # temporary
+ROTATION_OFFSET = 126  # temporary
 
 RESOLUTION = (4608, 2592)
 FOV = (102, 67)

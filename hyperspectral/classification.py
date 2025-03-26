@@ -24,7 +24,7 @@ def apply_smoothing(image, filter_size=10):
     return median_filter(image, size=filter_size)
 
 
-def calculated_ndvi(full_image):
+def calculated_ndvi(full_image, cal_arr):
     """Calculated NDVI for all pixels in the image"""
 
     red_idx = get_wavelength_index(cal_arr, 690, 2)
@@ -44,7 +44,7 @@ def calculated_ndvi(full_image):
 
 
 def classify_and_save(
-    model_path, full_image, label_encoding_path, output_path
+    model_path, full_image, label_encoding_path, output_path, cal_arr
 ):
 
     output_name, _ = os.path.splitext(output_path)
@@ -74,7 +74,7 @@ def classify_and_save(
     label_encoder = load_label_encoder(label_encoding_path)
 
     # Calculate NDVI
-    ndvi = calculated_ndvi(full_image)
+    ndvi = calculated_ndvi(full_image, cal_arr)
 
     # Saving the image
     output_path = output_name + "_ndvi.png"
