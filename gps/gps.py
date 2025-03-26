@@ -42,7 +42,7 @@ class Neo8T:
             print(f"Serial error: {e}")
         return None
 
-    def get_location(self):
+    def find_location(self):
         """Reads and parses the GPS location from NMEA sentences. Returns Dictionary containing latitude, longitude, altitude, and fix quality or None if no fix."""
         count = 0
         while True:
@@ -85,7 +85,7 @@ class Neo8T:
         """Holds until distance moved > {distance_threshold} and triggers callback function if provided and exits."""
         distance_moved = -99
         while distance_moved < self.distance_threshold:
-            self.location = self.get_location()
+            self.location = self.find_location()
             if self.location:
                 pos1 = (self.location["latitude"], self.location["longitude"])
                 pos2 = (self.last_location["latitude"], self.last_location["longitude"])
@@ -99,7 +99,7 @@ class Neo8T:
             time.sleep(1)
 
     def check_for_movement(self):
-        location = self.get_location()
+        location = self.find_location()
         if location:
             pos1 = (location["latitude"], location["longitude"])
             pos2 = (self.last_location["latitude"], self.last_location["longitude"])
@@ -118,7 +118,7 @@ class Neo8T:
             return False
         
     def get_location(self):
-        return location
+        return self.location
         
     def set_distance_threshold(self, distance):
         self.distance_threshold = distance
