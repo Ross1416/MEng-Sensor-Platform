@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from scipy.ndimage import median_filter
 import matplotlib.colors as mcolors
-from hyperspectral_driver import get_wavelength_index, get_calibration_array
+from hyperspectral.hyperspectral_driver import get_wavelength_index, get_calibration_array
 
 
 def select_bands(start=100, end=500, num_bands=30):
@@ -44,7 +44,7 @@ def calculated_ndvi(full_image):
 
 
 def classify_and_save(
-    model_path, image_path, label_encoding_path, output_path
+    model_path, full_image, label_encoding_path, output_path
 ):
 
     output_name, _ = os.path.splitext(output_path)
@@ -53,7 +53,7 @@ def classify_and_save(
     model = tf.keras.models.load_model(model_path)
 
     # Load hyperspectral image (full image for NDVI)
-    full_image = np.load(image_path)
+    # full_image = np.load(image_path)
 
     # Keep the reduced image for classification
     selected_band_indices = select_bands()
