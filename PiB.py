@@ -227,6 +227,21 @@ if __name__ == "__main__":
 
             sleep(1)
 
+    except KeyboardInterrupt:
+        logging.error(f"Keyboard interrupt")
+        
+        if ENABLE_HS:
+            axis.move_absolute(
+                2,
+                Units.ANGLE_DEGREES,
+                velocity=80,
+                velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
+                wait_until_idle=True,
+            )  # temporarily blocking
+            hs_cam.Close()
+            zaber_conn.close()
+        client_socket.close()
+        logging.info("All connections closed.")
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
         filename, line, func, text = tb[-1]
