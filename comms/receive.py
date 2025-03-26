@@ -36,7 +36,7 @@ def receive_images(conn, save_location):
         os.makedirs(save_location, exist_ok=True)
         
         # Send acknowledgment
-        num_images = int(conn.recv(1024).decode())
+        num_images = int(conn.recv(1).decode())
         conn.sendall(b"READY")
         print("READY")
         print(f"Expecting {num_images} images.")

@@ -17,7 +17,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     # Perform object detection
     objects = []
     for f in frames:
-        objects.append(object_detection(rgb_model, f))
+        objects.append(object_detection(rgb_model, f, 0.2))
     # Send images to PiA
     send_image_arrays(client_socket, frames)
     # Receive object detection data
@@ -57,7 +57,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
                         axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
                     )
                     send_images(client_socket, HSI_SCANS_PATH)
-                    send_object_detection_results(client_socket, mats)
+                    # send_object_detection_results(client_socket, mats)
                     delete_files_in_dir(HSI_SCANS_PATH)
 
     # # Send processed hyperspectral scans to PiA
@@ -140,9 +140,9 @@ ENABLE_DEBUG = False
 IP = "10.42.0.1"
 PORT = 5002
 PATH = "./captures/"
-CLASSES = ["person"]
+CLASSES = ["plant"]
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
-ROTATION_OFFSET = 126  # temporary
+ROTATION_OFFSET = -55  # temporary
 
 RESOLUTION = (4608, 2592)
 FOV = (102, 67)
