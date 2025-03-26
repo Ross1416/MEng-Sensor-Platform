@@ -136,7 +136,6 @@ if __name__ == "__main__":
 
     try:
         while commsHandlerInstance.is_connected():
-            print("Reached while loop of PiA")
             # logger.info(f"Queue Size: {commsHandlerInstance.receive_queue.qsize()}")
             # Process incoming messages 
             try:

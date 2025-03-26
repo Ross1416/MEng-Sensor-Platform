@@ -187,7 +187,7 @@ class CommsHandler():
                 self.connected = False
                 self.receive_queue.put((MessageType.ERROR, str(e)))
                 
-            sleep(2)  # Small sleep to prevent CPU hogging
+            sleep(0.01)  # Small sleep to prevent CPU hogging
             
     def _sender_worker(self):
         """Worker thread to send messages from queue"""
