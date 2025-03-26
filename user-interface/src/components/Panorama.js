@@ -57,7 +57,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     useEffect(()=> {
         const interval = setInterval(() => {
           updateSearchObjects();
-    }, 50);
+    }, 1000);
         return () => clearInterval(interval);
     }, [updateSearchObjects])
 

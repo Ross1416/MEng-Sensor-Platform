@@ -1,0 +1,18 @@
+{
+    "activeFile": "e89c9584-eb23-4e1b-aa13-0c1af972ba44.json",
+    "status": 0,
+    "status-message": "setting up",
+    "pi-connection": true,
+    "gps-connection": false,
+    "wifi-connection": true,
+    "search-objects": [
+        {
+            "object": "Human",
+            "hsi": true
+        },
+        {
+            "object": "Person",
+            "hsi": false
+        }
+    ]
+}
