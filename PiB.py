@@ -20,13 +20,18 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
         objects.append(object_detection(rgb_model, f, 0.2))
     # Send images to PiA
     send_image_arrays(client_socket, frames)
-    # Receive object detection data
-    detection_data = receive_object_detection_results(client_socket)
-    objects = detection_data + objects
+    # # Receive object detection data
+    # detection_data = receive_object_detection_results(client_socket)
+    # objects = detection_data + objects
     # Send object detection results to PiA
-    send_object_detection_results(client_socket, objects[2:])
-    # Assign IDs to objects
-    objects = assign_id(objects)
+    # send_object_detection_results(client_socket, objects[2:])
+
+    send_object_detection_results(client_socket, objects)
+    # # Assign IDs to objects
+    # objects = assign_id(objects)
+
+    # Receive filtered objects
+    objects = receive_object_detection_results(client_socket)
 
     # Take hyperspectral scan
     for i in range(len(objects)):  # For every camera
@@ -50,19 +55,12 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
                         logging.debug(
                             f"Camera {i}, object {j}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
                         )
-                        mats = on_rotate(
+                        mats, hs_classification, hs_ndvi = on_rotate(
                             axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
                         )
-                        send_images(client_socket, HSI_SCANS_PATH)
-                        # send_object_detection_results(client_socket, mats)
-                        delete_files_in_dir(HSI_SCANS_PATH)
-
-    # # Send processed hyperspectral scans to PiA
-    # send_images(client_socket, HSI_SCANS_PATH)
-    # # Send hyperspectral material distribution data to PiA
-    # send_object_detection_results(client_socket, hs_materials)
-    # # Remove all old hs scans
-    # delete_files_in_dir(HSI_SCANS_PATH)
+                        send_image_arrays(client_socket, [hs_classification, hs_ndvi])
+                        send_object_detection_results(client_socket, [mats])
+                        # delete_files_in_dir(HSI_SCANS_PATH)
 
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
@@ -126,7 +124,11 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     )
     print(mats)
 
-    return mats
+    # Open plots as arrays
+    hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
+    hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
+
+    return mats, hs_classification, hs_ndvi
 
 
 # IP = "hsiA.local"

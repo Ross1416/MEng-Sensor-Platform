@@ -14,8 +14,8 @@ class Object:
         distance=None,
         hs_scan=True,
         hs_materals=None,
-        hs_classification=None,
-        hs_ndvi=None,
+        hs_classification_ref=None,
+        hs_ndvi_ref=None,
     ):
         self.id = id
         self.label = label
@@ -24,8 +24,8 @@ class Object:
         self.distance = distance
         self.hs_scan = hs_scan
         self.hs_materials = hs_materals
-        self.hs_classification = hs_classification
-        self.hs_ndvi = hs_ndvi
+        self.hs_classification_ref = hs_classification_ref
+        self.hs_ndvi_ref = hs_ndvi_ref
 
     # def get_array():
     #     return [
@@ -37,16 +37,16 @@ class Object:
     #         self.hs_materals,
     #     ]
 
-    def assign_id(id):
+    def assign_id(self, id):
         self.id = id
 
-    def get_xyxy():
+    def get_xyxy(self):
         return self.coords
 
-    def set_xyxy(xyxy):
+    def set_xyxy(self, xyxy):
         self.coords = xyxy
 
-    def adjust_xyxy(x1_adj, y1_adj, x2_adj, y2_adj):
+    def adjust_xyxy(self, x1_adj, y1_adj, x2_adj, y2_adj):
         x1, y1, x2, y2 = self.get_xyxy()
         x1 += x1_adj
         y1 += y1_adj
@@ -54,7 +54,7 @@ class Object:
         y2 += y2_adj
         self.set_xyxy([x1, y1, x2, y2])
 
-    def get_xywh(centre_relative=False, img_width=None, img_height=None):
+    def get_xywh(self, centre_relative=False, img_width=None, img_height=None):
         """
         Convert bounding box coordinates from [x1, y1, x2, y2] to [x, y, w, h].
         With option to have [x,y] relative to centre of image
@@ -85,6 +85,16 @@ class Object:
                 y -= img_height / 2
 
         return (x, y, w, h)
+
+    def set_hs_classification_ref(hs_classification_ref):
+        self.hs_classification_ref = hs_classification_ref
+
+    def set_hs_ndvi_ref(hs_ndvi_ref):
+        self.hs_classification_ref = hs_ndvi_ref
+
+    def set_hs_materials(hs_materials):
+        self.hs_materials = hs_materials
+
 
 def object_detection(model, frame, conf=0.25):
     """
