@@ -24,7 +24,7 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     # Perform object detection
     objects = []
     for f in frames:
-        objects.append(object_detection(rgb_model, f))
+        objects.append(object_detection(rgb_model, f, 0.2))
     # Retrieve slave images and data
     frames += receive_image_arrays(conn)
 
@@ -33,12 +33,8 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
         os.makedirs(debug_dir, exist_ok=True)
 
         for i, frame in enumerate(frames):
-            frame_id = len(
-                [f for f in os.listdir(debug_dir) if f.endswith(".jpg")]
-            )
-            cv2.imwrite(
-                os.path.join(debug_dir, f"frame_{frame_id}.jpg"), frame
-            )
+            frame_id = len([f for f in os.listdir(debug_dir) if f.endswith(".jpg")])
+            cv2.imwrite(os.path.join(debug_dir, f"frame_{frame_id}.jpg"), frame)
 
     # Send object detection results to PiB
     send_object_detection_results(conn, objects)
@@ -46,8 +42,8 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     objects += receive_object_detection_results(conn)
     # Assign IDs to objects
     objects = assign_id(objects)
-    
-    # Blur people if privacy 
+
+    # Blur people if privacy
     setStatusMessage("blurring people")
 
     # Blur people if privacy
@@ -58,7 +54,8 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     setStatusMessage("stitching images")
     # Perform pano stitching
     panorama, objects = performPanoramicStitching(frames, objects)
-    # Restructure objects
+
+    # Restructure objects into one array instead of separated by frames
     objects_restructured = []
     for frame in objects:
         objects_restructured += frame
@@ -68,23 +65,23 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     filtered_objects = non_maximum_suppression(objects_restructured)
 
     # Updates json and moves images to correct folder
-    setStatusMessage("final touches")
-    uid = str(lon)+str(lat)
-    for i in range(len(filtered_objects)):
-        filtered_objects[i][1] = xyxy_to_xywh(
-            filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True
-        )
+    setStatusMessage("updating ui")
+    uid = str(lon) + str(lat)
+    # for i in range(len(filtered_objects)):
+    #     filtered_objects[i][1] = xyxy_to_xywh(
+    #         filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True
+    #     )
 
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
-    setStatusMessage("complete!")
 
     # Receive processed hyperspectral scans from PiB
     # Receive hyperspectral material distribution data from PiB
     hs_materials = []
     for i in range(len(objects_restructured)):
+        setStatusMessage(f"hyperspectral scanning {objects_restructured[i].label}")
         receive_images(conn, HSI_SCANS_PATH)
         # mats = receive_object_detection_results(conn)
-        mats={"nothing",0.1}
+        mats = {"nothing", 0.1}
         hs_materials.append(mats)
 
     # Extract filtered IDs
@@ -122,8 +119,8 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     delete_files_in_dir(HSI_SCANS_PATH)
 
     # Update JSON with hyperspectral data
-    updateJSON_HS(filtered_objects, 
-        hs_classification, hs_ndvi, hs_materials, lon, lat, activeFile
+    updateJSON_HS(
+        filtered_objects, hs_classification, hs_ndvi, hs_materials, lon, lat, activeFile
     )
 
 
@@ -139,7 +136,7 @@ ENABLE_DEBUG = False
 HSI_SCANS_PATH = "./hsi_scans/"
 
 # GPS
-GPS_PORT = "/dev/ttyACM0" # USB Port (check automatically?)
+GPS_PORT = "/dev/ttyACM0"  # USB Port (check automatically?)
 GPS_BAUDRATE = 115200
 DISTANCE_THRESHOLD = 10
 
@@ -157,8 +154,13 @@ if __name__ == "__main__":
     # Setup cameras and GPIO
     cams = setup_cameras()
     logging.debug("Setup cameras.")
-    # Setup GPS 
-    gps = Neo8T(port=GPS_PORT, baudrate=GPS_BAUDRATE,timeout=1,distance_threshold=DISTANCE_THRESHOLD)
+    # Setup GPS
+    gps = Neo8T(
+        port=GPS_PORT,
+        baudrate=GPS_BAUDRATE,
+        timeout=1,
+        distance_threshold=DISTANCE_THRESHOLD,
+    )
     logging.debug("Setup GPS")
     # Make connection
     server_socket, conn = make_server_connection(HOST, PORT)
@@ -177,7 +179,7 @@ if __name__ == "__main__":
         try:
             status, activeFile = getPlatformStatus()
         except json.decoder.JSONDecodeError:
-            logging.error("Error accessing JSON configuration file.")  
+            logging.error("Error accessing JSON configuration file.")
 
         # Update GPS status
         gps_status = gps.check_if_gps_locaiton()
@@ -188,14 +190,20 @@ if __name__ == "__main__":
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
 
-            # Get current location 
+            # Get current location
             location = gps.get_location()
             if location:
-                # Trigger new scan 
-                new_scan(rgb_model,activeFile, lat=location["latitude"], lon=location["longitude"], privacy=PRIVACY)       
+                # Trigger new scan
+                new_scan(
+                    rgb_model,
+                    activeFile,
+                    lat=location["latitude"],
+                    lon=location["longitude"],
+                    privacy=PRIVACY,
+                )
             else:
                 logging.debug("No location => using default Lat and long")
-                new_scan(rgb_model,activeFile, privacy=PRIVACY)       
+                new_scan(rgb_model, activeFile, privacy=PRIVACY)
 
             logging.info("Completed scan.")
 

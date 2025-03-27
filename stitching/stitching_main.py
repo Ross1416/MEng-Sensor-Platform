@@ -2,22 +2,30 @@ from stitching.stitching_functions import *
 import cv2
 import numpy as np
 
+
 def performPanoramicStitching(images, objects):
     map_x, map_y = getCylindricalProjection(images[3])
 
-    for i in range(len(images)): 
-        images[i], x_offset, y_offset = applyCylindricalProjection(images[i], map_x, map_y)
+    for i in range(len(images)):
+        images[i], x_offset, y_offset = applyCylindricalProjection(
+            images[i], map_x, map_y
+        )
         for obj in objects[i]:
-            x1 = obj[1][0]
-            y1 = obj[1][1]
-            x2 = obj[1][2]
-            y2 = obj[1][3]
+            # x1 = obj[1][0]
+            # y1 = obj[1][1]
+            # x2 = obj[1][2]
+            # y2 = obj[1][3]
+            x1, y1, x2, y2 = obj.get_xyxy()
 
-            (x1, x2, y1, y2) = findNewObjectLocation(x1, y1, x2, y2, map_x, map_y, x_offset, y_offset)
-            obj[1][0] = x1
-            obj[1][1] = y1
-            obj[1][2] = x2
-            obj[1][3] = y2
+            (x1, x2, y1, y2) = findNewObjectLocation(
+                x1, y1, x2, y2, map_x, map_y, x_offset, y_offset
+            )
+
+            obj.set_xyxy([x1, y1, x2, y2])
+            # obj[1][0] = x1
+            # obj[1][1] = y1
+            # obj[1][2] = x2
+            # obj[1][3] = y2
 
     # Commented code below is used for calibration
 
@@ -26,7 +34,7 @@ def performPanoramicStitching(images, objects):
     # H1 = calculateTransform(dst_pts, src_pts)
     # print(H1)
     # [[ 9.24197515e-01  1.58205770e-01  3.10296331e+03][-1.06465276e-02  9.93407578e-01  1.18884774e+01]]
-    H1 = np.array([[ 1,  0,  3.10296331e+03], [0, 1, 0]])
+    H1 = np.array([[1, 0, 3.10296331e03], [0, 1, 0]])
     panorama, objects[1] = applyTransform(images[0], images[1], H1, objects[1])
 
     # showImage(panorama)
@@ -36,7 +44,7 @@ def performPanoramicStitching(images, objects):
     # H2 = calculateTransform(dst_pts, src_pts)
     # print('H2', H2)
     # [[ 7.71854161e-01  1.82221907e-01  6.26729881e+03], [-1.50181816e-01  9.74840718e-01  2.18196294e+01]]q
-    H2 = np.array([[ 1,  0,  6.26729881e+03], [0,  1,  0]])
+    H2 = np.array([[1, 0, 6.26729881e03], [0, 1, 0]])
     panorama, objects[2] = applyTransform(panorama, images[2], H2, objects[2])
 
     ### Third Stitch ###
@@ -44,30 +52,31 @@ def performPanoramicStitching(images, objects):
     # H3 = calculateTransform(dst_pts, src_pts)
     # print(H3)
     # [[ 8.76097633e-01  2.13350716e-01  9.28608977e+03][-4.10457543e-02  9.85452950e-01  1.21832106e+02]]
-    H3 = np.array([[ 1,  0, 9.28608977e+03], [0, 1, 1.21832106e+02]])
+    H3 = np.array([[1, 0, 9.28608977e03], [0, 1, 1.21832106e02]])
     panorama, objects[3] = applyTransform(panorama, images[3], H3, objects[3])
 
     # Crop Image
     height, width, _ = panorama.shape
-    panorama = panorama[200:1900, 200:width-200, :]
+    panorama = panorama[200:1900, 200 : width - 200, :]
     for frame in objects:
         for obj in frame:
-            obj[1][0] -= 200
-            obj[1][2] -= 200
+            # obj[1][0] -= 200
+            # obj[1][2] -= 200
+            obj.adjust_xyxy(-200, -200, -200, -200)
 
-            obj[1][1] -= 200
-            obj[1][3] -= 200
+            # obj[1][1] -= 200
+            # obj[1][3] -= 200
 
     return panorama, objects
 
 
 if __name__ == "__main__":
-    image1 = cv2.imread('./test_images/2/cap_0.jpg')
-    image2 = cv2.imread('./test_images/2/cap_1.jpg')
-    image3 = cv2.imread('./test_images/2/cap_2.jpg')
-    image4 = cv2.imread('./test_images/2/cap_3.jpg')
+    image1 = cv2.imread("./test_images/2/cap_0.jpg")
+    image2 = cv2.imread("./test_images/2/cap_1.jpg")
+    image3 = cv2.imread("./test_images/2/cap_2.jpg")
+    image4 = cv2.imread("./test_images/2/cap_3.jpg")
 
-    label = 'fish'
+    label = "fish"
     x1 = 3000
     x2 = 3200
     y1 = 1750
@@ -78,4 +87,3 @@ if __name__ == "__main__":
 
     panorama = performPanoramicStitching([image1, image2, image3, image4], objects)
     showImage(panorama)
-
