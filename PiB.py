@@ -13,11 +13,11 @@ import traceback
 
 def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     # Capture images
-    frames = capture(cams, "PiB", PATH)
+    frames = capture(cams, "PiB")
     # Perform object detection
     objects = []
     for f in frames:
-        objects.append(object_detection(rgb_model, f, 0.2))
+        objects.append(object_detection(rgb_model, f, OD_THRESHOLD))
     # Send images to PiA
     send_image_arrays(client_socket, frames)
     # # Receive object detection data
@@ -133,29 +133,33 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
 
 # IP = "hsiA.local"
 
-ENABLE_HS = True
-ENABLE_DEBUG = False
-
+# COMMUNICATIONS
 IP = "10.42.0.1"
 PORT = 5002
-PATH = "./captures/"
-CLASSES = ["plant"]
-ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
-ROTATION_OFFSET = -55  # temporary
 
+# CAMERA
 RESOLUTION = (4608, 2592)
 FOV = (102, 67)
 
-CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
+# OBJECT DETECTION
+CLASSES = ["plant"]
+OD_THRESHOLD = 0.2
 
-
+# HYPERSPECTRAL
 MODEL_PATH = "./hyperspectral/NN_18_03_2025.keras"
 LABEL_ENCODING_PATH = "./hyperspectral/label_encoding.npy"
+CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 HSI_SCANS_PATH = "./hsi_scans/"
-
 HS_EXPOSURE_TIME = 10000
 HS_PIXEL_BINNING = 2
 HS_GAIN = 200
+
+ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
+ROTATION_OFFSET = -55  # temporary
+
+# OTHER
+ENABLE_HS = True
+ENABLE_DEBUG = True
 
 if __name__ == "__main__":
     # Setup Logging
@@ -230,11 +234,12 @@ if __name__ == "__main__":
                 velocity=80,
                 velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
                 wait_until_idle=True,
-            )  # temporarily blocking
+            )
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()
         logging.info("All connections closed.")
+
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
         filename, line, func, text = tb[-1]
@@ -248,7 +253,7 @@ if __name__ == "__main__":
                 velocity=80,
                 velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
                 wait_until_idle=True,
-            )  # temporarily blocking
+            )
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()

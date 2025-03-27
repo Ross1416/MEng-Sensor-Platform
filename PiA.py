@@ -24,7 +24,7 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     # Perform object detection
     objects = []
     for f in frames:
-        objects.append(object_detection(rgb_model, f, 0.2))
+        objects.append(object_detection(rgb_model, f, OD_THRESHOLD))
     # Retrieve slave images and data
     frames += receive_image_arrays(conn)
 
@@ -107,16 +107,18 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
     updateJSON_HS(filtered_objects, lon, lat, activeFile)
 
 
+# COMMUNICATIONS
 PORT = 5002
 HOST = "0.0.0.0"  # i.e. listening
+
+# CAMERA
 RESOLUTION = (4608, 2592)
 FOV = (102, 67)
+
+# OBJECT DETECTION
 PRIVACY = False  # Blur people
 CLASSES = ["plant"]
-
-ENABLE_DEBUG = False
-
-HSI_SCANS_PATH = "./hsi_scans/"
+OD_THRESHOLD = 0.2
 
 # UI
 UI_IMAGES_SAVE_PATH = "./user-interface/public/images/"
@@ -125,6 +127,9 @@ UI_IMAGES_SAVE_PATH = "./user-interface/public/images/"
 GPS_PORT = "/dev/ttyACM0"  # USB Port (check automatically?)
 GPS_BAUDRATE = 115200
 DISTANCE_THRESHOLD = 10
+
+# OTHER
+ENABLE_DEBUG = True
 
 if __name__ == "__main__":
     setStatusMessage("setting up")
@@ -137,6 +142,7 @@ if __name__ == "__main__":
         handlers=[logging.FileHandler("piA.log"), logging.StreamHandler()],
     )
     logging.info("##### Start up new sesson. #####")
+
     # Setup cameras and GPIO
     cams = setup_cameras()
     logging.debug("Setup cameras.")
