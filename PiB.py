@@ -13,59 +13,52 @@ import traceback
 
 def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     # Capture images
-    frames = capture(cams, "PiB", PATH)
+    frames = capture(cams, "PiB")
     # Perform object detection
     objects = []
     for f in frames:
-        objects.append(object_detection(rgb_model, f, 0.2))
+        objects.append(object_detection(rgb_model, f, OD_THRESHOLD))
     # Send images to PiA
     send_image_arrays(client_socket, frames)
-    # Receive object detection data
-    detection_data = receive_object_detection_results(client_socket)
-    objects = detection_data + objects
+    # # Receive object detection data
+    # detection_data = receive_object_detection_results(client_socket)
+    # objects = detection_data + objects
     # Send object detection results to PiA
-    send_object_detection_results(client_socket, objects[2:])
-    # Assign IDs to objects
-    objects = assign_id(objects)
+    # send_object_detection_results(client_socket, objects[2:])
+
+    send_object_detection_results(client_socket, objects)
+    # # Assign IDs to objects
+    # objects = assign_id(objects)
+
+    # Receive filtered objects
+    objects = receive_object_detection_results(client_socket)
 
     # Take hyperspectral scan
-    for i in range(len(objects)):  # For every camera
-        if objects[i] != None:
-            for j in range(
-                len(objects[i])
-            ):  # for every object detected in frame
-                # Get corner pixels of objects detected and convert to angle
-                px_1, px_2 = objects[i][j][1][:2], objects[i][j][1][2:]
-                xoffset = i * 90
-                angle_x1 = (
-                    pixel_to_angle(px_1, RESOLUTION, FOV)[0]
-                    + xoffset
-                    + ROTATION_OFFSET
-                )
-                angle_x2 = (
-                    pixel_to_angle(px_2, RESOLUTION, FOV)[0]
-                    + xoffset
-                    + ROTATION_OFFSET
-                )
-                id = objects[i][j][3]
+    for i in range(len(objects)):  # for every object detected in frame
+        # Get corner pixels of objects detected and convert to angle
+        px_1 = objects[i].get_xyxy()[:2]
+        px_2 = objects[i].get_xyxy()[2:]
+        xoffset = i * 90
+        angle_x1 = (
+            pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
+        )
+        angle_x2 = (
+            pixel_to_angle(px_2, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
+        )
+
+        if ENABLE_HS:
+            # Check if object should be scanned by hyperspectral
+            if objects[i].hs_scan:
+                id = objects[i].id
                 logging.debug(
-                    f"Camera {i}, object {j}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
+                    f"Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
                 )
-
-                if ENABLE_HS:
-                    mats = on_rotate(
-                        axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
-                    )
-                    send_images(client_socket, HSI_SCANS_PATH)
-                    # send_object_detection_results(client_socket, mats)
-                    delete_files_in_dir(HSI_SCANS_PATH)
-
-    # # Send processed hyperspectral scans to PiA
-    # send_images(client_socket, HSI_SCANS_PATH)
-    # # Send hyperspectral material distribution data to PiA
-    # send_object_detection_results(client_socket, hs_materials)
-    # # Remove all old hs scans
-    # delete_files_in_dir(HSI_SCANS_PATH)
+                mats, hs_classification, hs_ndvi = on_rotate(
+                    axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
+                )
+                send_image_arrays(client_socket, [hs_classification, hs_ndvi])
+                send_object_detection_results(client_socket, [mats])
+                # delete_files_in_dir(HSI_SCANS_PATH)
 
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
@@ -129,36 +122,42 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     )
     print(mats)
 
-    return mats
+    # Open plots as arrays
+    hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
+    hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
+
+    return mats, hs_classification, hs_ndvi
 
 
 # IP = "hsiA.local"
 
-ENABLE_HS = True
-ENABLE_DEBUG = False
-
+# COMMUNICATIONS
 IP = "10.42.0.1"
 PORT = 5002
-PATH = "./captures/"
-CLASSES = ["plant"]
-ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
-ROTATION_OFFSET = -55  # temporary
 
+# CAMERA
 RESOLUTION = (4608, 2592)
 FOV = (102, 67)
 
-CALIBRATION_FILE_PATH = (
-    "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
-)
+# OBJECT DETECTION
+CLASSES = ["plant"]
+OD_THRESHOLD = 0.1
 
-
+# HYPERSPECTRAL
 MODEL_PATH = "./hyperspectral/NN_18_03_2025.keras"
 LABEL_ENCODING_PATH = "./hyperspectral/label_encoding.npy"
+CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
 HSI_SCANS_PATH = "./hsi_scans/"
-
 HS_EXPOSURE_TIME = 10000
 HS_PIXEL_BINNING = 2
 HS_GAIN = 200
+
+ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
+ROTATION_OFFSET = 90  # temporary
+
+# OTHER
+ENABLE_HS = True
+ENABLE_DEBUG = True
 
 if __name__ == "__main__":
     # Setup Logging
@@ -192,9 +191,7 @@ if __name__ == "__main__":
             )  # temporarily blocking
 
             # Setup hyperspectral
-            hs_cam = setup_hyperspectral(
-                HS_EXPOSURE_TIME, HS_GAIN, HS_PIXEL_BINNING
-            )
+            hs_cam = setup_hyperspectral(HS_EXPOSURE_TIME, HS_GAIN, HS_PIXEL_BINNING)
             logging.info("Setup hyperspectral camera.")
 
         else:
@@ -208,9 +205,7 @@ if __name__ == "__main__":
         logging.debug("Connected to PiA")
 
         # Setup object detection modelx
-        rgb_model = YOLOWorld(
-            "object_detection/yolo_models/yolov8s-worldv2.pt"
-        )
+        rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
         logging.debug("Loaded RGB object detection model.")
         # TODO send search classes to PiB
         rgb_model.set_classes(CLASSES)
@@ -229,7 +224,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         logging.error(f"Keyboard interrupt")
-        
+
         if ENABLE_HS:
             axis.move_absolute(
                 2,
@@ -237,17 +232,18 @@ if __name__ == "__main__":
                 velocity=80,
                 velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
                 wait_until_idle=True,
-            )  # temporarily blocking
+            )
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()
         logging.info("All connections closed.")
+
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
         filename, line, func, text = tb[-1]
         logging.error(f"Error in PiB.py: {e}")
         logging.error(f"Occurred in file:{filename}, line {line}")
-        
+
         if ENABLE_HS:
             axis.move_absolute(
                 2,
@@ -255,7 +251,7 @@ if __name__ == "__main__":
                 velocity=80,
                 velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
                 wait_until_idle=True,
-            )  # temporarily blocking
+            )
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()

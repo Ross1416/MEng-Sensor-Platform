@@ -1,50 +1,62 @@
 import cv2
 import numpy as np
 
+
 ### Show Images for Testing + Debugging ####
-def showImage(image, title='Snapshot'):
+def showImage(image, title="Snapshot"):
     cv2.imshow(title, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+
 ### determine cylindrical projection parameters ####
 def getCylindricalProjection(img):
 
-    h, w = img.shape[:2] # Retrieve image dimensions
-    map_x, map_y = np.meshgrid(np.arange(w), np.arange(h)) # Create a coordinate array for mapping
-    
-    theta = (map_x - w / 2) / (w / 2) # Define approx. parameters
+    h, w = img.shape[:2]  # Retrieve image dimensions
+    map_x, map_y = np.meshgrid(
+        np.arange(w), np.arange(h)
+    )  # Create a coordinate array for mapping
+
+    theta = (map_x - w / 2) / (w / 2)  # Define approx. parameters
     phi = (map_y - h / 2) / (h / 2)
-    
+
     x = np.sin(theta) * np.cos(phi)
     y = np.sin(phi)
     z = np.cos(theta) * np.cos(phi)
 
     # Note: change coefficients to change warping effect
-    map_x = (w / 2) * (x / z +1)
-    map_y = (h / 2) * (y / z +1)
-        
+    map_x = (w / 2) * (x / z + 1)
+    map_y = (h / 2) * (y / z + 1)
+
     return map_x, map_y
+
 
 ### Apply cylindrical projection ####
 def applyCylindricalProjection(img, map_x, map_y):
 
     # Apply cylindrical projection
-    cylindricalProjection = cv2.remap(img, map_x.astype(np.float32), map_y.astype(np.float32), cv2.INTER_LINEAR)
+    cylindricalProjection = cv2.remap(
+        img, map_x.astype(np.float32), map_y.astype(np.float32), cv2.INTER_LINEAR
+    )
 
     # Crop
     cylindricalProjection, x_offset, y_offset = cropToObject(cylindricalProjection)
-        
+
     return cylindricalProjection, x_offset, y_offset
+
 
 ### Determine the coordinates of an object, after cylindrical projection ####
 def findNewObjectLocation(x1, y1, x2, y2, map_x, map_y, x_offset, y_offset):
-    distances = np.sqrt((map_x - x1) ** 2 + (map_y - y1) ** 2)  # Find closest coordinate
-    min_index1 = np.unravel_index(np.argmin(distances), distances.shape)  
+    distances = np.sqrt(
+        (map_x - x1) ** 2 + (map_y - y1) ** 2
+    )  # Find closest coordinate
+    min_index1 = np.unravel_index(np.argmin(distances), distances.shape)
 
-    distances = np.sqrt((map_x - x2) ** 2 + (map_y - y2) ** 2)  # Find closest coordinate
-    min_index2 = np.unravel_index(np.argmin(distances), distances.shape)  
-    
+    distances = np.sqrt(
+        (map_x - x2) ** 2 + (map_y - y2) ** 2
+    )  # Find closest coordinate
+    min_index2 = np.unravel_index(np.argmin(distances), distances.shape)
+
     (x1, y1) = tuple(min_index1[::-1])
     (x2, y2) = tuple(min_index2[::-1])
 
@@ -54,7 +66,7 @@ def findNewObjectLocation(x1, y1, x2, y2, map_x, map_y, x_offset, y_offset):
     y1 -= y_offset
     y2 -= y_offset
 
-    return (x1, x2, y1, y2) # Convert (row, col) -> (x', y')
+    return (x1, x2, y1, y2)  # Convert (row, col) -> (x', y')
 
 
 ### Return a cropped object from a black background ####
@@ -71,9 +83,14 @@ def cropToObject(image):
 
     # Draw and crop to bouding box
     x, y, w, h = cv2.boundingRect(largest_contour)
-    croppedImage = image[y:y+h, x:x+w]
+    croppedImage = image[y : y + h, x : x + w]
 
-    return croppedImage, x, y # return cropped image, plus left + upper lengths that was chopped off
+    return (
+        croppedImage,
+        x,
+        y,
+    )  # return cropped image, plus left + upper lengths that was chopped off
+
 
 ### Find Matching Co-ordinates through SIFT ####
 def findKeyPoints(img1, img2, horizontal_overlap=500):
@@ -92,14 +109,13 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
 
     # Create mask and apply SIFT to reference image
     mask = np.zeros((height, width), dtype=np.uint8)
-    mask[:, width-horizontal_overlap:] = 255  
+    mask[:, width - horizontal_overlap :] = 255
     kp1, des1 = sift.detectAndCompute(img1, mask)
 
     # Create mask and apply SIFT to warp image
     mask = np.zeros((height, width), dtype=np.uint8)
     mask[:, :horizontal_overlap] = 255  # White region in the rightmost quarter
     kp2, des2 = sift.detectAndCompute(img2, mask)
-
 
     # Brute Force Match
     bf = cv2.BFMatcher()
@@ -110,19 +126,27 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     # Perform Lowe's Ratio Test
     goodMatches = []
     for m, n in matches:
-        if m.distance < 0.75*n.distance:
+        if m.distance < 0.75 * n.distance:
             goodMatches.append(m)
 
-    img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    img_matches = cv2.drawMatches(
+        img1,
+        kp1,
+        img2,
+        kp2,
+        goodMatches,
+        None,
+        flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS,
+    )
     # showImage(img_matches)
 
     # Sort matches, best to worst
     goodMatches = sorted(goodMatches, key=lambda x: x.distance)
-    
+
     # Keep only top 3 matches
     if len(goodMatches) > 30:
         goodMatches = goodMatches[:30]
-    
+
     # Draw matches
     # img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     # showImage(img_matches)
@@ -133,39 +157,51 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
 
     return src_pts, dst_pts
 
+
 def calculateTransform(src_pts, dst_pts, ransac_threshold=3):
 
     # Compute the affine transformation matrix, using RANSAC
-    matrix, inliers = cv2.estimateAffine2D(src_pts, dst_pts, method=cv2.RANSAC, ransacReprojThreshold=ransac_threshold, maxIters=5000, confidence=0.9)
+    matrix, inliers = cv2.estimateAffine2D(
+        src_pts,
+        dst_pts,
+        method=cv2.RANSAC,
+        ransacReprojThreshold=ransac_threshold,
+        maxIters=5000,
+        confidence=0.9,
+    )
 
     return matrix
 
 
-### Apply affine transform to warp images ####   
+### Apply affine transform to warp images ####
 def applyTransform(img1, img2, matrix, objects):
     # Get image dimensions
-    height1, width1, _ = img1.shape # First image / panorama
-    height2, width2, _ = img2.shape # Image to stitch on
+    height1, width1, _ = img1.shape  # First image / panorama
+    height2, width2, _ = img2.shape  # Image to stitch on
 
     # Find max coordinates after transformation:
-    originalCorners = np.array([[0, 0], [width2, 0], [0, height2], [width2, height2]], dtype=np.float32)
+    originalCorners = np.array(
+        [[0, 0], [width2, 0], [0, height2], [width2, height2]], dtype=np.float32
+    )
     newCorners = cv2.transform(np.array([originalCorners]), matrix)[0]
     maxX = int(np.max(newCorners[:, 0]))
     maxY = int(np.max(newCorners[:, 1]))
-    
+
     # Apply the affine transformation, with a canvas = max coordinates
     canvas = cv2.warpAffine(img2, matrix, (maxX, max(height1, maxY)))
-    
+
     # Apply Blending
     blended = applyBlend(img1, canvas)
 
     # Find the new coordintes of an objects after warping
     if objects != []:
         for obj in objects:
-            x1 = obj[1][0]
-            y1 = obj[1][1]
-            x2 = obj[1][2]
-            y2 = obj[1][3]
+            # x1 = obj[1][0]
+            # y1 = obj[1][1]
+            # x2 = obj[1][2]
+            # y2 = obj[1][3]
+
+            x1, y1, x2, y2 = obj.get_xyxy()
 
             original_coords = np.array([[x1, y1], [x2, y2]], dtype=np.float32)
             new_coords = cv2.transform(np.array([original_coords]), matrix)[0]
@@ -175,10 +211,12 @@ def applyTransform(img1, img2, matrix, objects):
             x2 = round(new_coords[1][0])
             y2 = round(new_coords[1][1])
 
-            obj[1][0] = x1
-            obj[1][1] = y1
-            obj[1][2] = x2
-            obj[1][3] = y2
+            # obj[1][0] = x1
+            # obj[1][1] = y1
+            # obj[1][2] = x2
+            # obj[1][3] = y2
+
+            obj.set_xyxy([x1, y1, x2, y2])
 
     return blended, objects
 
@@ -186,7 +224,7 @@ def applyTransform(img1, img2, matrix, objects):
 def applyBlend(image1, canvas):
 
     # Extend image 1 to be the same size as the new canvas
-    height1, width1, _ = image1.shape # First image / panorama
+    height1, width1, _ = image1.shape  # First image / panorama
     img1 = np.zeros_like(canvas)
     img1[:height1, :width1, :] = image1
     # showImage(img1)
@@ -198,7 +236,7 @@ def applyBlend(image1, canvas):
     # Crop to the smallest bounding box
     blendedObject, x, y = cropToObject(identifyBlendedArea)
     # showImage(blendedObject)
-    
+
     # Get the blending area width
     height, width, _ = blendedObject.shape
 
@@ -211,15 +249,14 @@ def applyBlend(image1, canvas):
     # Project the new gradient to the blending shape
     gradient = np.where(blendedObject != 0, gradient, blendedObject)
     # showImage(gradient)
-# 
+    #
     # Place the new gradient back in its original position
-    newGradient = np.zeros_like(canvas).astype(np.float32)    
-    newGradient[y:y+height, x:x+width, :] = gradient
+    newGradient = np.zeros_like(canvas).astype(np.float32)
+    newGradient[y : y + height, x : x + width, :] = gradient
     # showImage(newGradient)
 
-    blended = ((1-newGradient)*img1 + newGradient*canvas).astype(np.uint8)    
-    blended = np.where(blended == 0, canvas, blended).astype(np.uint8) 
+    blended = ((1 - newGradient) * img1 + newGradient * canvas).astype(np.uint8)
+    blended = np.where(blended == 0, canvas, blended).astype(np.uint8)
     # showImage(blended, 'BLENDED')
 
     return blended
-

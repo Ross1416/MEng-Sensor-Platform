@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from scipy.ndimage import median_filter
 import matplotlib.colors as mcolors
-from hyperspectral.hyperspectral_driver import get_wavelength_index, get_calibration_array
+from hyperspectral.hyperspectral_driver import (
+    get_wavelength_index,
+    get_calibration_array,
+)
 
 
 def select_bands(start=100, end=500, num_bands=30):
