@@ -18,7 +18,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
     # Recevie object detection classes from PiA
     classes = receive_object_detection_results(client_socket)[0]
-    rgb_model.set_classes(classes.keys())
+    rgb_model.set_classes(list(classes.keys()))
 
     logging.info(f"Set RGB object detection classes to {classes}.")
 

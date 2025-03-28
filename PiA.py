@@ -20,7 +20,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     
     classes = getUserRequestedClasses()
 
-    rgb_model.set_classes(classes.keys())
+    rgb_model.set_classes(list(classes.keys()))
     
     logging.info(f"Set YOLO classes to {classes}.")
     
@@ -56,7 +56,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     objects += receive_object_detection_results(conn)
 
     # Calculate distance estimation to objects - append distance to object array
-    objects = calculate_distance(objects, distance_moved, last_objects)
+    # objects = calculate_distance(objects, distance_moved, last_objects)
     last_objects = objects # Update last objects
     # Assign IDs to objects
     objects = assign_id(objects)
@@ -103,21 +103,22 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     # Receive processed hyperspectral scans from PiB
     # Receive hyperspectral material distribution data from PiB
     for i in range(len(filtered_objects)):
-        setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
-        # Receive scan information
-        hs_classification, hs_ndvi = receive_image_arrays(conn)
-        hs_materials = receive_object_detection_results(conn)[0]
+        if classes[filtered_objects[i].label]:
+            setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
+            # Receive scan information
+            hs_classification, hs_ndvi = receive_image_arrays(conn)
+            hs_materials = receive_object_detection_results(conn)[0]
 
-        id = filtered_objects[i].id
-        # Save results to images in ui
-        save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-        cv2.imwrite(save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification)
-        cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+            id = filtered_objects[i].id
+            # Save results to images in ui
+            save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
+            cv2.imwrite(save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification)
+            cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
 
-        # Update object with refereances and materials
-        filtered_objects[i].set_hs_classification_ref(f"./hs_{uid}_{id}_classification.jpg")
-        filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
-        filtered_objects[i].set_hs_materials(hs_materials)
+            # Update object with refereances and materials
+            filtered_objects[i].set_hs_classification_ref(f"./hs_{uid}_{id}_classification.jpg")
+            filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
+            filtered_objects[i].set_hs_materials(hs_materials)
 
     # Update JSON with hyperspectral data
     updateJSON_HS(filtered_objects, lon, lat, activeFile)
@@ -204,13 +205,12 @@ if __name__ == "__main__":
             location = gps.get_location()
             distance_moved = gps.get_distance_moved()
             if location:
-                # Trigger new scan
-            if location:
                     new_scan(
                     rgb_model,
                     activeFile,
                     lat=location["latitude"],
-                    lon=location["longitude"], distance_moved=distance_moved,
+                    lon=location["longitude"], 
+                    distance_moved=distance_moved,
                     privacy=PRIVACY,
                 )
             else:

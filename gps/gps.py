@@ -121,7 +121,10 @@ class Neo8T:
             return False
         
     def get_location(self):
-        return location
+        return self.location
+
+    def get_distance_moved(self):
+        return self.distance_moved
         
     def set_distance_threshold(self, distance):
         self.distance_threshold = distance
