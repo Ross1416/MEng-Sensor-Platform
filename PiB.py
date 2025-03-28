@@ -34,33 +34,31 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     objects = receive_object_detection_results(client_socket)
 
     # Take hyperspectral scan
-    for i in range(len(objects)):  # For every camera
-        if objects[i] != None:
-            for j in range(len(objects[i])):  # for every object detected in frame
-                # Get corner pixels of objects detected and convert to angle
-                px_1 = objects[i][j].get_xyxy()[:2]
-                px_2 = objects[i][j].get_xyxy()[2:]
-                xoffset = i * 90
-                angle_x1 = (
-                    pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
-                )
-                angle_x2 = (
-                    pixel_to_angle(px_2, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
-                )
+    for i in range(len(objects)):  # for every object detected in frame
+        # Get corner pixels of objects detected and convert to angle
+        px_1 = objects[i].get_xyxy()[:2]
+        px_2 = objects[i].get_xyxy()[2:]
+        xoffset = i * 90
+        angle_x1 = (
+            pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
+        )
+        angle_x2 = (
+            pixel_to_angle(px_2, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
+        )
 
-                if ENABLE_HS:
-                    # Check if object should be scanned by hyperspectral
-                    if objects[i][j].hs_scan:
-                        id = objects[i][j].id
-                        logging.debug(
-                            f"Camera {i}, object {j}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
-                        )
-                        mats, hs_classification, hs_ndvi = on_rotate(
-                            axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
-                        )
-                        send_image_arrays(client_socket, [hs_classification, hs_ndvi])
-                        send_object_detection_results(client_socket, [mats])
-                        # delete_files_in_dir(HSI_SCANS_PATH)
+        if ENABLE_HS:
+            # Check if object should be scanned by hyperspectral
+            if objects[i].hs_scan:
+                id = objects[i].id
+                logging.debug(
+                    f"Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
+                )
+                mats, hs_classification, hs_ndvi = on_rotate(
+                    axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
+                )
+                send_image_arrays(client_socket, [hs_classification, hs_ndvi])
+                send_object_detection_results(client_socket, [mats])
+                # delete_files_in_dir(HSI_SCANS_PATH)
 
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
@@ -143,7 +141,7 @@ FOV = (102, 67)
 
 # OBJECT DETECTION
 CLASSES = ["plant"]
-OD_THRESHOLD = 0.2
+OD_THRESHOLD = 0.1
 
 # HYPERSPECTRAL
 MODEL_PATH = "./hyperspectral/NN_18_03_2025.keras"
@@ -155,7 +153,7 @@ HS_PIXEL_BINNING = 2
 HS_GAIN = 200
 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
-ROTATION_OFFSET = -55  # temporary
+ROTATION_OFFSET = 90  # temporary
 
 # OTHER
 ENABLE_HS = True

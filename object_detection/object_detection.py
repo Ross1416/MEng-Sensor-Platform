@@ -86,13 +86,13 @@ class Object:
 
         return (x, y, w, h)
 
-    def set_hs_classification_ref(hs_classification_ref):
+    def set_hs_classification_ref(self, hs_classification_ref):
         self.hs_classification_ref = hs_classification_ref
 
-    def set_hs_ndvi_ref(hs_ndvi_ref):
-        self.hs_classification_ref = hs_ndvi_ref
+    def set_hs_ndvi_ref(self, hs_ndvi_ref):
+        self.hs_ndvi_ref = hs_ndvi_ref
 
-    def set_hs_materials(hs_materials):
+    def set_hs_materials(self, hs_materials):
         self.hs_materials = hs_materials
 
 

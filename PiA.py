@@ -92,15 +92,13 @@ def new_scan(rgb_model, activeFile, lon=55.3, lat=-4, privacy=False):
 
         id = filtered_objects[i].id
         # Save results to images in ui
-        save_path = {UI_IMAGES_SAVE_PATH} + {activeFile[:-5]}
-        cv2.imwrite(save_path + "/hs_{uid}_{id}_classification.jpg", hs_classification)
-        cv2.imwrite(save_path + "/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+        save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
+        cv2.imwrite(save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification)
+        cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
 
         # Update object with refereances and materials
-        filtered_objects[i].set_hs_classification_ref(
-            "./hs_{uid}_{id}_classification.jpg", hs_classification
-        )
-        filtered_objects[i].set_hs_ndvi_ref("./hs_{uid}_{id}_ndvi.jpg")
+        filtered_objects[i].set_hs_classification_ref(f"./hs_{uid}_{id}_classification.jpg")
+        filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
         filtered_objects[i].set_hs_materials(hs_materials)
 
     # Update JSON with hyperspectral data
@@ -118,7 +116,7 @@ FOV = (102, 67)
 # OBJECT DETECTION
 PRIVACY = False  # Blur people
 CLASSES = ["plant"]
-OD_THRESHOLD = 0.2
+OD_THRESHOLD = 0.1
 
 # UI
 UI_IMAGES_SAVE_PATH = "./user-interface/public/images/"

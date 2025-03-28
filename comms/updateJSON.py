@@ -91,9 +91,9 @@ def updateJSON_HS(filtered_objects, lon, lat, activeFile):
             for i, json_obj in enumerate(pin["objects"]):
                 for j, detect_obj in enumerate(filtered_objects):
                     if json_obj["id"] == detect_obj.id:
-                        obj["HS_classification_ref"] = detect_obj.hs_classification_ref
-                        obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
-                        obj["HS_materials"] = detect_obj.hs_materials
+                        json_obj["HS_classification_ref"] = detect_obj.hs_classification_ref
+                        json_obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
+                        json_obj["HS_materials"] = detect_obj.hs_materials
 
     # Write to file
     with open(file_path, "w") as file:
@@ -152,7 +152,7 @@ def format_results(objects, image_shape):
                 "h": h,
                 "RGB_classification": obj.label,
                 "RGB_confidence": obj.conf,
-                "HS_materials": obj.hs_materals,
+                "HS_materials": obj.hs_materials,
                 "HS_classification_ref": "",
                 "HS_ndvi_ref": "",
                 "distance": obj.distance,
