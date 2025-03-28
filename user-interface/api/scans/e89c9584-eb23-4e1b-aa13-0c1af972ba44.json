@@ -15,7 +15,7 @@
                     "height": 400,
                     "RGB_classification": "dog",
                     "RGB_confidence": 0.8,
-                    "HS_classification": {
+                    "HS_materials": {
                         "wood": 0.4,
                         "stone": 0.3,
                         "metal": 0.3
@@ -39,7 +39,7 @@
                     "height": 400,
                     "RGB_classification": "fish",
                     "RGB_confidence": 0.8,
-                    "HS_classification": {
+                    "HS_materials": {
                         "wood": 0.4,
                         "stone": 0.3,
                         "metal": 0.3
@@ -54,7 +54,7 @@
                     "height": 100,
                     "RGB_classification": "dog",
                     "RGB_confidence": 0.8,
-                    "HS_classification": {
+                    "HS_materials": {
                         "wood": 0.4,
                         "stone": 0.3,
                         "metal": 0.3

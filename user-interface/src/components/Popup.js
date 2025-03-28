@@ -17,10 +17,9 @@ export function Popup({showHSI, setShowHSI, targetObject, selectedEnviroment}) {
     }
 
     useEffect(()=> {
-        console.log(targetObject?.HS_classification)
+        setWindow('overview')
     }, [showHSI])
 
-    const testData = {'wood': 0.5, 'iron':0.3, 'metal': 0.3}
 
     return (
         
@@ -30,29 +29,34 @@ export function Popup({showHSI, setShowHSI, targetObject, selectedEnviroment}) {
                     <button onClick={()=>setShowHSI(false)}>X</button>  
                 </div>
             {window=='overview' ? (
-                <div className='overview-container' style={{backgroundColor: 'white', width: '100%', height: '100%'}}>
+                <div className='overview-container' style={{backgroundColor: 'white', width: '100%', height: '400px'}}>
                     <h3>RGB Classification: {targetObject?.RGB_classification} </h3>
                     <h3>RGB Confidence: {targetObject?.RGB_confidence}</h3>
-                    <h3>Distance: {targetObject?.distance}</h3>
-                    <h3>HSI Classification:</h3>
-                        {/* <h2 className='hsi-class'>{targetObject?.HS_classification.keys()}: </h2> */}
-                        {Object.entries(testData).map(([item, value]) => (
+                    {targetObject?.distance && (
+                    <h3>Distance: {targetObject?.distance}</h3>)}
+                    {targetObject?.HS_materials && (
+                    <h3>HSI Classification:</h3>)}
+                        {targetObject?.HS_materials && 
+                        Object.entries(targetObject?.HS_materials).map(([item, value]) => (
                         <h2 className='hsi-class' key={item}>
-                        {item}: {Number(value*100)}%
+                        {item}: {Math.round(Number(value))}%
                         </h2>
-                        ))}
+                        ))
+                    }
                     
 
                 </div>
             ):(
-            <div style={{width: '100%', height: '100%'}}>
-                <img src={imgSource} alt='Dynamic' style={{width: '100%', height: '100%'}}/>
+            <div style={{width: '100%', height: '400px', backgroundColor: 'black', alignItems: 'center', justifyContent: 'center', display: 'flex'}}>
+                <img src={imgSource} alt='Dynamic' style={{maxWidth: '100%', maxHeight: '100%', objectFit: 'contain'}}/>
             </div>
             )}
             <div className='popup-footer'>
                     <button onClick={()=>changeWindow('overview')} className={window == 'overview' ? 'footer-toggle-on':'footer-toggle-off'}>Overview</button>  
-                    <button onClick={()=>changeWindow('classification')} className={window == 'classification' ? 'footer-toggle-on':'footer-toggle-off'}>Classification</button>  
-                    <button onClick={()=>changeWindow('plant-health')} className={window == 'plant-health' ? 'footer-toggle-on':'footer-toggle-off'}>Plant Health</button> 
+                    {targetObject?.HS_materials && (
+                    <button onClick={()=>changeWindow('classification')} className={window == 'classification' ? 'footer-toggle-on':'footer-toggle-off'}>Classification</button>  )}
+                    {targetObject?.HS_materials && (
+                    <button onClick={()=>changeWindow('plant-health')} className={window == 'plant-health' ? 'footer-toggle-on':'footer-toggle-off'}>Plant Health</button> )}
             </div>
         </div>
     );
