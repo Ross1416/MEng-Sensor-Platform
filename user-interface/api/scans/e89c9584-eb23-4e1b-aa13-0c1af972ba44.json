@@ -62,7 +62,252 @@
                     "HS_confidence": 0.7,
                     "distance": 10
                 }
-
+            ]
+        },
+        {
+            "geo_coords": [
+                0,
+                0
+            ],
+            "panorama_ref": "/img00.jpg",
+            "objects": [
+                {
+                    "id": 4,
+                    "x": 1056.0,
+                    "y": 270.0,
+                    "w": 426,
+                    "h": 864,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.89,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 5,
+                    "x": 1359.0,
+                    "y": 230.0,
+                    "w": 361,
+                    "h": 1038,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.88,
+                    "HS_materials": {
+                        "rock": 0.02482876712328767,
+                        "vegetation": 26.943493150684933,
+                        "water": 73.03167808219177
+                    },
+                    "HS_classification_ref": "./hs_00_5_classification.jpg",
+                    "HS_ndvi_ref": "./hs_00_5_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 0,
+                    "x": -4568.0,
+                    "y": 430.0,
+                    "w": 432,
+                    "h": 732,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.86,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 6,
+                    "x": 1956.0,
+                    "y": 244.0,
+                    "w": 522,
+                    "h": 698,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.85,
+                    "HS_materials": {
+                        "vegetation": 99.98983739837398,
+                        "water": 0.01016260162601626
+                    },
+                    "HS_classification_ref": "./hs_00_6_classification.jpg",
+                    "HS_ndvi_ref": "./hs_00_6_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 1,
+                    "x": -5887.0,
+                    "y": 437.0,
+                    "w": 767,
+                    "h": 1004,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.77,
+                    "HS_materials": {
+                        "vegetation": 40.658259423503324,
+                        "water": 59.34174057649667
+                    },
+                    "HS_classification_ref": "./hs_00_1_classification.jpg",
+                    "HS_ndvi_ref": "./hs_00_1_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 2,
+                    "x": -5545.0,
+                    "y": 370.0,
+                    "w": 462,
+                    "h": 915,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.34,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 7,
+                    "x": 6391.0,
+                    "y": 418.0,
+                    "w": 121,
+                    "h": 939,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.27,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 8,
+                    "x": 5219.0,
+                    "y": -356.0,
+                    "w": 155,
+                    "h": 195,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.17,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 9,
+                    "x": 5337.0,
+                    "y": 522.0,
+                    "w": 409,
+                    "h": 525,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.14,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "distance": null
+                }
+            ]
+        },
+        {
+            "geo_coords": [
+                0,
+                0
+            ],
+            "panorama_ref": "/img00.jpg",
+            "objects": [
+                {
+                    "id": 0,
+                    "x": -4723.0,
+                    "y": 464.0,
+                    "w": 880,
+                    "h": 1029,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.91,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 2,
+                    "x": 2351.0,
+                    "y": 262.0,
+                    "w": 374,
+                    "h": 821,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.85,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 3,
+                    "x": 2928.0,
+                    "y": 256.0,
+                    "w": 392,
+                    "h": 692,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.84,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 4,
+                    "x": 2021.0,
+                    "y": 307.0,
+                    "w": 401,
+                    "h": 720,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.74,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 5,
+                    "x": 6342.0,
+                    "y": 472.0,
+                    "w": 222,
+                    "h": 575,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.2,
+                    "HS_materials": {
+                        "rock": 0.02482876712328767,
+                        "vegetation": 26.943493150684933,
+                        "water": 73.03167808219177
+                    },
+                    "HS_classification_ref": "./hs_00_5_classification.jpg",
+                    "HS_ndvi_ref": "./hs_00_5_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 1,
+                    "x": -80.0,
+                    "y": -384.0,
+                    "w": 688,
+                    "h": 829,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.16,
+                    "HS_materials": {
+                        "vegetation": 40.658259423503324,
+                        "water": 59.34174057649667
+                    },
+                    "HS_classification_ref": "./hs_00_1_classification.jpg",
+                    "HS_ndvi_ref": "./hs_00_1_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 6,
+                    "x": 6239.0,
+                    "y": -436.0,
+                    "w": 188,
+                    "h": 233,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.15,
+                    "HS_materials": {
+                        "vegetation": 99.98983739837398,
+                        "water": 0.01016260162601626
+                    },
+                    "HS_classification_ref": "./hs_00_6_classification.jpg",
+                    "HS_ndvi_ref": "./hs_00_6_ndvi.jpg",
+                    "distance": null
+                }
             ]
         }
     ]
