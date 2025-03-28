@@ -24,12 +24,16 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     
     logging.info(f"Set YOLO classes to {classes}.")
     
-
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
+
+    # Sending RGB classes to PiB
+    logging.info(f"Sending Object detection classes to PiB.")
+    send_object_detection_results(conn, [classes])
+
     setStatusMessage("detecting objects")
     # Perform object detection
     objects = []
