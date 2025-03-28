@@ -266,6 +266,10 @@ def getUserRequestedClasses():
     data = data['search-objects']
     classes = {item['object']: item['hsi'] for item in data}
 
+    # New format {
+    # person: True
+    # }
+
     return classes
 
 CONFIGURATION_FILE_PATH = "./user-interface/api/sensorConfiguration.json"

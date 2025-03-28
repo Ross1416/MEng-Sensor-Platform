@@ -12,8 +12,16 @@ import traceback
 
 
 def on_trigger(rgb_model, axis, hs_cam, cal_arr):
+
     # Capture images
     frames = capture(cams, "PiB")
+
+    # Recevie object detection classes from PiA
+    classes = receive_object_detection_results(client_socket)[0]
+    rgb_model.set_classes(classes.keys())
+
+    logging.info(f"Set RGB object detection classes to {classes}.")
+
     # Perform object detection
     objects = []
     for f in frames:
@@ -48,7 +56,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
         if ENABLE_HS:
             # Check if object should be scanned by hyperspectral
-            if objects[i].hs_scan:
+            if classes[objects[i].label]:
                 id = objects[i].id
                 logging.debug(
                     f"Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
