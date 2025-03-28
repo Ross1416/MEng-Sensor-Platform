@@ -1,18 +1,18 @@
 import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Popup.css';
 
-export function Popup({showHSI, setShowHSI, targetObject}) {
+export function Popup({showHSI, setShowHSI, targetObject, selectedEnviroment}) {
 
     const [window, setWindow] = useState('overview')
-    const [imgSource, setImgSource] = useState('./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/hsi.JPG')
+    const [imgSource, setImgSource] = useState('')
     const [hsiData, setHSIData] = useState([])
 
     const changeWindow = (target) => {
         setWindow(target)
         if (target == 'classification') {
-            setImgSource('./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/hsi.JPG')
+            setImgSource('./images/' + selectedEnviroment.slice(0, -5) + '/' + targetObject.HS_classification_ref)
         } else if (target == 'plant-health') {
-            setImgSource('./images/e89c9584-eb23-4e1b-aa13-0c1af972ba44/img1.JPG')
+            setImgSource('./images/' + selectedEnviroment.slice(0, -5) + '/' + targetObject.HS_ndvi_ref)
         }
     }
 

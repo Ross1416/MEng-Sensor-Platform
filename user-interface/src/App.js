@@ -189,7 +189,7 @@ function App() {
   return (
   
     <div className='container'>
-      <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} targetObject={targetObject} />
+      <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} targetObject={targetObject} selectedEnviroment={selectedEnviroment}/>
   
       <div className='header'>
 

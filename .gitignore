@@ -28,3 +28,5 @@ node_modules/
 #Received Images
 received_images/
 yolo_models/
+
+#user-interface/api/sensorConfiguration.json

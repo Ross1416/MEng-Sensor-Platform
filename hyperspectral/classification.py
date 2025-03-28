@@ -1,148 +1,158 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+import tensorflow as tf
+from scipy.ndimage import median_filter
+import matplotlib.colors as mcolors
+from hyperspectral.hyperspectral_driver import (
+    get_wavelength_index,
+    get_calibration_array,
+)
 
-# Set paths
-images_folder = "images/indoor"
 
-# Load label encoding
-label_encoding_path = os.path.join(images_folder, "label_encoding.npy")
-if os.path.exists(label_encoding_path):
-    label_encoder = np.load(label_encoding_path, allow_pickle=True).item()
-else:
+def select_bands(start=100, end=500, num_bands=30):
+    """Selects a specified number of uniformly distributed spectral bands."""
+    return np.linspace(start, end - 1, num_bands, dtype=int)
+
+
+def load_label_encoder(label_encoding_path):
+    """Loads the label encoder from a file."""
+    if os.path.exists(label_encoding_path):
+        return np.load(label_encoding_path, allow_pickle=True).item()
     raise FileNotFoundError("Label encoding file not found!")
 
-# Reverse the label encoding for visualisation
-label_decoder = {v: k for k, v in label_encoder.items()}
 
-# Define valid spectral range (discard first and last 100 bands)
-valid_band_start = 100
-valid_band_end = 500
-num_valid_bands = valid_band_end - valid_band_start  # 400 bands available
-
-# Select 30 uniformly distributed bands from the valid 400 bands
-num_selected_bands = 20
-selected_bands = np.linspace(
-    valid_band_start, valid_band_end - 1, num_selected_bands, dtype=int
-)
-
-# Prepare dataset
-X = []
-y = []
-
-# Loop through subfolders
-for subfolder in os.listdir(images_folder):
-    subfolder_path = os.path.join(images_folder, subfolder)
-
-    # Skip if not a directory
-    if not os.path.isdir(subfolder_path):
-        continue
-
-    # Loop through saved class files
-    for file in os.listdir(subfolder_path):
-        if file.startswith("class_") and file.endswith(".npy"):
-            class_label = int(
-                file.split("_")[1].split(".")[0]
-            )  # Extract encoded label
-            data = np.load(os.path.join(subfolder_path, file))
-
-            # Select the 30 chosen spectral bands (from valid range)
-            data = data[:, selected_bands]
-
-            # Append to dataset
-            X.append(data)
-            y.append(np.full(len(data), class_label))  # Assign labels
-
-# Convert to numpy arrays
-X = np.vstack(X)  # Stack all data points
-y = np.hstack(y)  # Stack labels
-
-# Define the number of training samples to use (subsample N random samples)
-N = 500000
-if X.shape[0] > N:
-    idx = np.random.choice(X.shape[0], N, replace=False)
-    X = X[idx]
-    y = y[idx]
-
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-print(f"Dataset shape: {X.shape}, Labels shape: {y.shape}")
-print(f"Train size: {X_train.shape}, Test size: {X_test.shape}")
-
-# RF
-clf = RandomForestClassifier(n_estimators=100, random_state=42)
-clf.fit(X_train, y_train)
-
-# Evaluate model
-y_pred = clf.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Random Forest Accuracy: {accuracy:.4f}")
+def apply_smoothing(image, filter_size=10):
+    """Applies median filtering to reduce speckling noise in classification results."""
+    return median_filter(image, size=filter_size)
 
 
-# Function to classify an image and visualise results
-def classify_and_visualise(image, labels, model):
-    """
-    Classifies an entire hyperspectral image at pixel level and visualises results.
+def calculated_ndvi(full_image, cal_arr):
+    """Calculated NDVI for all pixels in the image"""
 
-    Args:
-        image: Hyperspectral image (H, W, Bands)
-        labels: Ground truth labels (H, W)
-        model: Trained classifier
-    """
-    h, w, d = image.shape
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 800, 2)
 
-    # Select only the 30 spectral bands (from valid range)
-    image_selected = image[:, :, selected_bands]
+    # Extract Red and NIR bands
+    red_band = (full_image[:, :, red_idx]).astype(np.float32)
+    nir_band = (full_image[:, :, nir_idx]).astype(np.float32)
 
-    # Reshape for prediction
-    image_reshaped = image_selected.reshape(-1, len(selected_bands))
+    # Avoid divide-by-zero
+    denominator = nir_band + red_band
 
-    predictions = model.predict(image_reshaped)  # Predict pixel-wise labels
-    predicted_labels = predictions.reshape(
-        h, w
-    )  # Reshape back to image format
+    # Compute NDVI
+    ndvi = (nir_band - red_band) / denominator
 
-    # Plot original labels vs predicted labels
-    fig, axes = plt.subplots(1, 3, figsize=(12, 6))
+    return ndvi
 
-    # Original labels
-    ax = axes[0]
-    ax.set_title("Original Labels")
-    sns.heatmap(labels, cmap="jet", square=True, cbar=False, ax=ax)
 
-    # Predicted labels
-    ax = axes[1]
-    ax.set_title("Predicted Labels")
-    sns.heatmap(predicted_labels, cmap="jet", square=True, cbar=False, ax=ax)
+def classify_and_save(
+    model_path, full_image, label_encoding_path, output_path, cal_arr
+):
 
-    # Single-band image visualisation
-    ax = axes[2]
-    ax.set_title("Single Band Image")
-    plt.imshow(image[:, :, selected_bands[5]], cmap="gray")
+    output_name, _ = os.path.splitext(output_path)
 
-    plt.show()
+    # Load model
+    model = tf.keras.models.load_model(model_path)
+
+    # Load hyperspectral image (full image for NDVI)
+    # full_image = np.load(image_path)
+
+    # Keep the reduced image for classification
+    selected_band_indices = select_bands()
+    image = full_image[:, :, selected_band_indices]  # reduced image
+
+    h, w, num_bands = image.shape
+    image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
+
+    # Classify image
+    predictions = model.predict(image_reshaped)
+    predicted_labels = np.argmax(predictions, axis=1)
+    classified_image = predicted_labels.reshape(h, w)
+
+    # Apply smoothing (using median filter)
+    smoothed_image = apply_smoothing(classified_image)
+
+    # Load label encoder
+    label_encoder = load_label_encoder(label_encoding_path)
+
+    # Calculate NDVI
+    ndvi = calculated_ndvi(full_image, cal_arr)
+
+    # Saving the image
+    output_path = output_name + "_ndvi.png"
+    plt.figure(figsize=(8, 6), facecolor="black")
+    ax = plt.gca()
+    ax.set_facecolor("black")
+    im = plt.imshow(ndvi, cmap="RdYlGn", vmin=-1, vmax=1)
+    cbar = plt.colorbar(im, label="NDVI")
+    cbar.ax.yaxis.label.set_color("white")
+    cbar.ax.tick_params(color="white", labelcolor="white")
+    plt.title("NDVI", color="white")
+    plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="black")
+    plt.close()
+    print(f"NDVI image saved as {output_path}")
+
+    # Extract unique classes and their counts
+    unique_classes, counts = np.unique(smoothed_image, return_counts=True)
+    total_pixels = smoothed_image.size
+
+    # Compute percentage of each class
+    class_percentages = {
+        label_encoder[orig][1]: (counts[i] / total_pixels) * 100
+        for i, orig in enumerate(unique_classes)
+    }
+
+    # Generate colormap
+    cmap = plt.get_cmap("gist_rainbow", len(unique_classes))
+    colors = cmap(np.linspace(0, 1, len(unique_classes)))
+    custom_cmap = mcolors.ListedColormap(colors)
+
+    # Generate legend mapping from encoded labels to class names
+    legend_labels = {
+        encoded: label_encoder[orig][1]
+        for orig, (encoded, _) in label_encoder.items()
+        if encoded in unique_classes
+    }
+
+    # Plot classification result
+    plt.figure(figsize=(8, 6), facecolor="black")
+    ax = plt.gca()
+    ax.set_facecolor("black")
+    img = plt.imshow(
+        smoothed_image,
+        cmap=custom_cmap,
+        vmin=unique_classes[0],
+        vmax=unique_classes[-1],
+    )
+    plt.title("Material Classification", color="white")
+
+    # Add colorbar legend
+    cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
+    cbar.set_ticklabels(list(legend_labels.values()))
+    cbar.set_label("Class Labels", color="white")
+    cbar.ax.tick_params(color="white", labelcolor="white")
+
+    # Save output image
+    output_path = output_name + "_classification.png"
+    plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="black")
+    plt.close()
+    print(f"Smoothed classification results saved to {output_path}")
+
+    return class_percentages
 
 
 if __name__ == "__main__":
-    sample = "indoor_014"
-    image_path = os.path.join(images_folder, sample + ".npy")
-    label_path = os.path.join(images_folder, sample, "label.png")
 
-    if os.path.exists(image_path) and os.path.exists(label_path):
-        image = np.load(image_path)  # Load hyperspectral image
-        labels = plt.imread(label_path)  # Load label mask
+    CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
+    cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
-        # Convert to grayscale (temp solution for now - weird error reading labels.png)
-        if len(labels.shape) == 3:
-            labels = labels[:, :, 0]
+    model_path = "NN_18_03_2025.keras"
+    image_path = "images/outdoor_dataset_limited/outdoor_dataset_005.npy"
+    label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
+    output_name = "test.png"
 
-        classify_and_visualise(image, labels, clf)
-    else:
-        print(f"{sample} not found.")
+    class_distribution = classify_and_save(
+        model_path, image_path, label_encoding_path, output_name
+    )
+    print("Class Distribution (%):", class_distribution)

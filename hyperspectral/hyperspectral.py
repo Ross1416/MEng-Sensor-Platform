@@ -12,7 +12,7 @@ def take_hyperspectral_image(PORT, nframe, angle, calibration):
         # print(get_wavelength_index(calibration_array,450,1))
 
         # Setup hyperspectral
-        cam = setup_hyperspectral()
+        cam = setup_hyperspectral(exposure_time, cam_gain, pixel_binning)
         fps = cam.ResultingFrameRateAbs.Value
 
         print("Setup Hyperspectral Camera")
@@ -33,6 +33,8 @@ def take_hyperspectral_image(PORT, nframe, angle, calibration):
 
         # Get required rotation speed
         speed = get_rotation_speed(NFRAMES, fps, ANGLE)
+
+        print(f"FPS: {fps}")
         print(f"Speed: {speed} degree/s")
 
         # Setup rotational stage
@@ -44,7 +46,7 @@ def take_hyperspectral_image(PORT, nframe, angle, calibration):
         rotate_relative(axis, ANGLE, speed)
 
         scene = grab_hyperspectral_scene(
-            cam, NFRAMES, white_image, dark_image, "indoor"
+            cam, NFRAMES, white_image, dark_image, "speed_test"
         )
 
         print("Plotting RGB Image...")
@@ -52,9 +54,9 @@ def take_hyperspectral_image(PORT, nframe, angle, calibration):
 
         # Get indices of RGB bands from calibration file
         RGB = (
-            get_wavelength_index(cal_arr, 690, 2),
-            get_wavelength_index(cal_arr, 535, 2),
-            get_wavelength_index(cal_arr, 470, 2),
+            get_wavelength_index(cal_arr, 690, pixel_binning),
+            get_wavelength_index(cal_arr, 535, pixel_binning),
+            get_wavelength_index(cal_arr, 470, pixel_binning),
         )
 
         plt.imshow(scene[:, :, RGB])
@@ -74,9 +76,17 @@ def take_hyperspectral_image(PORT, nframe, angle, calibration):
 
 
 if __name__ == "__main__":
+
+    # General parameters
     CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
     PORT = "COM7"  # CHANGE PER USER
-    NFRAMES = 800
     ANGLE = 27
+
+    # Camera parameters
+    NFRAMES = 1600
+    pixel_binning = 2
+    NFRAMES = 1600 / pixel_binning
+    exposure_time = 10000
+    cam_gain = 500
 
     take_hyperspectral_image(PORT, NFRAMES, ANGLE, CALIBRATION_FILE_PATH)
