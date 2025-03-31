@@ -71,13 +71,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
     # Rotate rotational stage
-    axis.move_absolute(
-        angles[0],
-        Units.ANGLE_DEGREES,
-        velocity=80,
-        velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
-        wait_until_idle=True,
-    )
+    rotate_safe(angles[0], 0, speed, blocking=True)
     logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
@@ -87,13 +81,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     logging.debug(f"Will grab {nframes} frames.")
     speed = get_rotation_speed(nframes, fps, abs(angles[1] - angles[0]))
     logging.info("Grabbing hyperspectral scan...")
-    axis.move_absolute(
-        angles[1],
-        Units.ANGLE_DEGREES,
-        velocity=speed,
-        velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
-        wait_until_idle=False,
-    )  # temporarily blocking
+    rotate_safe(angles[1], 0, speed, blocking=False)
     scene = grab_hyperspectral_scene(
         hs_cam, nframes, None, None, "test", calibrate=False
     )
@@ -162,6 +150,7 @@ HS_GAIN = 200
 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
 ROTATION_OFFSET = 90  # temporary
+ROTATION_SPEED = 50
 
 # OTHER
 ENABLE_HS = True
@@ -191,14 +180,8 @@ if __name__ == "__main__":
             # Home rotational stage
             logging.info("Homing rotational stage.")
             axis.home(wait_until_idle=True)
-            axis.move_absolute(
-                ROTATION_OFFSET,
-                Units.ANGLE_DEGREES,
-                velocity=80,
-                velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
-                wait_until_idle=True,
-            )  # temporarily blocking
-
+            rotate_safe(0, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
+        
             # Setup hyperspectral
             hs_cam = setup_hyperspectral(HS_EXPOSURE_TIME, HS_GAIN, HS_PIXEL_BINNING)
             logging.info("Setup hyperspectral camera.")
@@ -235,13 +218,7 @@ if __name__ == "__main__":
         logging.error(f"Keyboard interrupt")
 
         if ENABLE_HS:
-            axis.move_absolute(
-                2,
-                Units.ANGLE_DEGREES,
-                velocity=80,
-                velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
-                wait_until_idle=True,
-            )
+            rotate_safe(2, 0, ROTATION_SPEED, blocking=True)
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()
@@ -254,13 +231,7 @@ if __name__ == "__main__":
         logging.error(f"Occurred in file:{filename}, line {line}")
 
         if ENABLE_HS:
-            axis.move_absolute(
-                2,
-                Units.ANGLE_DEGREES,
-                velocity=80,
-                velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,
-                wait_until_idle=True,
-            )
+            rotate_safe(2, 0, ROTATION_SPEED, blocking=True)
             hs_cam.Close()
             zaber_conn.close()
         client_socket.close()
