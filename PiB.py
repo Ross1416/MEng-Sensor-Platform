@@ -48,10 +48,10 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
         px_2 = objects[i].get_xyxy()[2:]
         xoffset = i * 90
         angle_x1 = (
-            pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
+            pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset# + ROTATION_OFFSET
         )
         angle_x2 = (
-            pixel_to_angle(px_2, RESOLUTION, FOV)[0] + xoffset + ROTATION_OFFSET
+            pixel_to_angle(px_2, RESOLUTION, FOV)[0] + xoffset# + ROTATION_OFFSET
         )
 
         if ENABLE_HS:
@@ -71,7 +71,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
     # Rotate rotational stage
-    rotate_safe(axis, angles[0], 0, ROTATION_SPEED, blocking=True)
+    rotate_safe(axis, angles[0], ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
     logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
@@ -81,7 +81,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     logging.debug(f"Will grab {nframes} frames.")
     speed = get_rotation_speed(nframes, fps, abs(angles[1] - angles[0]))
     logging.info("Grabbing hyperspectral scan...")
-    rotate_safe(axis, angles[1], 0, speed, blocking=False)
+    rotate_safe(axis, angles[1], ROTATION_OFFSET, speed, blocking=False)
     scene = grab_hyperspectral_scene(
         hs_cam, nframes, None, None, "test", calibrate=False
     )

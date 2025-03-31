@@ -189,10 +189,12 @@ if __name__ == "__main__":
     # Mainloop
     while True:
         # Update save location
-        try:
-            status, activeFile = getPlatformStatus()
-        except json.decoder.JSONDecodeError:
-            logging.error("Error accessing JSON configuration file.")
+        status = None
+        while not status:
+            try:
+                status, activeFile = getPlatformStatus()
+            except json.decoder.JSONDecodeError:
+                logging.error("Error accessing JSON configuration file.")
 
         # Update GPS status
         gps_status = gps.check_if_gps_locaiton()

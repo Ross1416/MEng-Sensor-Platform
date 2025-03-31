@@ -164,18 +164,21 @@ def format_results(objects, image_shape):
 
 def setStatusMessage(msg):
     file_path = "./user-interface/api/sensorConfiguration.json"
-    try:
-        with open(file_path, "r") as file:
-            data = json.load(file)
+    error = True
+    while error:
+        try:
+            with open(file_path, "r") as file:
+                data = json.load(file)
 
-        # Construct dictionary with new data
-        data["status-message"] = msg
+            # Construct dictionary with new data
+            data["status-message"] = msg
 
-        # Write to file
-        with open(file_path, "w") as file:
-            json.dump(data, file, indent=4)
-    except:
-        print("error opening json")
+            # Write to file
+            with open(file_path, "w") as file:
+                json.dump(data, file, indent=4)
+            error = False
+        except:
+            print("error opening json")
 
 
 def getPlatformStatus():
