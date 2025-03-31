@@ -22,3 +22,13 @@ def rotate_relative(axis, angle, speed):
     """ Rotates axis by {angle} degrees at {speed} degrees per second. Non-blocking"""
     axis.settings.set("maxspeed", speed, Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND)
     axis.move_relative(angle, Units.ANGLE_DEGREES,wait_until_idle=False)
+
+def rotate_safe(axis, angle, offset, speed, scanning=False, max_extra_scan_angle = 45, blocking=False):
+    if scanning:
+        if angle < (180+max_extra_scan_angle):
+            axis.move_absolute(angle+offset,Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=blocking) 
+    else:
+        if angle > 180: 
+            axis.move_absolute((angle+offset)-360,Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=blocking) 
+        else: 
+            axis.move_absolute(angle+offset,Units.ANGLE_DEGREES,velocity=speed,velocity_unit=Units.ANGULAR_VELOCITY_DEGREES_PER_SECOND,wait_until_idle=blocking) 
