@@ -7,12 +7,32 @@
     "wifi-connection": false,
     "search-objects": [
         {
-            "hsi": true,
-            "object": "Human"
+            "object": "Person",
+            "hsi": false
         },
         {
-            "hsi": false,
-            "object": "Person"
+            "object": "Bottle",
+            "hsi": false
+        },
+        {
+            "object": "Whiteboard",
+            "hsi": false
+        },
+        {
+            "object": "Plant",
+            "hsi": true
+        },
+        {
+            "object": "Electronics",
+            "hsi": false
+        },
+        {
+            "object": "Door",
+            "hsi": false
+        },
+        {
+            "object": "Chair",
+            "hsi": false
         }
     ]
 }
