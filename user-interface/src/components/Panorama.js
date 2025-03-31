@@ -113,10 +113,9 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                             title="1"
                             text={obj.RGB_classification}
                             tooltip={(hotSpotDiv) => {
-                                hotSpotDiv.classList.add("custom-hotspot");
-                                // hotSpotDiv.classList.add("custom-hotspot-inner");
-                                hotSpotDiv.innerHTML = `<div class="custom-hotspot-inner"/>
-                                <h1 class="hotspot-text">${obj.RGB_classification}<h1/>`;
+                                obj?.HS_classification_ref ? hotSpotDiv.classList.add("custom-hotspot-blue") : hotSpotDiv.classList.add("custom-hotspot");
+                                obj?.HS_classification_ref ? hotSpotDiv.innerHTML = `<div class="custom-hotspot-inner-blue"/><h1 class="hotspot-text">${obj.RGB_classification}<h1/>`
+                                : hotSpotDiv.innerHTML =  `<div class="custom-hotspot-inner"/><h1 class="hotspot-text">${obj.RGB_classification}<h1/>`;
                               }}
                     
                             handleClick={() => handleHotspot(obj)}/> 
