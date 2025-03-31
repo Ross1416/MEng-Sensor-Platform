@@ -11,6 +11,7 @@ class Object:
         label=None,
         coords=None,
         conf=None,
+        camera=None,
         distance=None,
         hs_scan=True,
         hs_materals=None,
@@ -20,7 +21,9 @@ class Object:
         self.id = id
         self.label = label
         self.coords = coords
+        self.coords_original = coords
         self.conf = conf
+        self.camera = camera
         self.distance = distance
         self.hs_scan = hs_scan
         self.hs_materials = hs_materals
@@ -42,6 +45,12 @@ class Object:
 
     def get_xyxy(self):
         return self.coords
+    
+    def get_xyxy_original(self):
+        return self.coords_original
+    
+    def get_camera(self):
+        return self.camera
 
     def set_xyxy(self, xyxy):
         self.coords = xyxy
@@ -96,7 +105,7 @@ class Object:
         self.hs_materials = hs_materials
 
 
-def object_detection(model, frame, conf=0.25):
+def object_detection(model, frame, camera, conf=0.25):
     """
     Detects objects in frame using YOLO model.
     Inputs:
@@ -115,7 +124,7 @@ def object_detection(model, frame, conf=0.25):
         coords = [round(i) for i in coords]
         conf = math.ceil((box.conf[0] * 100)) / 100
         # results.append([label,coords,conf])
-        results.append(Object(label=label, coords=coords, conf=conf))
+        results.append(Object(label=label, coords=coords, conf=conf, camera=camera))
     print(f"Object detection results:\n{results}")
     return results
 

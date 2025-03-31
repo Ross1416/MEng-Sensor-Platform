@@ -24,8 +24,8 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
     # Perform object detection
     objects = []
-    for f in frames:
-        objects.append(object_detection(rgb_model, f, OD_THRESHOLD))
+    for i, f in enumerate(frames):
+        objects.append(object_detection(rgb_model, f, i+2, OD_THRESHOLD))
     # Send images to PiA
     send_image_arrays(client_socket, frames)
     # # Receive object detection data
@@ -44,9 +44,9 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     # Take hyperspectral scan
     for i in range(len(objects)):  # for every object detected in frame
         # Get corner pixels of objects detected and convert to angle
-        px_1 = objects[i].get_xyxy()[:2]
-        px_2 = objects[i].get_xyxy()[2:]
-        xoffset = i * 90
+        px_1 = objects[i].get_xyxy_original()[:2]
+        px_2 = objects[i].get_xyxy_original()[2:]
+        xoffset = objects[i].get_camera() * 90
         angle_x1 = (
             pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset# + ROTATION_OFFSET
         )

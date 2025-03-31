@@ -37,8 +37,8 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     setStatusMessage("detecting objects")
     # Perform object detection
     objects = []
-    for f in frames:
-        objects.append(object_detection(rgb_model, f, OD_THRESHOLD))
+    for i, f in enumerate(frames):
+        objects.append(object_detection(rgb_model, f, i, OD_THRESHOLD))
     # Retrieve slave images and data
     frames += receive_image_arrays(conn)
 
