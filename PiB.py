@@ -76,10 +76,19 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
     logging.debug(f"Calculated FPS: {fps}")
+    
+    # Calculate difference in angle and set minimum of 27 degrees
+    diff = abs(angles[1] - angles[0])
+    if diff < HS_MIN_CAPTURE_ANGLE:
+        extra = int((HS_MIN_CAPTURE_ANGLE - diff)/2)
+        angles[0] -= extra
+        angles[1] += extra
+    diff = abs(angles[1] - angles[0])
+
     # Calculate number of frames
-    nframes = get_nframes(abs(angles[1] - angles[0]), HS_PIXEL_BINNING)
+    nframes = get_nframes(diff, HS_PIXEL_BINNING)
     logging.debug(f"Will grab {nframes} frames.")
-    speed = get_rotation_speed(nframes, fps, abs(angles[1] - angles[0]))
+    speed = get_rotation_speed(nframes, fps, diff)
     logging.info("Grabbing hyperspectral scan...")
     rotate_safe(axis, angles[1], ROTATION_OFFSET, speed, blocking=False)
     scene = grab_hyperspectral_scene(
@@ -147,6 +156,7 @@ HSI_SCANS_PATH = "./hsi_scans/"
 HS_EXPOSURE_TIME = 10000
 HS_PIXEL_BINNING = 2
 HS_GAIN = 200
+HS_MIN_CAPTURE_ANGLE = 27
 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
 ROTATION_OFFSET = 90  # temporary
