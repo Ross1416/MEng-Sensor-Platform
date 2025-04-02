@@ -11,16 +11,20 @@ from cameras import *
 import logging
 from stitching.stitching_main import performPanoramicStitching
 import json
-import shutil
 
 
 # Triggers when change in GPS location
 def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     global last_objects
 
+    # Update classes of objects to detect from UI
     classes = getUserRequestedClasses()
+    if privacy:
+        classes = list(classes.keys())
+        if "person" not in classes:
+            classes.append("person")
 
-    rgb_model.set_classes(list(classes.keys()))
+    rgb_model.set_classes(classes)
 
     logging.info(f"Set YOLO classes to {classes}.")
 
@@ -32,7 +36,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
 
     # Sending RGB classes to PiB
     logging.info(f"Sending Object detection classes to PiB.")
-    send_object_detection_results(conn, [classes])
+    send_object_detection_results(conn, classes)
 
     setStatusMessage("detecting objects")
     # Perform object detection
