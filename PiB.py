@@ -213,6 +213,8 @@ if __name__ == "__main__":
         rgb_model.set_classes(CLASSES)
         logging.info(f"Set YOLO classes to {CLASSES}.")
 
+        rotate_safe(axis, 170, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
+
         logging.info("Setup complete. Waiting to start capture...")
 
         # Poll for trigger capture signal
@@ -220,6 +222,7 @@ if __name__ == "__main__":
             if receive_capture_request(client_socket) == 1:
                 logging.info("Triggered Capture.")
                 on_trigger(rgb_model, axis, hs_cam, cal_arr)
+                rotate_safe(axis, 170, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
                 capture_triggered = True
 
             sleep(1)

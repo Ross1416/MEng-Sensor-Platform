@@ -11,6 +11,7 @@ from cameras import *
 import logging
 from stitching.stitching_main import performPanoramicStitching
 import json
+import traceback
 
 
 # Triggers when change in GPS location
@@ -25,12 +26,13 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
             classes.append("person")
 
     rgb_model.set_classes(classes)
-
-    logging.info(f"Set YOLO classes to {classes}.")
+    logging.info(f"Set objects of interest to {classes}.")
 
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
+    logging.info("Captured frames")
+    
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
 
@@ -156,11 +158,12 @@ DISTANCE_THRESHOLD = 10
 # Globals
 last_objects = []
 
-
 # OTHER
 ENABLE_DEBUG = True
 
+### MAIN ###
 if __name__ == "__main__":
+    # Update UI status msg
     setStatusMessage("setting up")
     # Setup Logging
     logging.basicConfig(
@@ -172,72 +175,104 @@ if __name__ == "__main__":
     )
     logging.info("##### Start up new sesson. #####")
 
-    # Setup cameras and GPIO
-    cams = setup_cameras()
-    logging.debug("Setup cameras.")
-    # Setup GPS
-    gps = Neo8T(
-        port=GPS_PORT,
-        baudrate=GPS_BAUDRATE,
-        timeout=1,
-        distance_threshold=DISTANCE_THRESHOLD,
-    )
-    logging.debug("Setup GPS")
-    # Make connection
-    server_socket, conn = make_server_connection(HOST, PORT)
-    logging.debug("Connected to PiB")
-    # Setup object detection model
-    rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
-    logging.debug("Loaded RGB object detection model.")
-    logging.info(f"Privacy set {PRIVACY}.")
+    try:
+        # Setup cameras and GPIO
+        cams = setup_cameras()
+        logging.debug(f"Setup {len(cams)} cameras.")
 
-    logging.info(f"Waiting for trigger...")
+        # Setup GPS
+        gps = Neo8T(
+            port=GPS_PORT,
+            baudrate=GPS_BAUDRATE,
+            timeout=1,
+            distance_threshold=DISTANCE_THRESHOLD,
+        )
+        logging.debug("Setup GPS")
 
-    count = 0
-    # Mainloop
-    while True:
-        # Update save location
-        status = None
-        while not status:
-            try:
-                status, activeFile = getPlatformStatus()
-            except json.decoder.JSONDecodeError:
-                logging.error("Error accessing JSON configuration file.")
+        # Make connection to PiB
+        server_socket, conn = make_server_connection(HOST, PORT)
+        logging.debug("Connected to PiB")
 
-        GPS_coordinate_change = (
-            gps.check_for_movement()
-        )  # Updates gps location and checks for movement
-        if status == 2 or (status == 1 and GPS_coordinate_change):
-            timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-            save_location = f"./capture/{timestamp}-capture/"
+        # Setup object detection model
+        rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
+        logging.debug("Loaded RGB object detection model.")
 
-            # Get current location
-            location = gps.get_location()
-            distance_moved = gps.get_distance_moved()
-            logging.debug("Location: {location}")
-            logging.debug("Distance moved: {distance_moved}m")
-            if location:
-                new_scan(
-                    rgb_model,
-                    activeFile,
-                    lat=location["latitude"],
-                    lon=location["longitude"],
-                    distance_moved=distance_moved,
-                    privacy=PRIVACY,
-                )
-            else:
-                logging.debug("No location => using default Lat and long")
-                new_scan(rgb_model, activeFile, privacy=PRIVACY)
+        logging.info("All systems setup.")
+        logging.info(f"Privacy set {PRIVACY}.")
+        logging.info(f"Waiting for trigger from UI...")
 
-            logging.info("Completed scan.")
+        count = 0
+        # Mainloop
+        while True:
+            # Update save location
+            status = None
+            while not status:
+                try:
+                    status, activeFile = getPlatformStatus()
+                except json.decoder.JSONDecodeError:
+                    logging.error("Error accessing JSON configuration file.")
 
-            if status == 2:
-                setPlatformStatus(0)
+            # Update GPS location and check for change in location > than  DISTANCE_THRESHOLD
+            GPS_coordinate_change = (
+                gps.check_for_movement()
+            ) 
 
-        # Update GPS status every 30 cycles
-        if count > 30:
-            gps.update_location()
-            gps_status = gps.check_if_gps_locaiton()
-            updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
+            if GPS_coordinate_change:
+                logging.info("Movement detected.")
+            
+            # If manual UI trigger or in wait for movement mode + change in movement, perform new scn
+            if status == 2 or (status == 1 and GPS_coordinate_change):
+                logging.info("Scan triggered.")
 
-        count += 1
+                # Get current location
+                location = gps.get_location()
+                distance_moved = gps.get_distance_moved()
+                logging.debug("Location: {location}")
+                logging.debug("Distance moved: {distance_moved}m")
+
+                # If location known, trigger a new scan 
+                if location:
+                    new_scan(
+                        rgb_model,
+                        activeFile,
+                        lat=location["latitude"],
+                        lon=location["longitude"],
+                        distance_moved=distance_moved,
+                        privacy=PRIVACY,
+                    )
+                else:
+                    logging.info("No GPS location found => using Latitude and longitude of (0,0)")
+                    new_scan(rgb_model, activeFile, lat=0.0, lon=0.0, distance_moved=distance_moved, privacy=PRIVACY)
+
+                logging.info("Completed scan.")
+
+                if status == 2:
+                    setPlatformStatus(0)
+
+            # Update GPS status every 30 cycles
+            if count > 30:
+                gps.update_location()
+                gps_status = gps.check_if_gps_locaiton()
+                updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
+
+            count += 1
+    except KeyboardInterrupt:
+        logging.error(f"Keyboard interrupt")
+
+        server_socket.close()
+        logging.info("All connections closed.")
+
+    except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        filename, line, func, text = tb[-1]
+        logging.error(f"Error in PiB.py: {e}")
+        logging.error(f"Occurred in file:{filename}, line {line}")
+
+        server_socket.close()
+        logging.info("All connections closed.")
+
+    finally:
+        logging.info("System terminated.")
+
+
+    
