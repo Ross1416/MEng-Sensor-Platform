@@ -17,10 +17,11 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     frames = capture(cams, "PiB")
 
     # Receive object detection classes from PiA
-    classes = receive_object_detection_results(client_socket)
-    rgb_model.set_classes(classes)
+    classes = receive_object_detection_results(client_socket)[0]
+    classes_list = list(classes.keys())
+    rgb_model.set_classes(classes_list)
 
-    logging.info(f"Set RGB object detection classes to {classes}.")
+    logging.info(f"Set RGB object detection classes to {classes_list}.")
 
     # Perform object detection
     objects = []
@@ -81,8 +82,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     diff = abs(angles[1] - angles[0])
     if diff < HS_MIN_CAPTURE_ANGLE:
         extra = int((HS_MIN_CAPTURE_ANGLE - diff)/2)
-        angles[0] -= extra
-        angles[1] += extra
+        angles = (angles[0]-extra, angles[1]+extra)
     diff = abs(angles[1] - angles[0])
 
     # Calculate number of frames
@@ -159,7 +159,7 @@ HS_GAIN = 200
 HS_MIN_CAPTURE_ANGLE = 27
 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"  # TODO: find automatically?
-ROTATION_OFFSET = 90  # temporary
+ROTATION_OFFSET = 177  # temporary
 ROTATION_SPEED = 50
 
 # OTHER

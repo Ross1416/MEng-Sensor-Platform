@@ -69,11 +69,13 @@ class Neo8T:
                             "altitude": msg.altitude,
                             "fix_quality": msg.gps_qual,
                         }
+                        break
                 except pynmea2.ParseError:
                     pass
 
             if count > 10:
                 self.location = None
+                break
             else:
                 count += 1
 

@@ -2,7 +2,7 @@ from ultralytics import YOLOWorld
 import math
 import cv2
 import numpy as np
-
+import logging
 
 class Object:
     def __init__(
@@ -124,9 +124,10 @@ def object_detection(model, frame, camera, conf=0.25):
         coords = [round(i) for i in coords]
         conf = math.ceil((box.conf[0] * 100)) / 100
         # results.append([label,coords,conf])
-        results.append(Object(label=label, coords=coords, conf=conf, camera=camera))
+        obj = Object(label=label, coords=coords, conf=conf, camera=camera)
+        results.append(obj)
         logging.debug(
-            f"Object detected:\n{box.label}, {box.coords}, {box.conf}, {box.camera}"
+            f"Object detected:\n{obj.label}, {obj.coords}, {obj.conf}, {obj.camera}"
         )
     return results
 
@@ -207,7 +208,7 @@ def blur_people(frame, detections, blur_size=25):
 
     for i in range(len(detections)):
         # if detections[i][0] == "person":
-        if detections[i].label == "person":
+        if detections[i].label.lower() == "person":
             # x1, y1, x2, y2 = detections[i][1]
             x1, y1, x2, y2 = detections[i].get_xyxy()
             roi = frame[y1:y2, x1:x2]

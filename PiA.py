@@ -21,12 +21,12 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     # Update classes of objects to detect from UI
     classes = getUserRequestedClasses()
     if privacy:
-        classes = list(classes.keys())
-        if "person" not in classes:
-            classes.append("person")
+        classes_list = list(classes.keys())
+        if "person" not in classes_list:
+            classes_list.append("person")
 
-    rgb_model.set_classes(classes)
-    logging.info(f"Set objects of interest to {classes}.")
+    rgb_model.set_classes(classes_list)
+    logging.info(f"Set objects of interest to {classes_list}.")
 
     # Captures two images
     setStatusMessage("capturing images")
@@ -38,7 +38,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
 
     # Sending RGB classes to PiB
     logging.info(f"Sending Object detection classes to PiB.")
-    send_object_detection_results(conn, classes)
+    send_object_detection_results(conn, [classes])
 
     setStatusMessage("detecting objects")
     # Perform object detection
@@ -62,7 +62,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     objects += receive_object_detection_results(conn)
 
     # Calculate distance estimation to objects - append distance to object array
-    objects = calculate_distance(objects, distance_moved, last_objects)
+    # objects = calculate_distance(objects, distance_moved, last_objects)
     last_objects = objects  # Update last objects
     # Assign IDs to objects
     objects = assign_id(objects)
@@ -143,7 +143,7 @@ RESOLUTION = (4608, 2592)
 FOV = (102, 67)
 
 # OBJECT DETECTION
-PRIVACY = False  # Blur people
+PRIVACY = True  # Blur people
 CLASSES = ["plant"]
 OD_THRESHOLD = 0.1
 
@@ -227,8 +227,8 @@ if __name__ == "__main__":
                 # Get current location
                 location = gps.get_location()
                 distance_moved = gps.get_distance_moved()
-                logging.debug("Location: {location}")
-                logging.debug("Distance moved: {distance_moved}m")
+                logging.debug(f"Location: {location}")
+                logging.debug(f"Distance moved: {distance_moved}m")
 
                 # If location known, trigger a new scan 
                 if location:
@@ -272,6 +272,7 @@ if __name__ == "__main__":
         logging.info("All connections closed.")
 
     finally:
+        setPlatformStatus(0)
         logging.info("System terminated.")
 
 

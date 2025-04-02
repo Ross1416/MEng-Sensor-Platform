@@ -196,10 +196,10 @@ def applyTransform(img1, img2, matrix, objects):
     # Find the new coordintes of an objects after warping
     if objects != []:
         for obj in objects:
-            x1 = obj[1][0]
-            y1 = obj[1][1]
-            x2 = obj[1][2]
-            y2 = obj[1][3]
+            # x1 = obj[1][0]
+            # y1 = obj[1][1]
+            # x2 = obj[1][2]
+            # y2 = obj[1][3]
 
             x1, y1, x2, y2 = obj.get_xyxy()
 
