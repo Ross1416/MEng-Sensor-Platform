@@ -45,10 +45,10 @@ class Object:
 
     def get_xyxy(self):
         return self.coords
-    
+
     def get_xyxy_original(self):
         return self.coords_original
-    
+
     def get_camera(self):
         return self.camera
 
@@ -125,7 +125,9 @@ def object_detection(model, frame, camera, conf=0.25):
         conf = math.ceil((box.conf[0] * 100)) / 100
         # results.append([label,coords,conf])
         results.append(Object(label=label, coords=coords, conf=conf, camera=camera))
-    print(f"Object detection results:\n{results}")
+        logging.debug(
+            f"Object detected:\n{box.label}, {box.coords}, {box.conf}, {box.camera}"
+        )
     return results
 
 

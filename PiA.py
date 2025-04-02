@@ -56,7 +56,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     objects += receive_object_detection_results(conn)
 
     # Calculate distance estimation to objects - append distance to object array
-    # objects = calculate_distance(objects, distance_moved, last_objects)
+    objects = calculate_distance(objects, distance_moved, last_objects)
     last_objects = objects  # Update last objects
     # Assign IDs to objects
     objects = assign_id(objects)
@@ -187,7 +187,6 @@ if __name__ == "__main__":
     logging.debug("Loaded RGB object detection model.")
     logging.info(f"Privacy set {PRIVACY}.")
 
-
     logging.info(f"Waiting for trigger...")
 
     count = 0
@@ -201,7 +200,9 @@ if __name__ == "__main__":
             except json.decoder.JSONDecodeError:
                 logging.error("Error accessing JSON configuration file.")
 
-        GPS_coordinate_change = gps.check_for_movement() # Updates gps location and checks for movement
+        GPS_coordinate_change = (
+            gps.check_for_movement()
+        )  # Updates gps location and checks for movement
         if status == 2 or (status == 1 and GPS_coordinate_change):
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
@@ -209,6 +210,8 @@ if __name__ == "__main__":
             # Get current location
             location = gps.get_location()
             distance_moved = gps.get_distance_moved()
+            logging.debug("Location: {location}")
+            logging.debug("Distance moved: {distance_moved}m")
             if location:
                 new_scan(
                     rgb_model,
