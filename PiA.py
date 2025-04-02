@@ -17,13 +17,13 @@ import shutil
 # Triggers when change in GPS location
 def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     global last_objects
-    
+
     classes = getUserRequestedClasses()
 
     rgb_model.set_classes(list(classes.keys()))
-    
+
     logging.info(f"Set YOLO classes to {classes}.")
-    
+
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
@@ -57,7 +57,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
 
     # Calculate distance estimation to objects - append distance to object array
     # objects = calculate_distance(objects, distance_moved, last_objects)
-    last_objects = objects # Update last objects
+    last_objects = objects  # Update last objects
     # Assign IDs to objects
     objects = assign_id(objects)
 
@@ -112,11 +112,15 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
             id = filtered_objects[i].id
             # Save results to images in ui
             save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-            cv2.imwrite(save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification)
+            cv2.imwrite(
+                save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
+            )
             cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
 
             # Update object with refereances and materials
-            filtered_objects[i].set_hs_classification_ref(f"./hs_{uid}_{id}_classification.jpg")
+            filtered_objects[i].set_hs_classification_ref(
+                f"./hs_{uid}_{id}_classification.jpg"
+            )
             filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
             filtered_objects[i].set_hs_materials(hs_materials)
 
@@ -186,6 +190,7 @@ if __name__ == "__main__":
 
     logging.info(f"Waiting for trigger...")
 
+    count = 0
     # Mainloop
     while True:
         # Update save location
@@ -196,11 +201,7 @@ if __name__ == "__main__":
             except json.decoder.JSONDecodeError:
                 logging.error("Error accessing JSON configuration file.")
 
-        # Update GPS status
-        gps_status = gps.check_if_gps_locaiton()
-        updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
-
-        GPS_coordinate_change = gps.check_for_movement()
+        GPS_coordinate_change = gps.check_for_movement() # Updates gps location and checks for movement
         if status == 2 or (status == 1 and GPS_coordinate_change):
             timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
             save_location = f"./capture/{timestamp}-capture/"
@@ -209,11 +210,11 @@ if __name__ == "__main__":
             location = gps.get_location()
             distance_moved = gps.get_distance_moved()
             if location:
-                    new_scan(
+                new_scan(
                     rgb_model,
                     activeFile,
                     lat=location["latitude"],
-                    lon=location["longitude"], 
+                    lon=location["longitude"],
                     distance_moved=distance_moved,
                     privacy=PRIVACY,
                 )
@@ -225,3 +226,11 @@ if __name__ == "__main__":
 
             if status == 2:
                 setPlatformStatus(0)
+
+        # Update GPS status every 30 cycles
+        if count > 30:
+            gps.update_location()
+            gps_status = gps.check_if_gps_locaiton()
+            updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
+
+        count += 1

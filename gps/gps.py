@@ -4,34 +4,44 @@ import math
 import time
 import numpy as np
 
+
 class Neo8T:
-    def __init__(self, port="/dev/ttyAMA0", baudrate=9600, timeout=1, distance_threshold=10, movement_callback=None):
+    def __init__(
+        self,
+        port="/dev/ttyAMA0",
+        baudrate=9600,
+        timeout=1,
+        distance_threshold=10,
+        movement_callback=None,
+    ):
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
         self.connection = serial.Serial(port, baudrate, timeout=timeout)
         self.distance_threshold = distance_threshold
 
-        self.location = {
-                            "latitude": 0,
-                            "longitude": 0,
-                            "altitude": 0,
-                            "fix_quality": 0,
-                        }
+        # self.location = {
+        #                     "latitude": 0,
+        #                     "longitude": 0,
+        #                     "altitude": 0,
+        #                     "fix_quality": 0,
+        #                 }
+        self.location = None
+
         self.last_location = {
-                            "latitude": 0,
-                            "longitude": 0,
-                            "altitude": 0,
-                            "fix_quality": 0,
-                        }
+            "latitude": 0,
+            "longitude": 0,
+            "altitude": 0,
+            "fix_quality": 0,
+        }
         self.distance_moved = None
 
         self.movement_callback = movement_callback
 
-        #TO REMOVE
+        # TO REMOVE
         self._dummy_coords_index = 0
-        self._dummy_x_coords = np.linspace(55.844216,55.853709,50)
-        self._dummy_y_coords = np.linspace(-4.245121,-4.233920,50)
+        self._dummy_x_coords = np.linspace(55.844216, 55.853709, 50)
+        self._dummy_y_coords = np.linspace(-4.245121, -4.233920, 50)
 
     def read_raw_data(self):
         """Reads raw NMEA sentence from the GPS module. Returns Raw NMEA sentence as a string or None if no data is available."""
@@ -44,7 +54,7 @@ class Neo8T:
             print(f"Serial error: {e}")
         return None
 
-    def find_location(self):
+    def update_location(self):
         """Reads and parses the GPS location from NMEA sentences. Returns Dictionary containing latitude, longitude, altitude, and fix quality or None if no fix."""
         count = 0
         while True:
@@ -53,7 +63,7 @@ class Neo8T:
                 try:
                     msg = pynmea2.parse(raw_data)
                     if msg.latitude and msg.longitude:
-                        return {
+                        self.location = {
                             "latitude": msg.latitude,
                             "longitude": msg.longitude,
                             "altitude": msg.altitude,
@@ -61,12 +71,12 @@ class Neo8T:
                         }
                 except pynmea2.ParseError:
                     pass
-                    
-            if count > 20:
-                return None
+
+            if count > 10:
+                self.location = None
             else:
                 count += 1
-    
+
     def haversine(self, pos1, pos2):
         """Calculates distance in meters between two GPS coordinates.
         pos1 = (lat1,lon1)
@@ -78,7 +88,9 @@ class Neo8T:
         delta_lat = math.radians(lat2 - lat1)
         delta_lon = math.radians(lon2 - lon1)
 
-        a = (math.sin(delta_lat / 2) ** 2) + math.cos(phi1) * math.cos(phi2) * (math.sin(delta_lon / 2) ** 2)
+        a = (math.sin(delta_lat / 2) ** 2) + math.cos(phi1) * math.cos(phi2) * (
+            math.sin(delta_lon / 2) ** 2
+        )
         c = 2 * math.asin(math.sqrt(a))
 
         return R * c  # Distance in meters
@@ -92,7 +104,7 @@ class Neo8T:
                 pos1 = (self.location["latitude"], self.location["longitude"])
                 pos2 = (self.last_location["latitude"], self.last_location["longitude"])
                 self.distance_moved = self.haversine(pos1, pos2)
-                
+
                 if self.distance_moved >= self.distance_threshold:
                     self.last_location = self.location
                     if self.movement_callback:
@@ -100,12 +112,12 @@ class Neo8T:
             time.sleep(1)
 
     def check_for_movement(self):
-        location = self.find_location()
-        if location:
-            pos1 = (location["latitude"], location["longitude"])
+        self.update_location()
+        if self.location:
+            pos1 = (self.location["latitude"], self.location["longitude"])
             pos2 = (self.last_location["latitude"], self.last_location["longitude"])
             self.distance_moved = self.haversine(pos1, pos2)
-            
+
             if self.distance_moved >= self.distance_threshold:
                 self.last_location = location
                 return True
@@ -113,19 +125,19 @@ class Neo8T:
             self.distance_moved = 0
 
         return False
-    
+
     def check_if_gps_locaiton(self):
         if self.location:
             return True
         else:
             return False
-        
+
     def get_location(self):
         return self.location
 
     def get_distance_moved(self):
         return self.distance_moved
-        
+
     def set_distance_threshold(self, distance):
         self.distance_threshold = distance
 
@@ -133,20 +145,30 @@ class Neo8T:
         self._dummy_coords_index += 1
         if self._dummy_coords_index > 49:
             print("At end of dummy coords")
-            return (self._dummy_x_coords[49],self._dummy_y_coords[49])
+            return (self._dummy_x_coords[49], self._dummy_y_coords[49])
         else:
-            return (self._dummy_x_coords[self._dummy_coords_index],self._dummy_y_coords[self._dummy_coords_index])
+            return (
+                self._dummy_x_coords[self._dummy_coords_index],
+                self._dummy_y_coords[self._dummy_coords_index],
+            )
 
     def close(self):
         """Closes the serial connection."""
         if self.connection and self.connection.is_open:
             self.connection.close()
 
+
 def callback(loc):
     print(f"Trigger @ {loc}")
 
+
 if __name__ == "__main__":
-    gps = Neo8T(port="/dev/ttyACM0",baudrate=115200, distance_threshold=10, movement_callback=callback)
+    gps = Neo8T(
+        port="/dev/ttyACM0",
+        baudrate=115200,
+        distance_threshold=10,
+        movement_callback=callback,
+    )
     print("Setup GPS")
     fix = False
     while not fix:
