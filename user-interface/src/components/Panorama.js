@@ -108,8 +108,8 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                         objects?.map((obj) => (
                             <Pannellum.Hotspot
                             type="custom"
-                            pitch={(obj.y/850)*30}
-                            yaw={(obj.x/6453)*179}
+                            pitch={(obj.y/815)*-1*30}
+                            yaw={(obj.x/6399)*179}
                             title="1"
                             text={obj.RGB_classification}
                             tooltip={(hotSpotDiv) => {

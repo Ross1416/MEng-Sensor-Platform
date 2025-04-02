@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-
 ### Show Images for Testing + Debugging ####
 def showImage(image, title="Snapshot"):
     cv2.imshow(title, image)
@@ -120,8 +119,8 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     # Brute Force Match
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
-    # img_matches = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    # showImage(img_matches)
+    img_matches = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    showImage(img_matches)
 
     # Perform Lowe's Ratio Test
     goodMatches = []
@@ -144,11 +143,11 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     goodMatches = sorted(goodMatches, key=lambda x: x.distance)
 
     # Keep only top 3 matches
-    if len(goodMatches) > 30:
-        goodMatches = goodMatches[:30]
+    # if len(goodMatches) > 30:
+    #     goodMatches = goodMatches[:30]
 
-    # Draw matches
-    # img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # # Draw matches
+    img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     # showImage(img_matches)
 
     # Convert to numpy array
@@ -166,8 +165,8 @@ def calculateTransform(src_pts, dst_pts, ransac_threshold=3):
         dst_pts,
         method=cv2.RANSAC,
         ransacReprojThreshold=ransac_threshold,
-        maxIters=5000,
-        confidence=0.9,
+        # maxIters=10,
+        confidence=0.999,
     )
 
     return matrix
@@ -189,6 +188,7 @@ def applyTransform(img1, img2, matrix, objects):
 
     # Apply the affine transformation, with a canvas = max coordinates
     canvas = cv2.warpAffine(img2, matrix, (maxX, max(height1, maxY)))
+    # showImage(canvas, 'canvas')
 
     # Apply Blending
     blended = applyBlend(img1, canvas)
@@ -196,10 +196,10 @@ def applyTransform(img1, img2, matrix, objects):
     # Find the new coordintes of an objects after warping
     if objects != []:
         for obj in objects:
-            # x1 = obj[1][0]
-            # y1 = obj[1][1]
-            # x2 = obj[1][2]
-            # y2 = obj[1][3]
+            x1 = obj[1][0]
+            y1 = obj[1][1]
+            x2 = obj[1][2]
+            y2 = obj[1][3]
 
             x1, y1, x2, y2 = obj.get_xyxy()
 
@@ -210,11 +210,6 @@ def applyTransform(img1, img2, matrix, objects):
             y1 = round(new_coords[0][1])
             x2 = round(new_coords[1][0])
             y2 = round(new_coords[1][1])
-
-            # obj[1][0] = x1
-            # obj[1][1] = y1
-            # obj[1][2] = x2
-            # obj[1][3] = y2
 
             obj.set_xyxy([x1, y1, x2, y2])
 
@@ -227,15 +222,13 @@ def applyBlend(image1, canvas):
     height1, width1, _ = image1.shape  # First image / panorama
     img1 = np.zeros_like(canvas)
     img1[:height1, :width1, :] = image1
-    # showImage(img1)
 
     # Highlight the area to blend
     identifyBlendedArea = np.where((canvas > 0) & (img1 > 0), 255, 0).astype(np.uint8)
-    # showImage(identifyBlendedArea)
 
     # Crop to the smallest bounding box
     blendedObject, x, y = cropToObject(identifyBlendedArea)
-    # showImage(blendedObject)
+
 
     # Get the blending area width
     height, width, _ = blendedObject.shape
@@ -244,19 +237,15 @@ def applyBlend(image1, canvas):
     gradient = np.linspace(0, 1, width)
     gradient = np.stack([gradient] * 3, axis=1)  # Shape: (width, 3)
     gradient = np.tile(gradient, (height, 1, 1))  # Repeat for height
-    # showImage(gradient)
 
     # Project the new gradient to the blending shape
     gradient = np.where(blendedObject != 0, gradient, blendedObject)
-    # showImage(gradient)
-    #
+    
     # Place the new gradient back in its original position
     newGradient = np.zeros_like(canvas).astype(np.float32)
     newGradient[y : y + height, x : x + width, :] = gradient
-    # showImage(newGradient)
 
     blended = ((1 - newGradient) * img1 + newGradient * canvas).astype(np.uint8)
     blended = np.where(blended == 0, canvas, blended).astype(np.uint8)
-    # showImage(blended, 'BLENDED')
 
     return blended
