@@ -26,7 +26,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     # Perform object detection
     objects = []
     for i, f in enumerate(frames):
-        objects.append(object_detection(rgb_model, f, i+2, OD_THRESHOLD))
+        objects.append(object_detection(rgb_model, f, i + 2, OD_THRESHOLD))
     # Send images to PiA
     send_image_arrays(client_socket, frames)
     # # Receive object detection data
@@ -49,10 +49,12 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
         px_2 = objects[i].get_xyxy_original()[2:]
         xoffset = objects[i].get_camera() * 90
         angle_x1 = (
-            pixel_to_angle(px_1, RESOLUTION, FOV)[0] + xoffset# + ROTATION_OFFSET
+            pixel_to_angle(px_1, RESOLUTION, FOV)[0]
+            + xoffset  # + ROTATION_OFFSET
         )
         angle_x2 = (
-            pixel_to_angle(px_2, RESOLUTION, FOV)[0] + xoffset# + ROTATION_OFFSET
+            pixel_to_angle(px_2, RESOLUTION, FOV)[0]
+            + xoffset  # + ROTATION_OFFSET
         )
 
         if ENABLE_HS:
@@ -72,17 +74,19 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
     # Rotate rotational stage
-    rotate_safe(axis, angles[0], ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
+    rotate_safe(
+        axis, angles[0], ROTATION_OFFSET, ROTATION_SPEED, blocking=True
+    )
     logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
     logging.debug(f"Calculated FPS: {fps}")
-    
+
     # Calculate difference in angle and set minimum of 27 degrees
     diff = abs(angles[1] - angles[0])
     if diff < HS_MIN_CAPTURE_ANGLE:
-        extra = int((HS_MIN_CAPTURE_ANGLE - diff)/2)
-        angles = (angles[0]-extra, angles[1]+extra)
+        extra = int((HS_MIN_CAPTURE_ANGLE - diff) / 2)
+        angles = (angles[0] - extra, angles[1] + extra)
     diff = abs(angles[1] - angles[0])
 
     # Calculate number of frames
@@ -98,11 +102,6 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     # print("Plotting RGB Image...")
     # plt.figure()
     # Get indices of RGB bands from calibration file
-    # RGB = (
-    #     get_wavelength_index(cal_arr, 690, 2),
-    #     get_wavelength_index(cal_arr, 535, 2),
-    #     get_wavelength_index(cal_arr, 470, 2),
-    # )
 
     # plt.imshow(scene[:, :, RGB])
 
@@ -121,6 +120,16 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
         np.save(path, scene)
         logging.debug(f"Saved raw hyperspectral scene to {path}")
 
+        RGB = (
+            get_wavelength_index(cal_arr, 690, 2),
+            get_wavelength_index(cal_arr, 535, 2),
+            get_wavelength_index(cal_arr, 470, 2),
+        )
+
+        rgb_image = scene[:, :, RGB]
+
+        plt.imsave(f"RGB_{next_id}.png", rgb_image)
+
     output_path = HSI_SCANS_PATH + f"hs_{id}.jpg"
     mats = classify_and_save(
         MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr
@@ -128,7 +137,9 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     print(mats)
 
     # Open plots as arrays
-    hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
+    hs_classification = cv2.imread(
+        HSI_SCANS_PATH + f"hs_{id}_classification.png"
+    )
     hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
 
     return mats, hs_classification, hs_ndvi
@@ -151,7 +162,9 @@ OD_THRESHOLD = 0.1
 # HYPERSPECTRAL
 MODEL_PATH = "./hyperspectral/NN_18_03_2025.keras"
 LABEL_ENCODING_PATH = "./hyperspectral/label_encoding.npy"
-CALIBRATION_FILE_PATH = "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
+CALIBRATION_FILE_PATH = (
+    "./hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
+)
 HSI_SCANS_PATH = "./hsi_scans/"
 HS_EXPOSURE_TIME = 10000
 HS_PIXEL_BINNING = 2
@@ -190,10 +203,14 @@ if __name__ == "__main__":
             # Home rotational stage
             logging.info("Homing rotational stage.")
             axis.home(wait_until_idle=True)
-            rotate_safe(axis, 0, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
-        
+            rotate_safe(
+                axis, 0, ROTATION_OFFSET, ROTATION_SPEED, blocking=True
+            )
+
             # Setup hyperspectral
-            hs_cam = setup_hyperspectral(HS_EXPOSURE_TIME, HS_GAIN, HS_PIXEL_BINNING)
+            hs_cam = setup_hyperspectral(
+                HS_EXPOSURE_TIME, HS_GAIN, HS_PIXEL_BINNING
+            )
             logging.info("Setup hyperspectral camera.")
 
         else:
@@ -207,7 +224,9 @@ if __name__ == "__main__":
         logging.debug("Connected to PiA")
 
         # Setup object detection modelx
-        rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
+        rgb_model = YOLOWorld(
+            "object_detection/yolo_models/yolov8s-worldv2.pt"
+        )
         logging.debug("Loaded RGB object detection model.")
         # TODO send search classes to PiB
         rgb_model.set_classes(CLASSES)
@@ -222,7 +241,9 @@ if __name__ == "__main__":
             if receive_capture_request(client_socket) == 1:
                 logging.info("Triggered Capture.")
                 on_trigger(rgb_model, axis, hs_cam, cal_arr)
-                rotate_safe(axis, 170, ROTATION_OFFSET, ROTATION_SPEED, blocking=True)
+                rotate_safe(
+                    axis, 170, ROTATION_OFFSET, ROTATION_SPEED, blocking=True
+                )
                 capture_triggered = True
 
             sleep(1)
