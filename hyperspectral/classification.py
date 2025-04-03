@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from scipy.ndimage import median_filter
 import matplotlib.colors as mcolors
-from hyperspectral.hyperspectral_driver import (
+from hyperspectral_driver import (
     get_wavelength_index,
     get_calibration_array,
 )
@@ -46,6 +46,22 @@ def calculated_ndvi(full_image, cal_arr):
     return ndvi
 
 
+def calculate_ndmi(full_image, cal_arr):
+
+    nir_idx = get_wavelength_index(cal_arr, 800, 2)
+    swir_idx = get_wavelength_index(cal_arr, 1050, 2)
+
+    # Extract NIR and SWIR bands
+    nir_band = (full_image[:, :, nir_idx]).astype(np.float32)
+    swir_band = (full_image[:, :, swir_idx]).astype(np.float32)
+
+    denominator = nir_band + swir_band
+
+    ndmi = (nir_band - swir_band) / denominator
+
+    return ndmi
+
+
 def classify_and_save(
     model_path, full_image, label_encoding_path, output_path, cal_arr
 ):
@@ -56,28 +72,16 @@ def classify_and_save(
     model = tf.keras.models.load_model(model_path)
 
     # Load hyperspectral image (full image for NDVI)
-    # full_image = np.load(image_path)
-
-    # Keep the reduced image for classification
-    selected_band_indices = select_bands()
-    image = full_image[:, :, selected_band_indices]  # reduced image
-
-    h, w, num_bands = image.shape
-    image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
-
-    # Classify image
-    predictions = model.predict(image_reshaped)
-    predicted_labels = np.argmax(predictions, axis=1)
-    classified_image = predicted_labels.reshape(h, w)
-
-    # Apply smoothing (using median filter)
-    smoothed_image = apply_smoothing(classified_image)
+    full_image = np.load(image_path)
 
     # Load label encoder
-    label_encoder = load_label_encoder(label_encoding_path)
+    # label_encoder = load_label_encoder(label_encoding_path)
 
     # Calculate NDVI
     ndvi = calculated_ndvi(full_image, cal_arr)
+
+    # Calculate NDMI
+    ndmi = calculate_ndmi(full_image, cal_arr)
 
     # Saving the image
     output_path = output_name + "_ndvi.png"
@@ -93,53 +97,21 @@ def classify_and_save(
     plt.close()
     print(f"NDVI image saved as {output_path}")
 
-    # Extract unique classes and their counts
-    unique_classes, counts = np.unique(smoothed_image, return_counts=True)
-    total_pixels = smoothed_image.size
-
-    # Compute percentage of each class
-    class_percentages = {
-        label_encoder[orig][1]: (counts[i] / total_pixels) * 100
-        for i, orig in enumerate(unique_classes)
-    }
-
-    # Generate colormap
-    cmap = plt.get_cmap("gist_rainbow", len(unique_classes))
-    colors = cmap(np.linspace(0, 1, len(unique_classes)))
-    custom_cmap = mcolors.ListedColormap(colors)
-
-    # Generate legend mapping from encoded labels to class names
-    legend_labels = {
-        encoded: label_encoder[orig][1]
-        for orig, (encoded, _) in label_encoder.items()
-        if encoded in unique_classes
-    }
-
-    # Plot classification result
+    # Saving the image
+    output_path = output_name + "_ndmi.png"
     plt.figure(figsize=(8, 6), facecolor="black")
     ax = plt.gca()
     ax.set_facecolor("black")
-    img = plt.imshow(
-        smoothed_image,
-        cmap=custom_cmap,
-        vmin=unique_classes[0],
-        vmax=unique_classes[-1],
-    )
-    plt.title("Material Classification", color="white")
-
-    # Add colorbar legend
-    cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
-    cbar.set_ticklabels(list(legend_labels.values()))
-    cbar.set_label("Class Labels", color="white")
+    im = plt.imshow(ndvi, cmap="RdYlGn", vmin=-1, vmax=1)
+    cbar = plt.colorbar(im, label="NDMI")
+    cbar.ax.yaxis.label.set_color("white")
     cbar.ax.tick_params(color="white", labelcolor="white")
-
-    # Save output image
-    output_path = output_name + "_classification.png"
+    plt.title("NDMI", color="white")
     plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor="black")
     plt.close()
-    print(f"Smoothed classification results saved to {output_path}")
+    print(f"NDMI image saved as {output_path}")
 
-    return class_percentages
+    return ndmi
 
 
 if __name__ == "__main__":
@@ -152,7 +124,7 @@ if __name__ == "__main__":
     label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
     output_name = "test.png"
 
-    class_distribution = classify_and_save(
-        model_path, image_path, label_encoding_path, output_name
+    x = classify_and_save(
+        model_path, image_path, label_encoding_path, output_name, cal_arr
     )
-    print("Class Distribution (%):", class_distribution)
+    # print("Class Distribution (%):", class_distribution)
