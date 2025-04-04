@@ -246,8 +246,8 @@ if __name__ == "__main__":
                         privacy=PRIVACY,
                     )
                 else:
-                    logging.info("No GPS location found => using Latitude and longitude of (0,0)")
-                    new_scan(rgb_model, activeFile, lat=0.0, lon=0.0, distance_moved=distance_moved, privacy=PRIVACY)
+                    logging.info("No GPS location found. Try again.")
+                    setPlatformStatus(0)
 
                 logging.info("Completed scan.")
 
