@@ -1,3 +1,4 @@
+# This file specifies the functions for image stitching
 import cv2
 import numpy as np
 
@@ -7,8 +8,7 @@ def showImage(image, title="Snapshot"):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
-### determine cylindrical projection parameters ####
+### Determine cylindrical projection parameters ####
 def getCylindricalProjection(img):
 
     h, w = img.shape[:2]  # Retrieve image dimensions
@@ -41,7 +41,7 @@ def applyCylindricalProjection(img, map_x, map_y):
     # Crop
     cylindricalProjection, x_offset, y_offset = cropToObject(cylindricalProjection)
 
-    return cylindricalProjection, x_offset, y_offset
+    return cylindricalProjection, x_offset, y_offset 
 
 
 ### Determine the coordinates of an object, after cylindrical projection ####
@@ -99,10 +99,6 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 
-    # Equalize histogram
-    # referenceImage = cv2.equalizeHist(referenceImage)
-    # warpImage = cv2.equalizeHist(warpImage)
-
     # Perform SIFT
     sift = cv2.SIFT_create()
 
@@ -142,10 +138,6 @@ def findKeyPoints(img1, img2, horizontal_overlap=500):
     # Sort matches, best to worst
     goodMatches = sorted(goodMatches, key=lambda x: x.distance)
 
-    # Keep only top 3 matches
-    # if len(goodMatches) > 30:
-    #     goodMatches = goodMatches[:30]
-
     # # Draw matches
     img_matches = cv2.drawMatches(img1, kp1, img2, kp2, goodMatches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     # showImage(img_matches)
@@ -165,7 +157,6 @@ def calculateTransform(src_pts, dst_pts, ransac_threshold=3):
         dst_pts,
         method=cv2.RANSAC,
         ransacReprojThreshold=ransac_threshold,
-        # maxIters=10,
         confidence=0.999,
     )
 
@@ -196,10 +187,6 @@ def applyTransform(img1, img2, matrix, objects):
     # Find the new coordintes of an objects after warping
     if objects != []:
         for obj in objects:
-            # x1 = obj[1][0]
-            # y1 = obj[1][1]
-            # x2 = obj[1][2]
-            # y2 = obj[1][3]
 
             x1, y1, x2, y2 = obj.get_xyxy()
 
