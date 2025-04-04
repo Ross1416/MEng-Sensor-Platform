@@ -39,7 +39,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         setSearchObjects((prevItems) => prevItems.filter((_, i) => i !== index));
     }
     
-    const updateSearchObjects = () => {
+    const updateSearchObjects = async () => {
         if (searchObjects) {
             try {
                 fetch("/updateObjects", {
@@ -54,10 +54,11 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     }
 
 
+
     useEffect(()=> {
         const interval = setInterval(() => {
-          updateSearchObjects();
-    }, 1000);
+            updateSearchObjects();
+    }, 150); // If this interval is greater than App.js interval, the code will not execute. Keep it small for field testing, and large for demo.
         return () => clearInterval(interval);
     }, [updateSearchObjects])
 
