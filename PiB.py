@@ -76,11 +76,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
 
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
-    # Rotate rotational stage
-    rotate_safe(
-        axis, angles[0], ROTATION_OFFSET, ROTATION_SPEED, blocking=True
-    )
-    logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
+
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
     logging.debug(f"Calculated FPS: {fps}")
@@ -91,6 +87,12 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
         extra = int((HS_MIN_CAPTURE_ANGLE - diff) / 2)
         angles = (angles[0] - extra, angles[1] + extra)
     diff = abs(angles[1] - angles[0])
+
+    # Rotate rotational stage
+    rotate_safe(
+        axis, angles[0], ROTATION_OFFSET, ROTATION_SPEED, blocking=True
+    )
+    logging.info(f"Rotating hyperspectral to {angles[0]} degrees.")
 
     # Calculate number of frames
     nframes = get_nframes(diff, HS_PIXEL_BINNING)
