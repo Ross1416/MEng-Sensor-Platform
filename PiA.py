@@ -36,6 +36,11 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
 
+    # Wait for PiB to have captured
+    capture_success = False
+    while not capture_success:
+        capture_success = check_capture_success(conn)
+
     # Sending RGB classes to PiB
     logging.info(f"Sending Object detection classes to PiB.")
     send_object_detection_results(conn, [classes])

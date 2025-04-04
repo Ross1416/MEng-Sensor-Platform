@@ -175,6 +175,13 @@ def receive_capture_request(client_socket):
         # client_socket.close()
         return 0
 
+def send_capture_success(conn):
+    try:
+        conn.sendall(b"CAPTURE SUCCESS")
+        logging.debug("Capture success sent")
+    except Exception as e:
+        logging.error("Error: {e}")
+
 if __name__ == "__main__":
     ip = "10.12.23.188"
     test_ip = "10.12.71.113"

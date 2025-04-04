@@ -16,6 +16,9 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     # Capture images
     frames = capture(cams, "PiB")
 
+    # Send capture success to PiA
+    send_capture_success(client_socket)
+
     # Receive object detection classes from PiA
     classes = receive_object_detection_results(client_socket)[0]
     classes_list = list(classes.keys())

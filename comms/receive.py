@@ -29,7 +29,13 @@ def request_client_capture(server_socket, conn):
     except Exception as e:
         print("Error: {e}")
 
-    
+def check_capture_success(conn):
+    ack = conn.recv(1024).decode()
+    if ack == "CAPTURE SUCCESS":
+        return True
+    else:
+        return False
+        
 
 def receive_images(conn, save_location):
     try:
