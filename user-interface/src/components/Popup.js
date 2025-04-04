@@ -1,12 +1,13 @@
+// This files creates a Modal component, which shows when an object is clicked on. This shows further details / images of the object
 import React, {useState, useEffect, useRef} from 'react';
 import '../styles/Popup.css';
 
 export function Popup({showHSI, setShowHSI, targetObject, selectedEnviroment}) {
 
-    const [window, setWindow] = useState('overview')
-    const [imgSource, setImgSource] = useState('')
-    const [hsiData, setHSIData] = useState([])
+    const [window, setWindow] = useState('overview') // Which window is shown: overview, hsi classification, or ndvi. Add as more metrics used.
+    const [imgSource, setImgSource] = useState('') // Path to the image
 
+    // Change window
     const changeWindow = (target) => {
         setWindow(target)
         if (target == 'classification') {
@@ -16,6 +17,7 @@ export function Popup({showHSI, setShowHSI, targetObject, selectedEnviroment}) {
         }
     }
 
+    // Every time the window opens (showHSI), set window to 'overview' as default 
     useEffect(()=> {
         setWindow('overview')
     }, [showHSI])

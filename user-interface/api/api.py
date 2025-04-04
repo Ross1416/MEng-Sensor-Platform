@@ -1,3 +1,8 @@
+# This file specifies Flask APIs to enable Python back-end and 
+# JavaScript front-end to communicate
+
+
+# Imports
 from flask import Flask, send_file, request, jsonify
 import json
 import requests
@@ -44,7 +49,7 @@ def getJSONfilenames():
     except Exception as e:
         print('Error reading directory:', e)
 
-### Get the active enviroment ###
+### Get the active file ###
 @app.route("/getActiveFile")
 def getActiveFile():
     try: 
@@ -105,7 +110,7 @@ def createNewEnviroment():
     return 'Succesful update'
 
 
-### Update the active enviroment ###
+### Update the active file ###
 @app.route("/updateActiveEnviroment", methods=["POST"])
 def updateActiveEnviroment():
     # Read filename from API request
@@ -127,7 +132,7 @@ def updateActiveEnviroment():
     return 'Succesful update'
 
 
-### Update the active enviroment ###
+### Get the platforms current status, and connection statuses ###
 @app.route("/getPlatformStatus", methods=["GET"])
 def getPlatformStatus():
     # Specify the save path
@@ -138,7 +143,7 @@ def getPlatformStatus():
     return [data['status-message'], data['pi-connection'], data['gps-connection'], data['wifi-connection']]
 
 
-### Update the active enviroment ###
+### Update the objects that the user searches for ###
 @app.route("/updateObjects", methods=["POST"])
 def updateObjects():
     data = request.json

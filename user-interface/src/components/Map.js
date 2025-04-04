@@ -1,17 +1,15 @@
+// This files creates a Map component, which shows the coordinates of each scan
+
 import React, {useState, useEffect} from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import '../styles/Map.css';
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 
-// Update Map Coordinates
-const UpdateMapCenter = ({ newCenter }) => {
-    const map = useMap();
-};
 
-export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment, setSelectedPinInfo}) {
+export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelectedPinInfo}) {
     
-    const [mapCenter, setMapCenter] = useState([55.88000, -4.31000]) // default to London
+    const [mapCenter, setMapCenter] = useState([55.88000, -4.31000]) // map center - default to Glasgow
 
     // Set co-ords to users location
     useEffect(()=> {
@@ -28,6 +26,7 @@ export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment,
           }
     }, [])      
 
+    // Update the panorama component when a pin is clicked 
     const handlePinClick = (pin) => {
       setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pin.panorama_ref)
       setObjects(pin.objects)

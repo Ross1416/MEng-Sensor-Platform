@@ -1,9 +1,11 @@
+// This main file houses all compoennts (./components) and sends information across components.
+
+
 import './App.css';
 import React, {useState, useEffect} from 'react';
 import { Map } from './components/Map.js';
 import { Panorama } from './components/Panorama.js';
 import { Popup } from './components/Popup.js'
-
 
 function App() {
   
@@ -12,32 +14,32 @@ function App() {
   const [locationName, setLocationName] = useState('') // enviroment name
   const [pins, setPins] = useState(null) // list of pins in the enviroment
   const [objects, setObjects] = useState([]) // list of objects in a pin
-  const [enviroments, setEnvirorements] = useState(null) // a list of possible enviroments saved on device
-  const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected enviroment 
-  const [showHSI, setShowHSI] = useState(false)
-  const [hsiData, setHSIData] = useState({})
-  const [selectedPinInfo, setSelectedPinInfo] = useState(null)
-  const [targetObject, setTargetObject] = useState({})
+  const [enviroments, setEnvirorements] = useState(null) // list of files saved on device
+  const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected file 
+  const [showHSI, setShowHSI] = useState(false) // show modal?
+  const [selectedPinInfo, setSelectedPinInfo] = useState(null) // pin timestamp + coordinataes
+  const [targetObject, setTargetObject] = useState({}) // selected object information
 
  
   // DEVICE CONTROL 
   const [platformActive, setPlatformActive] = useState(0) // 1 for active device, 2 for test, 0 for deactive
-  const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // press to create new enviroment
-  const [newEnviromentName, setNewEnviromentName] = useState('')
-  const [takePhoto, setTakePhoto] = useState(false) 
-  const [statusMessage, setStatusMessage] = useState('')
-  const [statusMessageTimestamp, setStatusMessageTimestamp] = useState('')
-  const [gpsConnected, setGPSConnected] = useState(false)
-  const [piConnected, setPiConnected] = useState(false)
-  const [WIFIConnected, setWIFIConnected] = useState(false)
-  const [searchObjects, setSearchObjects] = useState(null)
+  const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // creates a new enviroment
+  const [newEnviromentName, setNewEnviromentName] = useState('') // user specified new enviroment name
+  const [takePhoto, setTakePhoto] = useState(false) // controls colour of camera button
+  const [statusMessage, setStatusMessage] = useState('') // status message contee nt
+  const [statusMessageTimestamp, setStatusMessageTimestamp] = useState('') // status message timestamp
+
+  const [gpsConnected, setGPSConnected] = useState(false) // is gps connected
+  const [piConnected, setPiConnected] = useState(false) // is Pi connected
+  const [WIFIConnected, setWIFIConnected] = useState(false)// is WiFi connected
+  const [searchObjects, setSearchObjects] = useState(null) // objects to search for
   
 
 
-  // Poll for data updates once every second
+  // Poll for data every 200ms
   const refreshData = () => {
 
-    // If the user has selected an enviroment...
+    // If the user has selected a file...
     if (selectedEnviroment) {
       try {
         fetch("/getData", {
@@ -56,7 +58,7 @@ function App() {
         console.log(error)
       }
     } else {
-       // If not, set default file
+       // If no file specified, set default file (first run)
       fetch("/getActiveFile").then(resp=>resp.json())
       .then((data) => {
         setSelectedEnviroment(data.activeFile);
@@ -189,7 +191,7 @@ function App() {
   return (
   
     <div className='container'>
-      <Popup setShowHSI={setShowHSI} showHSI={showHSI} hsiData={hsiData} targetObject={targetObject} selectedEnviroment={selectedEnviroment}/>
+      <Popup setShowHSI={setShowHSI} showHSI={showHSI} targetObject={targetObject} selectedEnviroment={selectedEnviroment}/>
   
       <div className='header'>
 
@@ -228,7 +230,7 @@ function App() {
         </div>
 
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setHSIData={setHSIData} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPinInfo={selectedPinInfo} setTargetObject={setTargetObject}/>
+          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPinInfo={selectedPinInfo} setTargetObject={setTargetObject}/>
         </div>
 
       </div> 

@@ -1,26 +1,20 @@
-import React, {useState, useEffect, useRef} from 'react';
+// This files creates a Panorama component, which shows stitched images and the position of objects in the enviroment
+import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects, selectedPinInfo, setTargetObject}) {
+export function Panorama({panorama, objects, locationName, setShowHSI, setSearchObjects, searchObjects, selectedPinInfo, setTargetObject}) {
 
+    const [showObjects, setShowObjects] = useState(true) // Whether objects are shown 
+    const [searchInput, setSearchInput] = useState('') // Input to search for a new object
+    const [hsiScan, setHsiScan] = useState(false) // Wether the new object should be scanned
 
-    const [showObjects, setShowObjects] = useState(true)
-    const [showMaterials, setShowMaterials] = useState(false)
-    const [showDistances, setShowDistances] = useState(false)
-    const [showConfidence, setShowConfidence] = useState(false)
-    const [edit, setEdit] = useState(false)
-    const [reset, setReset] = useState(false)
-    const [download, setDownload] = useState(false)
-    const [connected, setConnected] = useState(false)
-    const [searchInput, setSearchInput] = useState('')
-    const [hsiScan, setHsiScan] = useState(false)
-
-    // Toggle button change
+    // General function to toggle button 
     const toggleButton = (state, stateFunction) => {
         stateFunction(!state)
     }
 
+    // If enter pressed, add new object
     const handleNewSearchObject = async (event) => {
         const newEntry = {
             object: searchInput,
@@ -34,11 +28,12 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         } 
     }
 
-    
+    // If X pressed, delete this object
     const handleDeleteObject = async (index) => {
         setSearchObjects((prevItems) => prevItems.filter((_, i) => i !== index));
     }
     
+    // Every second, send current object array to back end
     const updateSearchObjects = async () => {
         if (searchObjects) {
             try {
@@ -53,8 +48,6 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         }
     }
 
-
-
     useEffect(()=> {
         const interval = setInterval(() => {
             updateSearchObjects();
@@ -63,6 +56,7 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
     }, [updateSearchObjects])
 
 
+    // On click, open further details regarding the object
     const handleHotspot = (obj) => {
         setShowHSI(true)
         setTargetObject(obj)
@@ -85,14 +79,12 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
 
             </div>
 
-            {/* <button onClick={changeScene}>PRESS ME</button> */}
             {panorama ? (
                 // <img src={panorama} alt='Dynamic' className='panorama'/>
                 <div style={{backgroundColor: 'black', width: '100%', height: '100%'}}>
                     <Pannellum
                         width={"100%"}
                         height={"100vh"}
-                        // title={scene.title}
                         image={panorama}
                         haov={358}
                         vaov={60}
@@ -105,7 +97,6 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                     >
 
                     {showObjects ? (
-                    // objects?.map(({ x, y, width, height, RGB_classification }) => (
                         objects?.map((obj) => (
                             <Pannellum.Hotspot
                             type="custom"
@@ -125,21 +116,12 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                     ) : <div/>}
                 </Pannellum>
                 
-                
                 </div>
                 
                 
             ) : 
             <p style={{color: 'white', margin: '10px', alignSelf:'center', justifySelf: 'center'}}>Select a location from the map</p>
             }
-
-            {/* {objects?.map((item, index) => (
-                <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.x1, top: item.y1, right: item.x2, bottom: item.y2, display: showMaterials || showObjects?'block':'none'}}>
-                    <p>{showObjects ? item.RGB_classification : ''}</p>
-                    <p>{showMaterials ? String(item.HS_classification) : ''}</p>
-                    <p>{showDistances ? item.distance + ' m': ''}</p>
-                </div>
-            ))} */}
             
             <div className='bottomBar'>
                 <h1>{locationName}</h1>
