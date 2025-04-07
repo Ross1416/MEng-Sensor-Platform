@@ -15,7 +15,7 @@ import traceback
 
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
+def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy=False):
     global last_objects
 
     # Update classes of objects to detect from UI
@@ -72,6 +72,9 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     # Assign IDs to objects
     objects = assign_id(objects)
 
+    # Send manual hyperspectral options
+    send_object_detection_results(server_socket, [manual_hs])
+
     # Blur people if privacy
     setStatusMessage("blurring people")
 
@@ -93,47 +96,51 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     setStatusMessage("removing duplicate objects")
     filtered_objects = non_maximum_suppression(objects_restructured)
 
-    # Send filtered objects to PiB
-    send_object_detection_results(conn, filtered_objects)
-
     # Updates json and moves images to correct folder
     setStatusMessage("updating ui")
     uid = str(lon) + str(lat)
-    # for i in range(len(filtered_objects)):
-    #     filtered_objects[i][1] = xyxy_to_xywh(
-    #         filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True
-    #     )
-
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
-    # # Extract filtered IDs
-    # filtered_ids = []
-    # for obj in filtered_objects:
-    #     filtered_ids.append(int(obj[3]))
+    if manual_hs:
+        hs_classification, hs_ndvi, rgb_image = receive_image_arrays(conn)
+        hs_materials = receive_object_detection_results(conn)[0]
+        id = -1
+        # Save results to images in ui
+        save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
+        cv2.imwrite(
+            save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
+        )
+        cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+        cv2.imwrite(save_path + f"/hs_{uid}_{id}_rgb.jpg", rgb_image)
 
-    # Receive processed hyperspectral scans from PiB
-    # Receive hyperspectral material distribution data from PiB
-    for i in range(len(filtered_objects)):
-        if classes[filtered_objects[i].label]:
-            setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
-            # Receive scan information
-            hs_classification, hs_ndvi = receive_image_arrays(conn)
-            hs_materials = receive_object_detection_results(conn)[0]
+    else:
+        # Send filtered objects to PiB
+        send_object_detection_results(conn, filtered_objects)
 
-            id = filtered_objects[i].id
-            # Save results to images in ui
-            save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-            cv2.imwrite(
-                save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
-            )
-            cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+        # Receive processed hyperspectral scans from PiB
+        # Receive hyperspectral material distribution data from PiB
+        for i in range(len(filtered_objects)):
+            if classes[filtered_objects[i].label]:
+                setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
+                # Receive scan information
+                hs_classification, hs_ndvi, rgb_image = receive_image_arrays(conn)
+                hs_materials = receive_object_detection_results(conn)[0]
 
-            # Update object with refereances and materials
-            filtered_objects[i].set_hs_classification_ref(
-                f"./hs_{uid}_{id}_classification.jpg"
-            )
-            filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
-            filtered_objects[i].set_hs_materials(hs_materials)
+                id = filtered_objects[i].id
+                # Save results to images in ui
+                save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
+                cv2.imwrite(
+                    save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
+                )
+                cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+                cv2.imwrite(save_path + f"/hs_{uid}_{id}_rgb.jpg", rgb_image)
+
+                # Update object with refereances and materials
+                filtered_objects[i].set_hs_classification_ref(
+                    f"./hs_{uid}_{id}_classification.jpg"
+                )
+                filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
+                filtered_objects[i].set_hs_materials(hs_materials)
 
     # Update JSON with hyperspectral data
     updateJSON_HS(filtered_objects, lon, lat, activeFile)
@@ -243,6 +250,7 @@ if __name__ == "__main__":
                         lat=location["latitude"],
                         lon=location["longitude"],
                         distance_moved=distance_moved,
+                        manual_hs=True,      ## TO GET FROM UI
                         privacy=PRIVACY,
                     )
                 else:

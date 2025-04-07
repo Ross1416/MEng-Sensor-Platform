@@ -41,39 +41,49 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     send_object_detection_results(client_socket, objects)
     # # Assign IDs to objects
     # objects = assign_id(objects)
+    
+    # Receive hyperspectral manual scan toggle
+    manual_hs = receive_object_detection_results(client_socket)[0]
 
-    # Receive filtered objects
-    objects = receive_object_detection_results(client_socket)
+    if manual_hs:
+       # Perform full 360 degree scan
+       if ENABLE_HS:
+            mats, hs_classification, hs_ndvi, rgb_image = on_rotate(axis, (-180, 179), hs_cam, cal_arr, -1)
+            send_image_arrays(client_socket, [hs_classification, hs_ndvi, rgb_image])
+            send_object_detection_results(client_socket, [mats])
+    else:
+        # Scan individual objects
+        # Receive filtered objects
+        objects = receive_object_detection_results(client_socket)
 
-    # Take hyperspectral scan
-    for i in range(len(objects)):  # for every object detected in frame
-        # Get corner pixels of objects detected and convert to angle
-        px_1 = objects[i].get_xyxy_original()[:2]
-        px_2 = objects[i].get_xyxy_original()[2:]
-        xoffset = objects[i].get_camera() * 90
-        angle_x1 = (
-            pixel_to_angle(px_1, RESOLUTION, FOV)[0]
-            + xoffset  # + ROTATION_OFFSET
-        )
-        angle_x2 = (
-            pixel_to_angle(px_2, RESOLUTION, FOV)[0]
-            + xoffset  # + ROTATION_OFFSET
-        )
+        # Take hyperspectral scan
+        for i in range(len(objects)):  # for every object detected in frame
+            # Get corner pixels of objects detected and convert to angle
+            px_1 = objects[i].get_xyxy_original()[:2]
+            px_2 = objects[i].get_xyxy_original()[2:]
+            xoffset = objects[i].get_camera() * 90
+            angle_x1 = (
+                pixel_to_angle(px_1, RESOLUTION, FOV)[0]
+                + xoffset  # + ROTATION_OFFSET
+            )
+            angle_x2 = (
+                pixel_to_angle(px_2, RESOLUTION, FOV)[0]
+                + xoffset  # + ROTATION_OFFSET
+            )
 
-        if ENABLE_HS:
-            # Check if object should be scanned by hyperspectral
-            if classes[objects[i].label]:
-                id = objects[i].id
-                logging.debug(
-                    f"Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
-                )
-                mats, hs_classification, hs_ndvi = on_rotate(
-                    axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
-                )
-                send_image_arrays(client_socket, [hs_classification, hs_ndvi])
-                send_object_detection_results(client_socket, [mats])
-                # delete_files_in_dir(HSI_SCANS_PATH)
-
+            if ENABLE_HS:
+                # Check if object should be scanned by hyperspectral
+                if classes[objects[i].label]:
+                    id = objects[i].id
+                    logging.debug(
+                        f"Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
+                    )
+                    mats, hs_classification, hs_ndvi, rgb_image = on_rotate(
+                        axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
+                    )
+                    send_image_arrays(client_socket, [hs_classification, hs_ndvi, rgb_image])
+                    send_object_detection_results(client_socket, [mats])
+                    # delete_files_in_dir(HSI_SCANS_PATH)
 
 def on_rotate(axis, angles, hs_cam, cal_arr, id):
 
@@ -112,7 +122,8 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
 
     # Save scene as .npy if debugging
     if ENABLE_DEBUG:
-        debug_dir = "./debug_PiB/"
+        # debug_dir = "./debug_PiB/"
+        debug_dir = "/media/groupc/44A2-2862/"
         os.makedirs(debug_dir, exist_ok=True)
         next_id = len(
             [
@@ -125,17 +136,17 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
         np.save(path, scene)
         logging.debug(f"Saved raw hyperspectral scene to {path}")
 
-        RGB = (
-            get_wavelength_index(cal_arr, 690, 2),
-            get_wavelength_index(cal_arr, 535, 2),
-            get_wavelength_index(cal_arr, 470, 2),
-        )
+    # Save RGB image
+    RGB = (
+        get_wavelength_index(cal_arr, 690, 2),
+        get_wavelength_index(cal_arr, 535, 2),
+        get_wavelength_index(cal_arr, 470, 2),
+    )
 
-        rgb_image = scene[:, :, RGB]
+    rgb_image = scene[:, :, RGB]
+    plt.imsave(f"hs_{id}_rgb.png", rgb_image)
 
-        plt.imsave(f"RGB_{next_id}.png", rgb_image)
-
-    output_path = HSI_SCANS_PATH + f"hs_{id}.jpg"
+    output_path = HSI_SCANS_PATH + f"hs_{id}.png"
     mats = classify_and_save(
         MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr
     )
@@ -147,7 +158,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     )
     hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
 
-    return mats, hs_classification, hs_ndvi
+    return mats, hs_classification, hs_ndvi, rgb_image
 
 
 # IP = "hsiA.local"
