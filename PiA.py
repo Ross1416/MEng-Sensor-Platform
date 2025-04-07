@@ -19,6 +19,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     global last_objects
 
     # Update classes of objects to detect from UI
+    logging.debug("Getting object of interest classes")
     classes = getUserRequestedClasses()
     if privacy:
         if "person" not in list(classes.keys()):
@@ -31,7 +32,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
     logging.info("Captured frames")
-    
+
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
 
@@ -117,7 +118,16 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         cv2.imwrite(hs_rgb_ref, rgb_image)
 
         # Update JSON with hyperspectral data
-        updateJSON_HS(filtered_objects, lon, lat, activeFile, hsi_ref, ndvi_ref, ndmi_ref, hs_materials)
+        updateJSON_HS(
+            filtered_objects,
+            lon,
+            lat,
+            activeFile,
+            hsi_ref,
+            ndvi_ref,
+            ndmi_ref,
+            hs_materials,
+        )
     else:
         # Send filtered objects to PiB
         send_object_detection_results(conn, filtered_objects)
@@ -128,7 +138,9 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
             if classes[filtered_objects[i].label]:
                 setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
                 # Receive scan information
-                hs_classification, hs_ndvi, hs_ndmi, rgb_image = receive_image_arrays(conn)
+                hs_classification, hs_ndvi, hs_ndmi, rgb_image = receive_image_arrays(
+                    conn
+                )
                 hs_materials = receive_object_detection_results(conn)[0]
 
                 id = filtered_objects[i].id
@@ -152,6 +164,8 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         updateJSON_HS(filtered_objects, lon, lat, activeFile)
 
 
+# ----- GLOBAL VARIABLES ----- #
+
 # COMMUNICATIONS
 PORT = 5002
 HOST = "0.0.0.0"  # i.e. listening
@@ -162,7 +176,7 @@ FOV = (102, 67)
 
 # OBJECT DETECTION
 PRIVACY = True  # Blur people
-CLASSES = ["plant"]
+CLASSES = ["person"]
 OD_THRESHOLD = 0.1
 
 # UI
@@ -179,10 +193,11 @@ last_objects = []
 # OTHER
 ENABLE_DEBUG = True
 
-### MAIN ###
+# ----- MAIN ----- #
 if __name__ == "__main__":
     # Update UI status msg
     setStatusMessage("setting up")
+
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -197,6 +212,10 @@ if __name__ == "__main__":
         # Setup cameras and GPIO
         cams = setup_cameras()
         logging.debug(f"Setup {len(cams)} cameras.")
+        if len(cams) < 2:
+            raise Exception(
+                "Cameras not working. Check connections."
+            )  # TODO move into function
 
         # Setup GPS
         gps = Neo8T(
@@ -219,8 +238,10 @@ if __name__ == "__main__":
         logging.info(f"Privacy set {PRIVACY}.")
         logging.info(f"Waiting for trigger from UI...")
 
+        setStatusMessage("setup complete. ready for capture")
+
+        ### Mainloop ###
         count = 0
-        # Mainloop
         while True:
             # Update save location
             status = None
@@ -229,15 +250,13 @@ if __name__ == "__main__":
                     status, activeFile, hsi_manual = getPlatformStatus()
                 except json.decoder.JSONDecodeError:
                     logging.error("Error accessing JSON configuration file.")
+                sleep(0.25)
 
             # Update GPS location and check for change in location > than  DISTANCE_THRESHOLD
-            GPS_coordinate_change = (
-                gps.check_for_movement()
-            ) 
-
+            GPS_coordinate_change = gps.check_for_movement()
             if GPS_coordinate_change:
                 logging.info("Movement detected.")
-            
+
             # If manual UI trigger or in wait for movement mode + change in movement, perform new scn
             if status == 2 or (status == 1 and GPS_coordinate_change):
                 logging.info("Scan triggered.")
@@ -245,10 +264,10 @@ if __name__ == "__main__":
                 # Get current location
                 location = gps.get_location()
                 distance_moved = gps.get_distance_moved()
-                logging.debug(f"Location: {location}")
-                logging.debug(f"Distance moved: {distance_moved}m")
+                logging.info(f"Location: {location}")
+                logging.info(f"Distance moved: {distance_moved}m")
 
-                # If location known, trigger a new scan 
+                # If location known, trigger a new scan
                 if location:
                     new_scan(
                         rgb_model,
@@ -275,17 +294,18 @@ if __name__ == "__main__":
                 updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
 
             count += 1
+            sleep(0.25)
+
     except KeyboardInterrupt:
         logging.error(f"Keyboard interrupt")
-
         server_socket.close()
         logging.info("All connections closed.")
 
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
         filename, line, func, text = tb[-1]
-        logging.error(f"Error in PiB.py: {e}")
-        logging.error(f"Occurred in file:{filename}, line {line}")
+        logging.critical(f"Error in PiB.py: {e}")
+        logging.critical(f"Occurred in file:{filename}, line {line}")
 
         server_socket.close()
         logging.info("All connections closed.")
@@ -293,6 +313,3 @@ if __name__ == "__main__":
     finally:
         setPlatformStatus(0)
         logging.info("System terminated.")
-
-
-    
