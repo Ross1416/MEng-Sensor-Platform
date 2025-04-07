@@ -222,7 +222,7 @@ if __name__ == "__main__":
             status = None
             while not status:
                 try:
-                    status, activeFile = getPlatformStatus()
+                    status, activeFile, hsi_manual = getPlatformStatus()
                 except json.decoder.JSONDecodeError:
                     logging.error("Error accessing JSON configuration file.")
 
@@ -252,7 +252,7 @@ if __name__ == "__main__":
                         lat=location["latitude"],
                         lon=location["longitude"],
                         distance_moved=distance_moved,
-                        manual_hs=True,      ## TO GET FROM UI
+                        manual_hs=hsi_manual,
                         privacy=PRIVACY,
                     )
                 else:

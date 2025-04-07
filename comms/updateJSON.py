@@ -188,8 +188,9 @@ def getPlatformStatus():
 
     status = data["status"]
     activeFile = data["activeFile"]
+    hsi_manual = data["hsi_manual_scan"]
 
-    return status, activeFile
+    return status, activeFile, hsi_manual
 
 
 def setPlatformStatus(status):
