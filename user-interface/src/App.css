@@ -45,6 +45,8 @@
   border: 1px solid white;
   border-radius: 15px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .dropdown {

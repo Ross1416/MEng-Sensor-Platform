@@ -9,33 +9,36 @@ import { Popup } from './components/Popup.js'
 
 function App() {
   
-  // ENVIROREMENT DATA 
-  const [panorama, setPanorama] = useState(null); // image reference to panorama
-  const [locationName, setLocationName] = useState('') // enviroment name
+  // ACCESSIBLE DATA 
   const [pins, setPins] = useState(null) // list of pins in the enviroment
   const [objects, setObjects] = useState([]) // list of objects in a pin
   const [enviroments, setEnvirorements] = useState(null) // list of files saved on device
-  const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected file 
-  const [showHSI, setShowHSI] = useState(false) // show modal?
-  const [selectedPinInfo, setSelectedPinInfo] = useState(null) // pin timestamp + coordinataes
-  const [targetObject, setTargetObject] = useState({}) // selected object information
 
+  // SELECTED DATA
+  const [locationName, setLocationName] = useState('') // enviroment name
+  const [selectedPin, setSelectedPin] = useState(null) // pin timestamp + coordinataes
+  const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected file 
+  const [targetObject, setTargetObject] = useState({}) // selected object information
+  const [panorama, setPanorama] = useState('')
+
+  // INTERFACE CONTROL
+  const [showHSI, setShowHSI] = useState(false) // show modal?
+  const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // creates a new enviroment
+  const [newEnviromentName, setNewEnviromentName] = useState('') // user specified new enviroment name
  
   // DEVICE CONTROL 
   const [platformActive, setPlatformActive] = useState(0) // 1 for active device, 2 for test, 0 for deactive
-  const [createNewEnviroment, setCreateNewEnviroment] = useState(false) // creates a new enviroment
-  const [newEnviromentName, setNewEnviromentName] = useState('') // user specified new enviroment name
   const [takePhoto, setTakePhoto] = useState(false) // controls colour of camera button
   const [statusMessage, setStatusMessage] = useState('') // status message contee nt
   const [statusMessageTimestamp, setStatusMessageTimestamp] = useState('') // status message timestamp
+  const [searchObjects, setSearchObjects] = useState([])
 
+  // DEVICE ANALYSIS
   const [gpsConnected, setGPSConnected] = useState(false) // is gps connected
   const [piConnected, setPiConnected] = useState(false) // is Pi connected
   const [WIFIConnected, setWIFIConnected] = useState(false)// is WiFi connected
-  const [searchObjects, setSearchObjects] = useState(null) // objects to search for
+
   
-
-
   // Poll for data every 200ms
   const refreshData = () => {
 
@@ -88,9 +91,9 @@ function App() {
     // If user has not selected a panorama yet, set default 
     if (pins && selectedEnviroment && !panorama) {
       try {
-        setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pins[0].panorama_ref)
+        setPanorama('./images/' + selectedEnviroment.slice(0, -5) + pins[0]?.panorama_ref)
         setObjects(pins[0].objects)
-        setSelectedPinInfo({timestamp: '00:00:00',coords: String(pins[0].geo_coords[0]) + ', ' +String(pins[0].geo_coords[1])})
+        setSelectedPin(pins[0])
       } catch (err) {
         console.log(err)
       }
@@ -214,6 +217,8 @@ function App() {
 
 
         <div className='upper-right-buttons'>
+          <label for="options">Choose a map:</label>
+
           <h1 style={{color: WIFIConnected ? 'white':'grey', margin: '5px'}}>WiFi</h1>
           <h1 style={{color: piConnected ? 'white':'grey', margin: '5px'}}>Pi</h1>
           <h1 style={{color: gpsConnected ? 'white':'grey', margin: '5px'}}>GPS</h1> 
@@ -226,11 +231,11 @@ function App() {
       </div>
       <div className='body'>
         <div className='map-container'>
-          <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} selectedEnviroment={selectedEnviroment} selectedPinInfo={selectedPinInfo} setSelectedPinInfo={setSelectedPinInfo} />
+          <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} selectedEnviroment={selectedEnviroment} selectedPin={selectedPin} setSelectedPin={setSelectedPin} />
         </div>
-
+        
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPinInfo={selectedPinInfo} setTargetObject={setTargetObject}/>
+          <Panorama panorama={panorama} setPanorama={setPanorama} selectedEnviroment={selectedEnviroment} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPin={selectedPin} setTargetObject={setTargetObject}/>
         </div>
 
       </div> 

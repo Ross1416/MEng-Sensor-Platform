@@ -148,8 +148,7 @@ def getPlatformStatus():
 def updateObjects():
     data = request.json
     objects = data.get("objects")
-
-    print('test: ', objects)
+    hsiManualScan = data.get("hsiManualScan")
 
     filePath = "./sensorConfiguration.json"
     with open(filePath, "r") as file:
@@ -157,6 +156,7 @@ def updateObjects():
 
     # Update current active file, so backend knows where to save
     data["search-objects"] = objects
+    data["hsi_manual_scan"] = hsiManualScan
 
     # Write to file
     with open(filePath, "w") as file:

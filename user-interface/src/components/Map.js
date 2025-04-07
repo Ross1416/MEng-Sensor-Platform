@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 
 
-export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelectedPinInfo}) {
+export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelectedPin}) {
     
     const [mapCenter, setMapCenter] = useState([55.851771, -4.2379665]) // map center - default to Glasgow
 
@@ -28,9 +28,8 @@ export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelec
 
     // Update the panorama component when a pin is clicked 
     const handlePinClick = (pin) => {
-      setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pin.panorama_ref)
+      setSelectedPin(pin)
       setObjects(pin.objects)
-      setSelectedPinInfo({timestamp: '00:00:00',coords: String(pin.geo_coords[0]) + ', ' +String(pin.geo_coords[1])})
     };
     
     return (

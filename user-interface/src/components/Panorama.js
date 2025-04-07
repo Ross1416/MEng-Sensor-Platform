@@ -3,16 +3,17 @@ import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setShowHSI, setSearchObjects, searchObjects, selectedPinInfo, setTargetObject}) {
+export function Panorama({panorama, setPanorama, selectedEnviroment, objects, locationName, setShowHSI, setSearchObjects, searchObjects, selectedPin, setTargetObject}) {
 
-    const [showObjects, setShowObjects] = useState(true) // Whether objects are shown 
+    const [showRGB, setShowRGB] = useState(true)
+    const [showObjects, setShowObjects] = useState(false) // Whether objects are shown 
+    const [showHSClassification, setShowHSIClassification] = useState(false)
+    const [showNVDI, setShowNDVI] = useState(false)
+
+
     const [searchInput, setSearchInput] = useState('') // Input to search for a new object
     const [hsiScan, setHsiScan] = useState(false) // Wether the new object should be scanned
-
-    // General function to toggle button 
-    const toggleButton = (state, stateFunction) => {
-        stateFunction(!state)
-    }
+    const [hsiManualScan, setHSIManualScan] = useState(false)
 
     // If enter pressed, add new object
     const handleNewSearchObject = async (event) => {
@@ -40,7 +41,7 @@ export function Panorama({panorama, objects, locationName, setShowHSI, setSearch
                 fetch("/updateObjects", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({objects: searchObjects})
+                body: JSON.stringify({objects: searchObjects, hsiManualScan: hsiManualScan})
             })} catch (err) {
                 console.log(err)
            }
@@ -51,7 +52,7 @@ export function Panorama({panorama, objects, locationName, setShowHSI, setSearch
     useEffect(()=> {
         const interval = setInterval(() => {
             updateSearchObjects();
-    }, 150); // If this interval is greater than App.js interval, the code will not execute. Keep it small for field testing, and large for demo.
+    }, 200); // If this interval is greater than App.js interval, the code will not execute. Keep it small for field testing, and large for demo.
         return () => clearInterval(interval);
     }, [updateSearchObjects])
 
@@ -61,14 +62,81 @@ export function Panorama({panorama, objects, locationName, setShowHSI, setSearch
         setShowHSI(true)
         setTargetObject(obj)
     }
+
+    const handleShowHSIClassification = () => {
+        setShowHSIClassification(true)
+        setShowNDVI(false)
+        setShowObjects(false)
+        setShowRGB(false)
+    }
+
+    const handleShowObjects = () => {
+        setShowHSIClassification(false)
+        setShowNDVI(false)
+        setShowObjects(true)
+        setShowRGB(false)
+    }
+
+    const handleShowNVDI = () => {
+        setShowHSIClassification(false)
+        setShowNDVI(true)
+        setShowObjects(false)
+        setShowRGB(false)
+    }
+
+    const handleShowRGB = () => {
+        setShowRGB(true)
+        setShowHSIClassification(false)
+        setShowNDVI(false)
+        setShowObjects(false)
+    }
+
+    useEffect(()=>{
+        handleShowRGB()
+        if (selectedEnviroment) {
+            setPanorama('./images/' + selectedEnviroment.slice(0, -5) + selectedPin?.panorama_ref)
+        }
+    }, [selectedPin])
+
+
+    useEffect(()=> {
+    if (selectedEnviroment && selectedPin) {
+            var suffix = null
+        if (showObjects || showRGB ) {
+            suffix = selectedPin?.panorama_ref
+        } else if (showNVDI) {
+            suffix = selectedPin?.nvdi_ref
+        } else if (showHSClassification) {
+            suffix = selectedPin?.hsi_ref
+        }
+        if (suffix != null) {
+            console.log('updating panorama')
+            setPanorama('./images/' + selectedEnviroment.slice(0, -5) + suffix)
+        }
+       }
+        
+    }, [showRGB])
         
     return (
         <div className='panorama-container'>
-            
-            <h1 style={{fontWeight: 'lighter',position: 'absolute', left: '5px', top: '5px', color: 'white', zIndex: 100, fontSize: '16px'}}>Timestamp: {selectedPinInfo ? selectedPinInfo.timestamp : ''}</h1>
-            <h1 style={{fontWeight: 'lighter', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100, fontSize: '16px'}}>Lon/Lat: {selectedPinInfo ? selectedPinInfo.coords[0] : ''} </h1>
+            <h1 style={{fontWeight: 'lighter', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100, fontSize: '16px'}}>Lon/Lat: {selectedPin?.geo_coords} </h1>
 
             <div style={{position: 'absolute', right: '5px', top: '5px', zIndex: 100, display: 'flex', flexDirection: 'column'}}>
+                <button style={{backgroundColor: hsiManualScan ? 'white':'transparent', color:hsiManualScan?'black':'black', padding: '5px', borderRadius: '5px', fontSize: '16px', fontWeight: 'lighter'}} onClick={()=>setHSIManualScan(!hsiManualScan)}>Manual HSI</button>
+                {/* {hsiManualScanOpen && ( */}
+                {/* // <div className="absolute mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-10"> */}
+                {/* {['left', 'right'].map((direction) => (
+                    <label key={direction} className="flex items-center p-2 hover:bg-gray-100">
+                    <input
+                        type="checkbox"
+                        checked={selected.includes(direction)}
+                        onChange={() => handleChange(direction)}
+                        className="mr-2"
+                    />
+                    {direction}
+                    </label>
+                ))}
+                </div>)} */}
                 {searchObjects?.map((item, index)=> (
                     <div key={index} style={{backgroundColor: 'black', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between', }}>
                          <input type="checkbox" disabled={true} checked={item.hsi} style={{width: '15px', height: '15px', accentColor: 'grey', alignSelf: 'center'}}/>
@@ -86,6 +154,7 @@ export function Panorama({panorama, objects, locationName, setShowHSI, setSearch
                         width={"100%"}
                         height={"100vh"}
                         image={panorama}
+                        // image={'./forest.jpg'}
                         haov={358}
                         vaov={60}
                         autoLoad={true}
@@ -125,7 +194,20 @@ export function Panorama({panorama, objects, locationName, setShowHSI, setSearch
             
             <div className='bottomBar'>
                 <h1>{locationName}</h1>
-                <h2 style={{color: showObjects?'white':'grey'}} onClick={() => toggleButton(showObjects, setShowObjects)}>Show Objects</h2>
+                <h1>|</h1>
+                <h2>Select Overlay:</h2>
+                {selectedPin?.panorama_ref ? (
+                    <h2 style={{color: showRGB?'white':'grey'}} onClick={handleShowRGB}>RGB</h2>
+                ):<div/>}
+                {selectedPin?.panorama_ref ? (
+                    <h2 style={{color: showObjects?'white':'grey'}} onClick={handleShowObjects}>Objects</h2>
+                ):<div/>}
+                {selectedPin?.hsi_ref ? (
+                <h2 style={{color: showHSClassification?'white':'grey'}} onClick={handleShowHSIClassification}>HSI Classification</h2>
+                ):<div/>}
+                {selectedPin?.nvdi_ref ? (
+                <h2 style={{color: showNVDI?'white':'grey'}} onClick={handleShowNVDI}>NDVI</h2>
+                ):<div/>}
                 <div className='search-input'>
                     <input style={{width: '100%', backgroundColor: 'transparent', color: 'white', fontSize: '20px', fontWeight: 'lighter', borderColor: 'transparent', fontFamily: 'inherit', left: '5px'}} placeholder='Search for...' value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}/>
                     <div style={{display: 'flex', flexDirection: 'row', position: 'absolute', right: '20px', height: '100%'}}> 
