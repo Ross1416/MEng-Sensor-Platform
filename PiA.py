@@ -250,6 +250,7 @@ if __name__ == "__main__":
                         lat=location["latitude"],
                         lon=location["longitude"],
                         distance_moved=distance_moved,
+                        manual_hs=True,      ## TO GET FROM UI
                         privacy=PRIVACY,
                     )
                 else:

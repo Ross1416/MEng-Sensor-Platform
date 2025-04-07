@@ -122,8 +122,8 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
 
     # Save scene as .npy if debugging
     if ENABLE_DEBUG:
-        debug_dir = "./debug_PiB/"
-        # debug_dir = "/media/......"
+        # debug_dir = "./debug_PiB/"
+        debug_dir = "/media/groupc/44A2-2862/"
         os.makedirs(debug_dir, exist_ok=True)
         next_id = len(
             [
