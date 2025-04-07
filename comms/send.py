@@ -8,8 +8,9 @@ import pickle
 import logging
 import cv2
 
+
 def make_client_connection(ip, port):
-    # TODO: Add timeout?
+    logging.debug("Connecting to server")
     while True:
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,49 +24,55 @@ def make_client_connection(ip, port):
         except Exception as e:
             print(f"Error: {e}")
             sleep(2)
+    logging.debug("Successful connection to server")
 
 
 def list_images(folder_path, client_socket):
     # get the path/directory
-        images = [f for f in os.listdir(folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
-        if not images:
-            print("No images found")
-            client_socket.close()
-            return
-
-        print(len(images))
-        client_socket.sendall(f"{len(images)}".encode())
-
-        for image in images:
-            image_path = os.path.join(folder_path, image)
-            print(f"Getting ready to send {image}...")
-            filesize = os.path.getsize(image)
-            
-            filename = os.path.basename(image)
-
-            client_socket.sendall(f"{filename}|{filesize}".encode())
-
-            # Wait for acknowledgment
-            print("Waiting for acknowledgement...")
-            ack = client_socket.recv(1024).decode()
-            if ack != "READY":
-                print("Server is not ready to receive the file.")
-                return
-            print("Acknowledgement received.")
-            # Send the image file
-            with open(image_path, "rb") as file:
-                while (chunk := file.read(1024)):
-                    client_socket.sendall(chunk)
-            
-            print(f"Image {filename} sent successfully!")
-        
-        print("All images sent!")
+    images = [
+        f for f in os.listdir(folder_path) if f.endswith((".png", ".jpg", ".jpeg"))
+    ]
+    if not images:
+        print("No images found")
+        client_socket.close()
         return
+
+    print(len(images))
+    client_socket.sendall(f"{len(images)}".encode())
+
+    for image in images:
+        image_path = os.path.join(folder_path, image)
+        print(f"Getting ready to send {image}...")
+        filesize = os.path.getsize(image)
+
+        filename = os.path.basename(image)
+
+        client_socket.sendall(f"{filename}|{filesize}".encode())
+
+        # Wait for acknowledgment
+        print("Waiting for acknowledgement...")
+        ack = client_socket.recv(1024).decode()
+        if ack != "READY":
+            print("Server is not ready to receive the file.")
+            return
+        print("Acknowledgement received.")
+        # Send the image file
+        with open(image_path, "rb") as file:
+            while chunk := file.read(1024):
+                client_socket.sendall(chunk)
+
+        print(f"Image {filename} sent successfully!")
+
+    print("All images sent!")
+    return
+
 
 def send_images(client_socket, folder_path):
     try:
         # get the path/directory of the photos taken locally on the child Pi
-        images = [f for f in os.listdir(folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        images = [
+            f for f in os.listdir(folder_path) if f.endswith((".png", ".jpg", ".jpeg"))
+        ]
         if not images:
             print("No images found")
             return
@@ -89,14 +96,14 @@ def send_images(client_socket, folder_path):
             print("Acknowledgement received.")
             # Send the image file
             with open(image_path, "rb") as file:
-                while (chunk := file.read(1024)):
+                while chunk := file.read(1024):
                     client_socket.sendall(chunk)
-            
+
             print(f"Image {filename} sent successfully!")
             sleep(1)
-        
+
         print("All images sent!")
-    
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -105,23 +112,23 @@ def send_image_arrays(client_socket, frames):
     """Takes in an array of frames and sends them over socekt"""
     # Send number of frames to expect
     logging.debug(f"Sending {len(frames)} frames.")
-    client_socket.send(len(frames).to_bytes(8, byteorder='big'))
+    client_socket.send(len(frames).to_bytes(8, byteorder="big"))
     # Send all images
     for img in frames:
-        img = cv2.imencode('.jpg', img)[1] # Compress image
+        img = cv2.imencode(".jpg", img)[1]  # Compress image
         data = pickle.dumps(img)
         logging.debug(f"Sending frame of size {len(data)}")
-        client_socket.send(len(data).to_bytes(8, byteorder='big'))
+        client_socket.send(len(data).to_bytes(8, byteorder="big"))
         client_socket.sendall(data)
         logging.debug(f"Frame sent.")
 
 
 def receive_object_detection_results(client_socket):
     # Get number of objects
-    num_objects = client_socket.recv(8)   
+    num_objects = client_socket.recv(8)
     if not num_objects:
         return []
-    num_objects = int.from_bytes(num_objects, byteorder='big')
+    num_objects = int.from_bytes(num_objects, byteorder="big")
     logging.debug(f"Receiving {num_objects} objects.")
 
     objects = []
@@ -132,7 +139,7 @@ def receive_object_detection_results(client_socket):
             data_size = client_socket.recv(8)  # First 8 bytes for size
             if not data_size:
                 break
-            data_size = int.from_bytes(data_size, byteorder='big')
+            data_size = int.from_bytes(data_size, byteorder="big")
             logging.debug(f"Receiving object detection data {i} of size {data_size}.")
             data = b""
             while len(data) < data_size:
@@ -148,6 +155,7 @@ def receive_object_detection_results(client_socket):
 
     return objects
 
+
 def delete_files_in_dir(path):
     try:
         files = os.listdir(path)
@@ -159,6 +167,7 @@ def delete_files_in_dir(path):
     except OSError:
         print("Error occurred while deleting files.")
 
+
 def receive_capture_request(client_socket):
     try:
         ack = client_socket.recv(1024).decode()
@@ -166,21 +175,26 @@ def receive_capture_request(client_socket):
             print("No capture request made.")
             return
         print("Capture request received.")
-        sleep(2)    
+        sleep(2)
         return 1
-        
+
     except Exception as e:
         print(f"Error: {e}")
         sleep(1)
         # client_socket.close()
         return 0
 
+
 def send_capture_success(conn):
+    logging.debug("Send capture success")
     try:
         conn.sendall(b"CAPTURE SUCCESS")
         logging.debug("Capture success sent")
     except Exception as e:
         logging.error("Error: {e}")
+
+    logging.debug("Sent capture success")
+
 
 if __name__ == "__main__":
     ip = "10.12.23.188"
@@ -190,6 +204,6 @@ if __name__ == "__main__":
 
     client_socket = make_client_connection(test_ip, port)
 
-    while(1):
+    while 1:
         receive_capture_request(client_socket)
         send_images(path, client_socket)

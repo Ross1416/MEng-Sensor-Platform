@@ -19,19 +19,21 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     global last_objects
 
     # Update classes of objects to detect from UI
-    logging.debug("Getting object of interest classes")
     classes = getUserRequestedClasses()
+
+    # If privacy enabled and "person" class not included,
+    # it is added to allow blurring
     if privacy:
         if "person" not in list(classes.keys()):
             classes["person"] = False
 
-    rgb_model.set_classes(list(classes.keys()))
+    # Update YOLO model with objects of interest
     logging.info(f"Set objects of interest to {list(classes.keys())}.")
+    rgb_model.set_classes(list(classes.keys()))
 
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
-    logging.info("Captured frames")
 
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
@@ -42,7 +44,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         capture_success = check_capture_success(conn)
 
     # Sending RGB classes to PiB
-    logging.info(f"Sending Object detection classes to PiB.")
+    logging.info("Sending Object detection classes to PiB.")
     send_object_detection_results(conn, [classes])
 
     setStatusMessage("detecting objects")
@@ -50,16 +52,22 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     objects = []
     for i, f in enumerate(frames):
         objects.append(object_detection(rgb_model, f, i, OD_THRESHOLD))
+
     # Retrieve slave images and data
+    logging.info("Receiving PiB frames")
     frames += receive_image_arrays(conn)
 
+    # If in debug mode, save rgb frames
     if ENABLE_DEBUG:
         debug_dir = "./debug_PiA/"
         os.makedirs(debug_dir, exist_ok=True)
 
         for i, frame in enumerate(frames):
             frame_id = len([f for f in os.listdir(debug_dir) if f.endswith(".jpg")])
-            cv2.imwrite(os.path.join(debug_dir, f"frame_{frame_id}_{i}.jpg"), frame)
+            path = os.path.join(debug_dir, f"frame_{frame_id}_{i}.jpg")
+            cv2.imwrite(path, frame)
+
+        logging.debug(f"Saved individual RGB frames to {path}")
 
     # # Send object detection results to PiB
     # send_object_detection_results(conn, objects)
@@ -73,12 +81,11 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     objects = assign_id(objects)
 
     # Send manual hyperspectral options
+    logging.debug("Send manual hyperspectral scan option value")
     send_object_detection_results(conn, [manual_hs])
 
     # Blur people if privacy
     setStatusMessage("blurring people")
-
-    # Blur people if privacy
     if privacy:
         for i in range(len(frames)):
             frames[i] = blur_people(frames[i], objects[i], 255)
@@ -88,6 +95,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     panorama, objects = performPanoramicStitching(frames, objects)
 
     # Restructure objects into one array instead of separated by frames
+    logging.debug("Restructuring objects array")
     objects_restructured = []
     for frame in objects:
         objects_restructured += frame
@@ -101,17 +109,25 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     uid = str(lon) + str(lat)
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
+    # If manual hs scan checked
     if manual_hs:
+        # Perform singular 360 hs scan
+        logging.debug("Recieving manual hyperspectral scan results")
+        setStatusMessage("Performing manual 360 hyperspectral scan")
         hs_classification, hs_ndvi, hs_ndmi, rgb_image = receive_image_arrays(conn)
         hs_materials = receive_object_detection_results(conn)[0]
-        id = -1
+
         # Save results to images in ui
+        id = -1
+
+        # Save paths
         save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
         hsi_ref = save_path + f"/hs_{uid}_{id}_classification.jpg"
         ndvi_ref = save_path + f"/hs_{uid}_{id}_ndvi.jpg"
         ndmi_ref = save_path + f"/hs_{uid}_{id}_ndmi.jpg"
         hs_rgb_ref = save_path + f"/hs_{uid}_{id}_rgb.jpg"
 
+        logging.debug(f"Writing images to {save_path}")
         cv2.imwrite(hsi_ref, hs_classification)
         cv2.imwrite(ndvi_ref, hs_ndvi)
         cv2.imwrite(ndmi_ref, hs_ndmi)
@@ -130,28 +146,38 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         )
     else:
         # Send filtered objects to PiB
+        logging.debug(
+            "Sending filtered object detection results to PiB for hyperspectral scanning"
+        )
         send_object_detection_results(conn, filtered_objects)
 
-        # Receive processed hyperspectral scans from PiB
-        # Receive hyperspectral material distribution data from PiB
+        # Receive processed hyperspectral data from PiB for each object
         for i in range(len(filtered_objects)):
             if classes[filtered_objects[i].label]:
                 setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
+                logging.debug(f"hyperspectral scanning {filtered_objects[i].label}")
+
                 # Receive scan information
+                logging.debug(f"Receiving scan data")
                 hs_classification, hs_ndvi, hs_ndmi, rgb_image = receive_image_arrays(
                     conn
                 )
                 hs_materials = receive_object_detection_results(conn)[0]
+                logging.debug("Received scan data")
 
                 id = filtered_objects[i].id
-                # Save results to images in ui
                 save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-                cv2.imwrite(
-                    save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
-                )
-                cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
-                cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndmi.jpg", hs_ndmi)
-                cv2.imwrite(save_path + f"/hs_{uid}_{id}_rgb.jpg", rgb_image)
+                hsi_ref = save_path + f"/hs_{uid}_{id}_classification.jpg"
+                ndvi_ref = save_path + f"/hs_{uid}_{id}_ndvi.jpg"
+                ndmi_ref = save_path + f"/hs_{uid}_{id}_ndmi.jpg"
+                hs_rgb_ref = save_path + f"/hs_{uid}_{id}_rgb.jpg"
+
+                # Save results to images in ui
+                logging.debug(f"Writing images to {save_path}")
+                cv2.imwrite(hsi_ref, hs_classification)
+                cv2.imwrite(ndvi_ref, hs_ndvi)
+                cv2.imwrite(ndmi_ref, hs_ndmi)
+                cv2.imwrite(hs_rgb_ref, rgb_image)
 
                 # Update object with refereances and materials
                 filtered_objects[i].set_hs_classification_ref(
@@ -178,17 +204,15 @@ FOV = (102, 67)
 PRIVACY = True  # Blur people
 CLASSES = ["person"]
 OD_THRESHOLD = 0.1
+last_objects = []
 
 # UI
 UI_IMAGES_SAVE_PATH = "./user-interface/public/images/"
 
 # GPS
-GPS_PORT = "/dev/ttyACM0"  # USB Port (check automatically?)
+GPS_PORT = "/dev/ttyACM0"
 GPS_BAUDRATE = 115200
 DISTANCE_THRESHOLD = 10
-
-# Globals
-last_objects = []
 
 # OTHER
 ENABLE_DEBUG = True

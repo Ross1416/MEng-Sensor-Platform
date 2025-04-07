@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import logging
 
+
 class Object:
     def __init__(
         self,
@@ -115,7 +116,7 @@ def object_detection(model, frame, camera, conf=0.25):
     Outputs:
     -Array of objects [[label,[x1,y1,x2,y2],confidence]]
     """
-
+    logging.debug(f"Detecting objects in frame {camera}")
     detections = model.predict(frame, conf=conf)
     results = []
     for box in detections[0].boxes:
@@ -205,7 +206,7 @@ def blur_people(frame, detections, blur_size=25):
     Output:
     - blurred_image : image with all detected faces blurred
     """
-
+    logging.debug("Blurring people")
     for i in range(len(detections)):
         # if detections[i][0] == "person":
         if detections[i].label.lower() == "person":
@@ -214,6 +215,7 @@ def blur_people(frame, detections, blur_size=25):
             roi = frame[y1:y2, x1:x2]
             roi = cv2.GaussianBlur(roi, (blur_size, blur_size), 0)
             frame[y1 : y1 + roi.shape[0], x1 : x1 + roi.shape[1]] = roi
+    logging.debug("Blurring complete")
     return frame
 
 
@@ -246,10 +248,10 @@ def non_maximum_suppression(objects, iou_threshold=0.5):
         -list: Filtered list of objects with unique detections
     """
     # Sort objects by confidence score in descending order
+    logging.debug("Performing non maximum suppression")
     objects = sorted(objects, key=lambda x: x.conf, reverse=True)
 
     selected_objects = []
-
     # Loop while unfiltered objects remaining
     while len(objects) > 0:
         # Select the object with the highest score
@@ -272,6 +274,7 @@ def non_maximum_suppression(objects, iou_threshold=0.5):
 
         objects = filtered_objects
 
+    logging.debug("Non-maximum suppression complete")
     return selected_objects
 
 

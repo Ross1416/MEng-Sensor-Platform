@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from scipy.ndimage import median_filter
 import matplotlib.colors as mcolors
+import logging
 from hyperspectral.hyperspectral_driver import (
     get_wavelength_index,
     get_calibration_array,
@@ -54,6 +55,7 @@ def plot_and_save_index(
 
 def calculate_ndvi(full_image, cal_arr):
     """Calculate NDVI for all pixels in the image."""
+    logging.debug("Calculating NDVI")
     red_idx = get_wavelength_index(cal_arr, 690, 2)
     nir_idx = get_wavelength_index(cal_arr, 860, 2)
 
@@ -65,12 +67,13 @@ def calculate_ndvi(full_image, cal_arr):
 
     # Replace NaNs and Infs with 0
     ndvi = np.nan_to_num(ndvi, nan=0.0, posinf=0.0, neginf=0.0)
-
+    logging.debug("Succesfully calculated NDVI")
     return ndvi
 
 
 def calculate_pi(full_image, cal_arr):
     """ """
+    logging.debug("Calculating PI")
     r680 = get_wavelength_index(cal_arr, 680, 2)
     r750 = get_wavelength_index(cal_arr, 750, 2)
     r860 = get_wavelength_index(cal_arr, 860, 2)
@@ -85,18 +88,20 @@ def calculate_pi(full_image, cal_arr):
     )
 
     pi = np.nan_to_num(pi, nan=0.0, posinf=0.0, neginf=0.0)
-
+    logging.debug("Succesfully calculated PI")
     return pi
 
 
 def classify_and_save(
     model_path, full_image, label_encoding_path, output_path, cal_arr
 ):
-
+    logging.debug("Classifying hyperspectral scene")
     output_name, _ = os.path.splitext(output_path)
 
     # Load model
+    logging.debug("Loading classification model")
     model = tf.keras.models.load_model(model_path)
+    logging.debug("Successfully loaded classification model")
 
     # Load hyperspectral image (full image for NDVI)
     # full_image = np.load(image_path)
@@ -109,12 +114,16 @@ def classify_and_save(
     image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
 
     # Classify image
+    logging.debug("Classifying materials in scene")
     predictions = model.predict(image_reshaped)
     predicted_labels = np.argmax(predictions, axis=1)
     classified_image = predicted_labels.reshape(h, w)
+    logging.debug("Finished classifying materials")
 
     # Apply smoothing (using median filter)
+    logging.debug("Smoothing classification result")
     smoothed_image = apply_smoothing(classified_image)
+    logging.debug("Successfully finished smoothing classification result")
 
     # Load label encoder
     label_encoder = load_label_encoder(label_encoding_path)
@@ -124,6 +133,7 @@ def classify_and_save(
     total_pixels = smoothed_image.size
 
     # Compute percentage of each class
+    logging.debug("Computing material classification distribution")
     class_percentages = {
         label_encoder[orig][1]: (counts[i] / total_pixels) * 100
         for i, orig in enumerate(unique_classes)
@@ -171,7 +181,7 @@ def classify_and_save(
         transparent=True,
     )
     plt.close()
-    print(f"Smoothed classification results saved to {output_path}")
+    logging.debug(f"Smoothed classification results saved to {output_path}")
 
     """
     Calculate Indices
@@ -198,7 +208,7 @@ def classify_and_save(
         vmax=1,
     )
 
-    return class_percentages
+    return class_percentages, ndvi, pi
 
 
 if __name__ == "__main__":

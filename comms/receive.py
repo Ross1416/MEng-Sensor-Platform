@@ -6,11 +6,12 @@ import pickle
 import logging
 import cv2
 
+
 def make_server_connection(host, port):
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_socket.bind((host,port))
+        server_socket.bind((host, port))
         server_socket.listen(1)
         print(f"Server listening on {host}:{port}")
 
@@ -22,25 +23,29 @@ def make_server_connection(host, port):
     except Exception as e:
         print(f"Error: {e}")
 
+
 def request_client_capture(server_socket, conn):
+    logging.debug("requesting client capture")
     try:
         conn.sendall(b"CAPTURE REQUEST")
         print("Capture request sent")
     except Exception as e:
         print("Error: {e}")
 
+
 def check_capture_success(conn):
     ack = conn.recv(1024).decode()
     if ack == "CAPTURE SUCCESS":
+        logging.debub("Check Capture - success")
         return True
     else:
         return False
-        
+
 
 def receive_images(conn, save_location):
     try:
         os.makedirs(save_location, exist_ok=True)
-        
+
         # Send acknowledgment
         num_images = int(conn.recv(1).decode())
         conn.sendall(b"READY")
@@ -69,17 +74,16 @@ def receive_images(conn, save_location):
             print(f"Image received and saved at {save_path}")
             conn.sendall(b"READY")
 
-
     except Exception as e:
         print(f"Error: {e}")
 
 
 def receive_image_arrays(conn):
     # Get number of images
-    num_images = conn.recv(8)   
+    num_images = conn.recv(8)
     if not num_images:
         return []
-    num_images = int.from_bytes(num_images, byteorder='big')
+    num_images = int.from_bytes(num_images, byteorder="big")
     logging.debug(f"Receiving {num_images} frames.")
 
     frames = []
@@ -90,7 +94,7 @@ def receive_image_arrays(conn):
             data_size = conn.recv(8)  # First 8 bytes for size
             if not data_size:
                 break
-            data_size = int.from_bytes(data_size, byteorder='big')
+            data_size = int.from_bytes(data_size, byteorder="big")
             logging.debug(f"Receiving frame {i} of size {data_size}.")
             data = b""
             while len(data) < data_size:
@@ -108,32 +112,30 @@ def receive_image_arrays(conn):
     return frames
 
 
-
 def send_object_detection_results(client_socket, objects):
     """Send object detection results to PiB over socket"""
     try:
         # Send number of objects
-        client_socket.send(len(objects).to_bytes(8, byteorder='big'))
+        client_socket.send(len(objects).to_bytes(8, byteorder="big"))
         # Send all objects
         for obj in objects:
             # Serialise the data
             data = pickle.dumps(obj)
-            logging.debug(f"Sending object detection data of size {len(data)}")
-            client_socket.send(len(data).to_bytes(8, byteorder='big'))
+            logging.debug(f"Sending array data of size {len(data)}")
+            client_socket.send(len(data).to_bytes(8, byteorder="big"))
             client_socket.sendall(data)
-            logging.debug(f"Object detection data sent.")
+            logging.debug(f"Data sent.")
 
     except Exception as e:
         print(f"Error: {e}")
 
 
-
 if __name__ == "__main__":
     port = 5002
-    host = "0.0.0.0" # i.e. listening
+    host = "0.0.0.0"  # i.e. listening
     save_location = "./received_images"
 
     server_socket, conn = make_server_connection(host, port)
-    
+
     request_client_capture(server_socket, conn)
     receive_images(save_location, server_socket, conn)
