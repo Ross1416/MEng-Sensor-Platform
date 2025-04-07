@@ -30,3 +30,5 @@ received_images/
 yolo_models/
 
 #user-interface/api/sensorConfiguration.json
+user-interface/api/scans/
+user-interface/public/images

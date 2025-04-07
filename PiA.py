@@ -102,7 +102,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
 
     if manual_hs:
-        hs_classification, hs_ndvi, rgb_image = receive_image_arrays(conn)
+        hs_classification, hs_ndvi, hs_ndmi, rgb_image = receive_image_arrays(conn)
         hs_materials = receive_object_detection_results(conn)[0]
         id = -1
         # Save results to images in ui
@@ -111,6 +111,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
             save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
         )
         cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+        cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndmi.jpg", hs_ndmi)
         cv2.imwrite(save_path + f"/hs_{uid}_{id}_rgb.jpg", rgb_image)
 
     else:
@@ -123,7 +124,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
             if classes[filtered_objects[i].label]:
                 setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
                 # Receive scan information
-                hs_classification, hs_ndvi, rgb_image = receive_image_arrays(conn)
+                hs_classification, hs_ndvi, hs_ndmi, rgb_image = receive_image_arrays(conn)
                 hs_materials = receive_object_detection_results(conn)[0]
 
                 id = filtered_objects[i].id
@@ -133,6 +134,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
                     save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
                 )
                 cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+                cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndmi.jpg", hs_ndmi)
                 cv2.imwrite(save_path + f"/hs_{uid}_{id}_rgb.jpg", rgb_image)
 
                 # Update object with refereances and materials

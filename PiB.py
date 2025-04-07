@@ -48,8 +48,8 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
     if manual_hs:
        # Perform full 360 degree scan
        if ENABLE_HS:
-            mats, hs_classification, hs_ndvi, rgb_image = on_rotate(axis, (-180, 179), hs_cam, cal_arr, -1)
-            send_image_arrays(client_socket, [hs_classification, hs_ndvi, rgb_image])
+            mats, hs_classification, hs_ndvi, hs_ndmi, rgb_image = on_rotate(axis, (-180, 179), hs_cam, cal_arr, -1)
+            send_image_arrays(client_socket, [hs_classification, hs_ndvi, hs_ndmi, rgb_image])
             send_object_detection_results(client_socket, [mats])
     else:
         # Scan individual objects
@@ -78,10 +78,10 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
                     logging.debug(
                         f"Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
                     )
-                    mats, hs_classification, hs_ndvi, rgb_image = on_rotate(
+                    mats, hs_classification, hs_ndvi, hs_ndmi, rgb_image = on_rotate(
                         axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
                     )
-                    send_image_arrays(client_socket, [hs_classification, hs_ndvi, rgb_image])
+                    send_image_arrays(client_socket, [hs_classification, hs_ndvi, hs_ndmi, rgb_image])
                     send_object_detection_results(client_socket, [mats])
                     # delete_files_in_dir(HSI_SCANS_PATH)
 
@@ -157,8 +157,9 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
         HSI_SCANS_PATH + f"hs_{id}_classification.png"
     )
     hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
+    hs_ndmi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndmi.png")
 
-    return mats, hs_classification, hs_ndvi, rgb_image
+    return mats, hs_classification, hs_ndvi, hs_ndmi, rgb_image
 
 
 # IP = "hsiA.local"
