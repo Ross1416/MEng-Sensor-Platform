@@ -107,13 +107,18 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         id = -1
         # Save results to images in ui
         save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-        cv2.imwrite(
-            save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification
-        )
-        cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
-        cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndmi.jpg", hs_ndmi)
-        cv2.imwrite(save_path + f"/hs_{uid}_{id}_rgb.jpg", rgb_image)
+        hsi_ref = save_path + f"/hs_{uid}_{id}_classification.jpg"
+        ndvi_ref = save_path + f"/hs_{uid}_{id}_ndvi.jpg"
+        ndmi_ref = save_path + f"/hs_{uid}_{id}_ndmi.jpg"
+        hs_rgb_ref = save_path + f"/hs_{uid}_{id}_rgb.jpg"
 
+        cv2.imwrite(hsi_ref, hs_classification)
+        cv2.imwrite(ndvi_ref, hs_ndvi)
+        cv2.imwrite(ndmi_ref, hs_ndmi)
+        cv2.imwrite(hs_rgb_ref, rgb_image)
+
+        # Update JSON with hyperspectral data
+        updateJSON_HS(filtered_objects, lon, lat, activeFile, hsi_ref, ndvi_ref, ndmi_ref, hs_materials)
     else:
         # Send filtered objects to PiB
         send_object_detection_results(conn, filtered_objects)
@@ -144,8 +149,8 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
                 filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
                 filtered_objects[i].set_hs_materials(hs_materials)
 
-    # Update JSON with hyperspectral data
-    updateJSON_HS(filtered_objects, lon, lat, activeFile)
+        # Update JSON with hyperspectral data
+        updateJSON_HS(filtered_objects, lon, lat, activeFile)
 
 
 # COMMUNICATIONS
