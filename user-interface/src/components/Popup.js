@@ -27,7 +27,7 @@ export function Popup({showHSI, setShowHSI, targetObject, selectedEnviroment}) {
         
         <div className={showHSI ? 'popup-container-show' : 'popup-container-hide' }>
             <div className='popup-header'>
-                    <h1 className='popup-title'>Hyperspectral Analysis</h1> 
+                    <h1 className='popup-title'>Hyperspectral Analysis {targetObject.id}</h1> 
                     <button onClick={()=>setShowHSI(false)}>X</button>  
                 </div>
             {window=='overview' ? (

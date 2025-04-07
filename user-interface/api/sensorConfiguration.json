@@ -1,9 +1,18 @@
 {
-    "activeFile": "e89c9584-eb23-4e1b-aa13-0c1af972ba44.json",
+    "activeFile": "b6fd7a23-edde-45d0-ba12-48b66161aa8b.json",
     "status": 0,
     "status-message": "setting up",
     "pi-connection": false,
     "gps-connection": false,
     "wifi-connection": false,
-    "search-objects": []
+    "search-objects": [
+        {
+            "object": "Lamp",
+            "hsi": true
+        },
+        {
+            "object": "Methane Plumes",
+            "hsi": true
+        }
+    ]
 }

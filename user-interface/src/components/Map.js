@@ -9,7 +9,7 @@ import L from "leaflet";
 
 export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelectedPinInfo}) {
     
-    const [mapCenter, setMapCenter] = useState([55.88000, -4.31000]) // map center - default to Glasgow
+    const [mapCenter, setMapCenter] = useState([55.851771, -4.2379665]) // map center - default to Glasgow
 
     // Set co-ords to users location
     useEffect(()=> {

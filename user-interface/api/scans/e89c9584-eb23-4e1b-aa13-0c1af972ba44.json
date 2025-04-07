@@ -92,13 +92,9 @@
                     "h": 1038,
                     "RGB_classification": "person",
                     "RGB_confidence": 0.88,
-                    "HS_materials": {
-                        "rock": 0.02482876712328767,
-                        "vegetation": 26.943493150684933,
-                        "water": 73.03167808219177
-                    },
-                    "HS_classification_ref": "./hs_00_5_classification.jpg",
-                    "HS_ndvi_ref": "./hs_00_5_ndvi.jpg",
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
                     "distance": null
                 },
                 {
@@ -122,12 +118,9 @@
                     "h": 698,
                     "RGB_classification": "person",
                     "RGB_confidence": 0.85,
-                    "HS_materials": {
-                        "vegetation": 99.98983739837398,
-                        "water": 0.01016260162601626
-                    },
-                    "HS_classification_ref": "./hs_00_6_classification.jpg",
-                    "HS_ndvi_ref": "./hs_00_6_ndvi.jpg",
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
                     "distance": null
                 },
                 {
@@ -138,12 +131,9 @@
                     "h": 1004,
                     "RGB_classification": "person",
                     "RGB_confidence": 0.77,
-                    "HS_materials": {
-                        "vegetation": 40.658259423503324,
-                        "water": 59.34174057649667
-                    },
-                    "HS_classification_ref": "./hs_00_1_classification.jpg",
-                    "HS_ndvi_ref": "./hs_00_1_ndvi.jpg",
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
                     "distance": null
                 },
                 {
@@ -181,8 +171,8 @@
                     "RGB_classification": "Plant",
                     "RGB_confidence": 0.17,
                     "HS_materials": null,
-                    "HS_classification_ref": "",
-                    "HS_ndvi_ref": "",
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
                     "distance": null
                 },
                 {
@@ -193,9 +183,12 @@
                     "h": 525,
                     "RGB_classification": "Plant",
                     "RGB_confidence": 0.14,
-                    "HS_materials": null,
-                    "HS_classification_ref": "",
-                    "HS_ndvi_ref": "",
+                    "HS_materials": {
+                        "vegetation": 59.83866279069767,
+                        "water": 40.16133720930233
+                    },
+                    "HS_classification_ref": "./hs_0.00.0_9_classification.jpg",
+                    "HS_ndvi_ref": "./hs_0.00.0_9_ndvi.jpg",
                     "distance": null
                 }
             ]
@@ -241,9 +234,12 @@
                     "h": 692,
                     "RGB_classification": "person",
                     "RGB_confidence": 0.84,
-                    "HS_materials": null,
-                    "HS_classification_ref": null,
-                    "HS_ndvi_ref": null,
+                    "HS_materials": {
+                        "vegetation": 60.5672697368421,
+                        "water": 39.43273026315789
+                    },
+                    "HS_classification_ref": "./hs_0.00.0_3_classification.jpg",
+                    "HS_ndvi_ref": "./hs_0.00.0_3_ndvi.jpg",
                     "distance": null
                 },
                 {
@@ -267,13 +263,9 @@
                     "h": 575,
                     "RGB_classification": "Plant",
                     "RGB_confidence": 0.2,
-                    "HS_materials": {
-                        "rock": 0.02482876712328767,
-                        "vegetation": 26.943493150684933,
-                        "water": 73.03167808219177
-                    },
-                    "HS_classification_ref": "./hs_00_5_classification.jpg",
-                    "HS_ndvi_ref": "./hs_00_5_ndvi.jpg",
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
                     "distance": null
                 },
                 {
@@ -284,12 +276,9 @@
                     "h": 829,
                     "RGB_classification": "Plant",
                     "RGB_confidence": 0.16,
-                    "HS_materials": {
-                        "vegetation": 40.658259423503324,
-                        "water": 59.34174057649667
-                    },
-                    "HS_classification_ref": "./hs_00_1_classification.jpg",
-                    "HS_ndvi_ref": "./hs_00_1_ndvi.jpg",
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
                     "distance": null
                 },
                 {
@@ -300,12 +289,365 @@
                     "h": 233,
                     "RGB_classification": "Plant",
                     "RGB_confidence": 0.15,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                }
+            ]
+        },
+        {
+            "geo_coords": [
+                0.0,
+                0.0
+            ],
+            "panorama_ref": "/img0.00.0.jpg",
+            "objects": [
+                {
+                    "id": 22,
+                    "x": 262.0,
+                    "y": 171.0,
+                    "w": 580,
+                    "h": 1389,
+                    "RGB_classification": "Person",
+                    "RGB_confidence": 0.96,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 10,
+                    "x": -2035.0,
+                    "y": 329.0,
+                    "w": 1061,
+                    "h": 1352,
+                    "RGB_classification": "Person",
+                    "RGB_confidence": 0.94,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 11,
+                    "x": -1085.0,
+                    "y": 337.0,
+                    "w": 1096,
+                    "h": 1205,
+                    "RGB_classification": "Person",
+                    "RGB_confidence": 0.92,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 12,
+                    "x": 115.0,
+                    "y": 90.0,
+                    "w": 264,
+                    "h": 1388,
+                    "RGB_classification": "Person",
+                    "RGB_confidence": 0.91,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 25,
+                    "x": 6621.0,
+                    "y": 574.0,
+                    "w": 180,
+                    "h": 348,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.78,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 26,
+                    "x": 6243.0,
+                    "y": 741.0,
+                    "w": 402,
+                    "h": 469,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.77,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 23,
+                    "x": 650.0,
+                    "y": 571.0,
+                    "w": 452,
+                    "h": 677,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.75,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 0,
+                    "x": -6385.0,
+                    "y": 514.0,
+                    "w": 193,
+                    "h": 396,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.64,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 13,
+                    "x": -295.0,
+                    "y": -491.0,
+                    "w": 1086,
+                    "h": 936,
+                    "RGB_classification": "Whiteboard",
+                    "RGB_confidence": 0.61,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 24,
+                    "x": 439.0,
+                    "y": -320.0,
+                    "w": 964,
+                    "h": 934,
+                    "RGB_classification": "Whiteboard",
+                    "RGB_confidence": 0.58,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 14,
+                    "x": -1551.0,
+                    "y": 851.0,
+                    "w": 445,
+                    "h": 303,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.56,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 1,
+                    "x": -4021.0,
+                    "y": 329.0,
+                    "w": 257,
+                    "h": 383,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.43,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 15,
+                    "x": -1331.0,
+                    "y": 695.0,
+                    "w": 521,
+                    "h": 588,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.37,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 2,
+                    "x": -2967.0,
+                    "y": 691.0,
+                    "w": 73,
+                    "h": 137,
+                    "RGB_classification": "Bottle",
+                    "RGB_confidence": 0.3,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 3,
+                    "x": -3511.0,
+                    "y": -605.0,
+                    "w": 189,
+                    "h": 244,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.29,
                     "HS_materials": {
-                        "vegetation": 99.98983739837398,
-                        "water": 0.01016260162601626
+                        "vegetation": 60.5672697368421,
+                        "water": 39.43273026315789
                     },
-                    "HS_classification_ref": "./hs_00_6_classification.jpg",
-                    "HS_ndvi_ref": "./hs_00_6_ndvi.jpg",
+                    "HS_classification_ref": "./hs_0.00.0_3_classification.jpg",
+                    "HS_ndvi_ref": "./hs_0.00.0_3_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 4,
+                    "x": -3233.0,
+                    "y": -231.0,
+                    "w": 607,
+                    "h": 852,
+                    "RGB_classification": "Whiteboard",
+                    "RGB_confidence": 0.27,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 5,
+                    "x": -6524.0,
+                    "y": 604.0,
+                    "w": 50,
+                    "h": 520,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.26,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 6,
+                    "x": -5423.0,
+                    "y": 589.0,
+                    "w": 425,
+                    "h": 541,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.19,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 17,
+                    "x": -2803.0,
+                    "y": 348.0,
+                    "w": 49,
+                    "h": 142,
+                    "RGB_classification": "Bottle",
+                    "RGB_confidence": 0.19,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 18,
+                    "x": -3224.0,
+                    "y": -665.0,
+                    "w": 106,
+                    "h": 154,
+                    "RGB_classification": "Bottle",
+                    "RGB_confidence": 0.19,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 8,
+                    "x": -3137.0,
+                    "y": 823.0,
+                    "w": 414,
+                    "h": 51,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.16,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 19,
+                    "x": -2367.0,
+                    "y": -217.0,
+                    "w": 939,
+                    "h": 644,
+                    "RGB_classification": "Whiteboard",
+                    "RGB_confidence": 0.16,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 20,
+                    "x": -3205.0,
+                    "y": 779.0,
+                    "w": 329,
+                    "h": 163,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.15,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 9,
+                    "x": -3380.0,
+                    "y": 198.0,
+                    "w": 314,
+                    "h": 382,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.14,
+                    "HS_materials": {
+                        "vegetation": 59.83866279069767,
+                        "water": 40.16133720930233
+                    },
+                    "HS_classification_ref": "./hs_0.00.0_9_classification.jpg",
+                    "HS_ndvi_ref": "./hs_0.00.0_9_ndvi.jpg",
+                    "distance": null
+                },
+                {
+                    "id": 21,
+                    "x": -641.0,
+                    "y": 595.0,
+                    "w": 216,
+                    "h": 480,
+                    "RGB_classification": "Chair",
+                    "RGB_confidence": 0.14,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 27,
+                    "x": 5459.0,
+                    "y": -86.0,
+                    "w": 570,
+                    "h": 420,
+                    "RGB_classification": "Plant",
+                    "RGB_confidence": 0.13,
+                    "HS_materials": {
+                        "vegetation": 70.30050188205772,
+                        "water": 29.699498117942287
+                    },
+                    "HS_classification_ref": "./hs_0.00.0_27_classification.jpg",
+                    "HS_ndvi_ref": "./hs_0.00.0_27_ndvi.jpg",
                     "distance": null
                 }
             ]
