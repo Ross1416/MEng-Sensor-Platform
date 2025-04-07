@@ -21,12 +21,11 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     # Update classes of objects to detect from UI
     classes = getUserRequestedClasses()
     if privacy:
-        classes_list = list(classes.keys())
-        if "person" not in classes_list:
-            classes_list.append("person")
+        if "person" not in list(classes.keys()):
+            classes["person"] = False
 
-    rgb_model.set_classes(classes_list)
-    logging.info(f"Set objects of interest to {classes_list}.")
+    rgb_model.set_classes(list(classes.keys()))
+    logging.info(f"Set objects of interest to {list(classes.keys())}.")
 
     # Captures two images
     setStatusMessage("capturing images")
@@ -73,7 +72,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
     objects = assign_id(objects)
 
     # Send manual hyperspectral options
-    send_object_detection_results(server_socket, [manual_hs])
+    send_object_detection_results(conn, [manual_hs])
 
     # Blur people if privacy
     setStatusMessage("blurring people")
