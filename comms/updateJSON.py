@@ -89,8 +89,9 @@ def updateJSON_HS(
     activeFile,
     hs_classifcation_ref=None,
     hs_ndvi_ref=None,
-    hs_ndmi_ref=None,
+    hs_pi_ref=None,
     hs_materials_ref=None,
+    hs_rgb_ref=None,
 ):
     logging.debug("Updating ui json with hyperspectral results")
     file_path = "./user-interface/api/scans/" + activeFile
@@ -103,7 +104,8 @@ def updateJSON_HS(
             if hs_classifcation_ref:
                 pin["hsi_ref"] = hs_classifcation_ref
                 pin["ndvi_ref"] = hs_ndvi_ref
-                pin["ndmi_ref"] = hs_ndmi_ref
+                pin["pi_ref"] = hs_pi_ref
+                pin["rgb_ref"] = hs_rgb_ref
                 pin["materials_ref"] = hs_materials_ref
 
             for i, json_obj in enumerate(pin["objects"]):
@@ -113,6 +115,8 @@ def updateJSON_HS(
                             detect_obj.hs_classification_ref
                         )
                         json_obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
+                        json_obj["HS_pi_ref"] = detect_obj.hs_pi_ref
+                        json_obj["HS_rgb_ref"] = detect_obj.hs_rgb_ref
                         json_obj["HS_materials"] = detect_obj.hs_materials
 
     # Write to file

@@ -18,6 +18,8 @@ class Object:
         hs_materals=None,
         hs_classification_ref=None,
         hs_ndvi_ref=None,
+        hs_pi_ref=None,
+        hs_rgb_ref=None,
     ):
         self.id = id
         self.label = label
@@ -30,6 +32,8 @@ class Object:
         self.hs_materials = hs_materals
         self.hs_classification_ref = hs_classification_ref
         self.hs_ndvi_ref = hs_ndvi_ref
+        self.hs_pi_ref = hs_pi_ref
+        self.hs_rgb_ref = hs_rgb_ref
 
     # def get_array():
     #     return [
@@ -101,6 +105,12 @@ class Object:
 
     def set_hs_ndvi_ref(self, hs_ndvi_ref):
         self.hs_ndvi_ref = hs_ndvi_ref
+
+    def set_hs_pi_ref(self, hs_pi_ref):
+        self.hs_pi_ref = hs_pi_ref
+
+    def set_hs_rgb_ref(self, hs_rgb_ref):
+        self.hs_rgb_ref = hs_rgb_ref
 
     def set_hs_materials(self, hs_materials):
         self.hs_materials = hs_materials

@@ -58,7 +58,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
         if ENABLE_HS:
             logging.debug("Performing manual hyperspectral scan")
             mats, hs_classification, hs_ndvi, hs_ndmi, rgb_image = on_rotate(
-                axis, (-180, 179), hs_cam, cal_arr, -1
+                axis, (-180, 179), hs_cam, cal_arr, -1, True
             )
             logging.debug("Sending manual hyperspectral scan results to PiA")
             send_image_arrays(
@@ -94,17 +94,17 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
                     logging.debug(
                         f"Scanning Object {i}, ID: {id}, X pixel coords: {px_1},{px_2} => X angle: {angle_x1},{angle_x2}"
                     )
-                    mats, hs_classification, hs_ndvi, hs_ndmi, rgb_image = on_rotate(
-                        axis, (angle_x1, angle_x2), hs_cam, cal_arr, id
+                    mats, hs_classification, hs_ndvi, hs_pi, rgb_image = on_rotate(
+                        axis, (angle_x1, angle_x2), hs_cam, cal_arr, id, False
                     )
                     logging.debug("Sending scan results to PiA")
                     send_image_arrays(
-                        client_socket, [hs_classification, hs_ndvi, hs_ndmi, rgb_image]
+                        client_socket, [hs_classification, hs_ndvi, hs_pi, rgb_image]
                     )
                     send_object_detection_results(client_socket, [mats])
 
 
-def on_rotate(axis, angles, hs_cam, cal_arr, id):
+def on_rotate(axis, angles, hs_cam, cal_arr, id, manual_hs=False):
 
     # Grab hyperspectral data
     fps = hs_cam.ResultingFrameRateAbs.Value
@@ -159,17 +159,19 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id):
     plt.imsave(f"hs_{id}_rgb.png", rgb_image)
 
     output_path = HSI_SCANS_PATH + f"hs_{id}.png"
-    mats = classify_and_save(
+    mats, hs_classification, hs_ndvi, hs_pi = classify_and_save(
         MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr
     )
 
     # Open plots as arrays
     logging.debug("Reading HS image results")
-    hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
-    hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
-    hs_ndmi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndmi.png")
+    hs_rgb = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_rgb.png")
+    if not manual_hs:
+        hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
+        hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
+        hs_pi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_pi.png")
 
-    return mats, hs_classification, hs_ndvi, hs_ndmi, rgb_image
+    return mats, hs_classification, hs_ndvi, hs_pi, hs_rgb
 
 
 # ----- GLOBAL VARIABLES ----- #
