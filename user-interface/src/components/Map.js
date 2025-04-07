@@ -49,8 +49,7 @@ export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelec
                     click: () => handlePinClick(pin),
                   }}>
                   <Popup>
-                      <strong>{pin.name}</strong> <br /> Coordinates:{" "}
-                      {pin.geo_coords.join(", ")}
+                     {pin.geo_coords[0].toFixed(2)}, {pin.geo_coords[1].toFixed(2)}
                   </Popup>
                   </Marker>
               ))}

@@ -32,6 +32,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState('') // status message contee nt
   const [statusMessageTimestamp, setStatusMessageTimestamp] = useState('') // status message timestamp
   const [searchObjects, setSearchObjects] = useState([])
+  const [hsiManualScan, setHSIManualScan] = useState(false)
 
   // DEVICE ANALYSIS
   const [gpsConnected, setGPSConnected] = useState(false) // is gps connected
@@ -222,7 +223,7 @@ function App() {
           <h1 style={{color: WIFIConnected ? 'white':'grey', margin: '5px'}}>WiFi</h1>
           <h1 style={{color: piConnected ? 'white':'grey', margin: '5px'}}>Pi</h1>
           <h1 style={{color: gpsConnected ? 'white':'grey', margin: '5px'}}>GPS</h1> 
-          
+
           <button className={platformActive == 1 ? 'button-on' : 'button-off'} onClick={updatePlatformActiveStatus}>⏻</button>
           <button className={takePhoto == 1 ? 'button-on' : 'button-off'} onClick={handleTakePhoto}>[◉"]</button>   
         </div>
@@ -235,7 +236,7 @@ function App() {
         </div>
         
         <div className='panoramic-container'>
-          <Panorama panorama={panorama} setPanorama={setPanorama} selectedEnviroment={selectedEnviroment} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPin={selectedPin} setTargetObject={setTargetObject}/>
+          <Panorama panorama={panorama} hsiManualScan={hsiManualScan} setHSIManualScan={setHSIManualScan} setPanorama={setPanorama} selectedEnviroment={selectedEnviroment} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPin={selectedPin} setTargetObject={setTargetObject}/>
         </div>
 
       </div> 
