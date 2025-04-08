@@ -3,7 +3,7 @@
 # Can also be used to calibrate pre-computed homographies.
 
 # Imports
-from stitching.stitching_functions import *
+from stitching_functions import *
 import cv2
 import numpy as np
 import logging
@@ -38,33 +38,33 @@ def performPanoramicStitching(images, objects):
     # H1 = calculateTransform(dst_pts, src_pts)
     # print(H1)
 
-    # Recieved matrix: [[1.35159885e+00  3.19910857e-02  3.17669474e+03][1.10186136e-01  1.00985201e+00 -6.59898193e+01]
+    # Recieved matrix: [[8.40855598e-01  6.12737961e-02  3.25624999e+03][ 8.77841949e-02  9.89504187e-01 -5.27089969e+01]]
     logging.debug(f"Stitching images 0 and 1")
-    H1 = np.array([[1, 0, 3.17669474e03], [0, 1, -6.59898193e01]])
+    H1 = np.array([[1,  0,  3.25624999e+03],[ 0,  1, -4.27089969e+01]])
     panorama, objects[1] = applyTransform(images[0], images[1], H1, objects[1])
 
     ### Second Stitch ###
     # src_pts, dst_pts = findKeyPoints(panorama, images[2])
     # H2 = calculateTransform(dst_pts, src_pts)
     # print(H2)
-    #  [8.37013279e-01 -7.54037497e-03  6.50557947e+03][-8.13317303e-02  9.96339191e-01 -1.10695318e+02]]
+    # [[8.70816812e-01  2.95356821e-02  6.50228434e+03][-6.58791426e-02  1.00045882e+00 -1.04482638e+02]]
     logging.debug(f"Stitching images 1 and 2")
-    H2 = np.array([[1, 0, 6.50557947e03], [0, 1, -1.10695318e02]])
+    H2 = np.array([[1,  0,  6.50228434e+03],[0,  1, -1.04482638e+02]])
     panorama, objects[2] = applyTransform(panorama, images[2], H2, objects[2])
 
     ### Third Stitch ###
     # src_pts, dst_pts = findKeyPoints(panorama, images[3])
     # H3 = calculateTransform(dst_pts, src_pts)
     # print(H3)
-    # [1.00527621e+00  3.14864854e-02  9.71394509e+03][ 2.97894815e-02  9.90249756e-01 -4.36688338e+01]]
+    # [[ 9.09794130e-01  1.11946952e-01  9.64858946e+03][-3.19979319e-02  9.96809381e-01 -2.34668237e+01]]
     logging.debug(f"Stitching images 2 and 3")
     H3 = np.array(
         [
-            [1, 3.14864854e-02, 9.71394509e03],
-            [2.97894815e-02, 9.90249756e-01, -4.36688338e01],
+             [1,  0, 9.74858946e+03],[0,  1, -2.34668237e+01]
         ]
     )
     panorama, objects[3] = applyTransform(panorama, images[3], H3, objects[3])
+
 
     # Crop Image
     logging.debug(f"Cropping stitched image")
@@ -80,10 +80,10 @@ def performPanoramicStitching(images, objects):
 
 
 if __name__ == "__main__":
-    image1 = cv2.imread("./test_images/5/0.jpg")
-    image2 = cv2.imread("./test_images/5/1.jpg")
-    image3 = cv2.imread("./test_images/5/2.jpg")
-    image4 = cv2.imread("./test_images/5/3.jpg")
+    image1 = cv2.imread("./images/0.jpg")
+    image2 = cv2.imread("./images/1.jpg")
+    image3 = cv2.imread("./images/2.jpg")
+    image4 = cv2.imread("./images/3.jpg")
 
     objects = [[], [], [], []]
 
