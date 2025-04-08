@@ -208,7 +208,7 @@ def classify_and_save(
         vmax=1,
     )
 
-    return class_percentages, img, ndvi, pi
+    return class_percentages
 
 
 if __name__ == "__main__":

@@ -133,6 +133,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id, manual_hs=False):
 
     # Save scene as .npy if debugging
     if ENABLE_DEBUG:
+        logging.debug("Saving debug data")
         # debug_dir = "./debug_PiB/"
         debug_dir = "/media/groupc/44A2-2862/debug_PiB/"  # USB debug path
         os.makedirs(debug_dir, exist_ok=True)
@@ -159,17 +160,16 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id, manual_hs=False):
     plt.imsave(f"hs_{id}_rgb.png", rgb_image)
 
     output_path = HSI_SCANS_PATH + f"hs_{id}.png"
-    mats, hs_classification, hs_ndvi, hs_pi = classify_and_save(
+    mats = classify_and_save(
         MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr
     )
 
     # Open plots as arrays
     logging.debug("Reading HS image results")
     hs_rgb = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_rgb.png")
-    if not manual_hs:
-        hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
-        hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
-        hs_pi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_pi.png")
+    hs_classification = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_classification.png")
+    hs_ndvi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_ndvi.png")
+    hs_pi = cv2.imread(HSI_SCANS_PATH + f"hs_{id}_pi.png")
 
     return mats, hs_classification, hs_ndvi, hs_pi, hs_rgb
 
@@ -199,7 +199,7 @@ HS_GAIN = 200
 HS_MIN_CAPTURE_ANGLE = 27
 
 ROTATIONAL_STAGE_PORT = "/dev/ttyUSB0"
-ROTATION_OFFSET = 177
+ROTATION_OFFSET = -90
 ROTATION_SPEED = 50
 
 # OTHER

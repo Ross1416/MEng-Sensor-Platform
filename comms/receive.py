@@ -36,7 +36,7 @@ def request_client_capture(server_socket, conn):
 def check_capture_success(conn):
     ack = conn.recv(1024).decode()
     if ack == "CAPTURE SUCCESS":
-        logging.debub("Check Capture - success")
+        logging.debug("Check Capture - success")
         return True
     else:
         return False
