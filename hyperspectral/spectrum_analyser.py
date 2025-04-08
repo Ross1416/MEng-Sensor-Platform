@@ -43,6 +43,56 @@ def calculate_ndvi(full_image, cal_arr):
     ndvi = (nir_band - red_band) / (nir_band + red_band)
     return np.nan_to_num(ndvi, nan=0.0, posinf=0.0, neginf=0.0)
 
+def calculate_gndvi(full_image, cal_arr):
+    green_idx = get_wavelength_index(cal_arr, 560, 2)
+    nir_idx = get_wavelength_index(cal_arr, 860, 2)
+    green_band = full_image[:, :, green_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    ndvi = (nir_band - green_band) / (nir_band + green_band)
+    return np.nan_to_num(ndvi, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_ndwi(full_image, cal_arr):
+    green_idx = get_wavelength_index(cal_arr, 560, 2)
+    nir_idx = get_wavelength_index(cal_arr, 860, 2)
+    green_band = full_image[:, :, green_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    ndwi = (green_band-nir_band) / (green_band+nir_band)
+    return np.nan_to_num(ndwi, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_msavi(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 860, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    msavi = 0.5*(2*(nir_band+1)-np.sqrt((2*nir_band+1)**2-8*(nir_band-red_band)))
+    return np.nan_to_num(msavi, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_pvi(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 860, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    a=0.6
+    b=0.2
+    pvi = (nir_band-a*red_band-b)/(np.sqrt(1+a**2))
+    return np.nan_to_num(pvi, nan=0.0, posinf=0.0, neginf=0.0)
+
+# Wide Dynamic Range Vegitation Index
+def calculate_wdrvi(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 860, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    wdrvi = (0.1*nir_band - red_band) / (0.1*nir_band + red_band)
+    return np.nan_to_num(wdrvi, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_npcri(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    blue_idx = get_wavelength_index(cal_arr, 492, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    blue_band = full_image[:, :, blue_idx].astype(np.float32)
+    pvi = (red_band-blue_band) / (red_band+blue_band)
+    return np.nan_to_num(pvi, nan=0.0, posinf=0.0, neginf=0.0)
 
 def save_spectrum(spectrum, label, x, y):
     header = ["file", "x", "y", "label"] + [f"{wl:.2f}" for wl in wavelengths]
@@ -56,11 +106,17 @@ def save_spectrum(spectrum, label, x, y):
 
     print(f"Saved labeled spectrum: ({x}, {y}) -> '{label}'")
 
-
+def quick_save(folder_path, file_name, index_data, name):
+    path = os.path.join(
+        folder_path, f"{os.path.splitext(file_name)[0]}_{name}.png"
+    )
+    plot_and_save_index(
+        index_data, path, title=name.upper(), cmap="RdYlGn", vmin=-1, vmax=1
+    )
 # === Configuration ===
 
-CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
-folder_path = "./debug_PiB"
+CALIBRATION_FILE_PATH = "hyperspectral/calibration/BaslerPIA1600_CalibrationA.txt"
+folder_path = "./debug_PiB/"
 output_csv = "labeled_spectra.csv"
 
 root = tk.Tk()
@@ -103,16 +159,24 @@ num_bands = image_data.shape[2]
 binning_factor = len(cal_arr) // num_bands
 wavelengths = cal_arr[::binning_factor][:num_bands]
 
-# === Compute NDVI and Save ===
+# === Compute Indexes and Save ===
 
 ndvi = calculate_ndvi(image_data, cal_arr)
-ndvi_path = os.path.join(
-    folder_path, f"{os.path.splitext(file_name)[0]}_ndvi.png"
-)
-plot_and_save_index(
-    ndvi, ndvi_path, title="NDVI", cmap="RdYlGn", vmin=-1, vmax=1
-)
+gndvi = calculate_gndvi(image_data, cal_arr)
+ndwi = calculate_ndwi(image_data, cal_arr)
+msavi = calculate_msavi(image_data, cal_arr)
+pvi = calculate_pvi(image_data, cal_arr)
+npcri = calculate_npcri(image_data, cal_arr)
+wdrvi = calculate_wdrvi(image_data, cal_arr) # poor
 
+quick_save(folder_path, file_name, ndvi, "ndvi")
+quick_save(folder_path, file_name, gndvi, "gndvi")
+quick_save(folder_path, file_name, ndwi, "ndwi")
+quick_save(folder_path, file_name, msavi, "msavi")
+quick_save(folder_path, file_name, pvi, "pvi")
+quick_save(folder_path, file_name, wdrvi, "wdrvi")
+
+exit()
 # === RGB Image Creation ===
 
 try:
