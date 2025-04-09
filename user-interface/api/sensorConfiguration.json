@@ -1,10 +1,10 @@
 {
     "activeFile": "b6fd7a23-edde-45d0-ba12-48b66161aa8b.json",
-    "status": 2,
+    "status": 1,
     "status-message": "setting up",
     "pi-connection": false,
     "gps-connection": false,
     "wifi-connection": false,
     "search-objects": [],
-    "hsi_manual_scan": true
+    "hsi_manual_scan": false
 }
