@@ -114,7 +114,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         # Perform singular 360 hs scan
         logging.debug("Recieving manual hyperspectral scan results")
         setStatusMessage("Performing manual 360 hyperspectral scan")
-        hs_classification, hs_ndvi, hs_pi, rgb_image = receive_image_arrays(conn)
+        hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(conn)
         hs_materials = receive_object_detection_results(conn)[0]
 
         # Save results to images in ui
@@ -122,16 +122,16 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
 
         # Save paths
         save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-        hsi_ref = save_path + f"/hs_{uid}_{id}_classification.jpg"
-        ndvi_ref = save_path + f"/hs_{uid}_{id}_ndvi.jpg"
-        pi_ref = save_path + f"/hs_{uid}_{id}_pi.jpg"
-        rgb_ref = save_path + f"/hs_{uid}_{id}_rgb.jpg"
+        hsi_ref = f"/hs_{uid}_{id}_classification.jpg"
+        ndvi_ref = f"/hs_{uid}_{id}_ndvi.jpg"
+        pi_ref = f"/hs_{uid}_{id}_pi.jpg"
+        rgb_ref = f"/hs_{uid}_{id}_rgb.jpg"
 
         logging.debug(f"Writing images to {save_path}")
-        cv2.imwrite(hsi_ref, hs_classification)
-        cv2.imwrite(ndvi_ref, hs_ndvi)
-        cv2.imwrite(pi_ref, hs_pi)
-        cv2.imwrite(rgb_ref, rgb_image)
+        cv2.imwrite(save_path + hsi_ref, hs_classification)
+        cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
+        cv2.imwrite(save_path + pi_ref, hs_pi)
+        cv2.imwrite(rgb_ref, hs_rgb)
 
         # Update JSON with hyperspectral data
         updateJSON_HS(
@@ -160,7 +160,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
 
                 # Receive scan information
                 logging.debug(f"Receiving scan data")
-                hs_classification, hs_ndvi, hs_pi, rgb_image = receive_image_arrays(
+                hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(
                     conn
                 )
                 hs_materials = receive_object_detection_results(conn)[0]
@@ -168,17 +168,17 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
 
                 id = filtered_objects[i].id
                 save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-                hsi_ref = save_path + f"/hs_{uid}_{id}_classification.jpg"
-                ndvi_ref = save_path + f"/hs_{uid}_{id}_ndvi.jpg"
-                pi_ref = save_path + f"/hs_{uid}_{id}_pi.jpg"
-                rgb_ref = save_path + f"/hs_{uid}_{id}_rgb.jpg"
+                hsi_ref = f"/hs_{uid}_{id}_classification.jpg"
+                ndvi_ref = f"/hs_{uid}_{id}_ndvi.jpg"
+                pi_ref = f"/hs_{uid}_{id}_pi.jpg"
+                rgb_ref = f"/hs_{uid}_{id}_rgb.jpg"
 
                 # Save results to images in ui
                 logging.debug(f"Writing images to {save_path}")
-                cv2.imwrite(hsi_ref, hs_classification)
-                cv2.imwrite(ndvi_ref, hs_ndvi)
-                cv2.imwrite(pi_ref, hs_pi)
-                cv2.imwrite(rgb_ref, rgb_image)
+                cv2.imwrite(save_path + hsi_ref, hs_classification)
+                cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
+                cv2.imwrite(save_path + pi_ref, hs_pi)
+                cv2.imwrite(save_path + rgb_ref, hs_rgb)
 
                 # Update object with refereances and materials
                 filtered_objects[i].set_hs_classification_ref(
@@ -211,7 +211,7 @@ FOV = (102, 67)
 # OBJECT DETECTION
 PRIVACY = True  # Blur people
 CLASSES = ["person"]
-OD_THRESHOLD = 0.1
+OD_THRESHOLD = 0.03
 last_objects = []
 
 # UI
@@ -304,8 +304,8 @@ if __name__ == "__main__":
                     new_scan(
                         rgb_model,
                         activeFile,
-                        lat=location["latitude"],
-                        lon=location["longitude"],
+                        lat=location["longitude"],
+                        lon=location["latitude"],
                         distance_moved=distance_moved,
                         manual_hs=hsi_manual,
                         privacy=PRIVACY,
@@ -326,7 +326,6 @@ if __name__ == "__main__":
                 updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
 
             count += 1
-            sleep(0.25)
 
     except KeyboardInterrupt:
         logging.error(f"Keyboard interrupt")

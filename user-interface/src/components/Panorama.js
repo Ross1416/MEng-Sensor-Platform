@@ -88,7 +88,7 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
         if (showObjects || showRGB ) {
             suffix = selectedPin?.panorama_ref
         } else if (showNVDI) {
-            suffix = selectedPin?.nvdi_ref
+            suffix = selectedPin?.ndvi_ref
         } else if (showHSIClassification) {
             suffix = selectedPin?.hsi_ref
         }
@@ -123,8 +123,9 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                         width={"100%"}
                         height={"100vh"}
                         image={panorama}
-                        haov={358}
-                        vaov={60}
+                        haov={showRGB|| showObjects ? 358 : 220}
+                        vaov={showRGB|| showObjects ? 60 : 30}
+                        yaw={showRGB|| showObjects ? 225 : 0}
                         autoLoad={true}
                         autoRotate={0}
                         showControls={false}
@@ -173,7 +174,7 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                 {selectedPin?.hsi_ref ? (
                 <h2 style={{color: showHSIClassification?'white':'grey'}} onClick={()=>handleToggle(setShowHSIClassification)}>HSI Classification</h2>
                 ):<div/>}
-                {selectedPin?.nvdi_ref ? (
+                {selectedPin?.ndvi_ref ? (
                 <h2 style={{color: showNVDI?'white':'grey'}} onClick={()=>handleToggle(setShowNDVI)}>NDVI</h2>
                 ):<div/>}
                 {selectedPin?.ndmi_ref ? (

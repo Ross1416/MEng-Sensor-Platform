@@ -11,10 +11,7 @@ import matplotlib.pyplot as plt
 from hyperspectral_driver import *
 
 
-def npy_to_png(class_name):
-
-    # Define path
-    folder = f"images/{class_name}"
+def npy_to_png(folder):
 
     cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
@@ -27,7 +24,8 @@ def npy_to_png(class_name):
 
     # Loop through files in the input folder
     for file in os.listdir(folder):
-        if file.startswith(class_name) and file.endswith(".npy"):
+
+        if file.endswith(".npy"):
             file_path = os.path.join(folder, file)
 
             # Load hyperspectral .npy file
@@ -51,6 +49,8 @@ def npy_to_png(class_name):
 if __name__ == "__main__":
 
     CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
-    CLASS_NAME = "outdoor_dataset"
 
-    npy_to_png(class_name=CLASS_NAME)
+    # Define path
+    folder = f"debug_PiB_2"
+
+    npy_to_png(folder)

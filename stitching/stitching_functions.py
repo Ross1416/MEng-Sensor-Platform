@@ -1,6 +1,8 @@
 # This file specifies the functions for image stitching
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 ### Show Images for Testing + Debugging ####
 def showImage(image, title="Snapshot"):
@@ -236,3 +238,65 @@ def applyBlend(image1, canvas):
     blended = np.where(blended == 0, canvas, blended).astype(np.uint8)
 
     return blended
+
+def normalise_brightness(img, verbose=False):
+    result = img.copy().astype(np.float32)
+
+    b, g, r = cv2.split(img)
+
+    # Plot histograms
+    plt.figure(figsize=(10, 4))
+
+    if verbose:
+        plt.subplot(1, 3, 1)
+        plt.hist(b.ravel(), bins=256, range=[0, 256], color='blue')
+        plt.title('Blue Channel')
+
+        plt.subplot(1, 3, 2)
+        plt.hist(g.ravel(), bins=256, range=[0, 256], color='green')
+        plt.title('Green Channel')
+
+        plt.subplot(1, 3, 3)
+        plt.hist(r.ravel(), bins=256, range=[0, 256], color='red')
+        plt.title('Red Channel')
+
+        plt.tight_layout()
+        plt.show()
+
+
+
+    # Compute average per channel
+    avg_b = np.mean(result[:, :, 0])
+    avg_g = np.mean(result[:, :, 1])
+    avg_r = np.mean(result[:, :, 2])
+
+    avg_gray = (avg_r + avg_g + avg_b) / 3
+
+    # Scale each channel
+    result[:, :, 0] *= avg_gray / avg_b
+    result[:, :, 1] *= avg_gray / avg_g
+    result[:, :, 2] *= avg_gray / avg_r
+
+    # Clip and convert back
+    result = np.clip(result, 0, 255).astype(np.uint8)
+    
+    b, g, r = cv2.split(result)
+
+    if verbose:
+        plt.subplot(1, 3, 1)
+        plt.hist(b.ravel(), bins=256, range=[0, 256], color='blue')
+        plt.title('Blue Channel')
+
+        plt.subplot(1, 3, 2)
+        plt.hist(g.ravel(), bins=256, range=[0, 256], color='green')
+        plt.title('Green Channel')
+
+        plt.subplot(1, 3, 3)
+        plt.hist(r.ravel(), bins=256, range=[0, 256], color='red')
+        plt.title('Red Channel')
+
+        plt.tight_layout()
+        plt.show()
+
+    return result
+

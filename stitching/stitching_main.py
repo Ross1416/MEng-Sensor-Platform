@@ -3,7 +3,7 @@
 # Can also be used to calibrate pre-computed homographies.
 
 # Imports
-from stitching.stitching_functions import *
+from stitching_functions import *
 import cv2
 import numpy as np
 import logging
@@ -80,10 +80,16 @@ def performPanoramicStitching(images, objects):
 
 
 if __name__ == "__main__":
-    image1 = cv2.imread("./images/0.jpg")
-    image2 = cv2.imread("./images/1.jpg")
-    image3 = cv2.imread("./images/2.jpg")
-    image4 = cv2.imread("./images/3.jpg")
+    image1 = cv2.imread("./images/2/frame_40_0.jpg")
+    image2 = cv2.imread("./images/2/frame_41_1.jpg")
+    image3 = cv2.imread("./images/2/frame_42_2.jpg")
+    image4 = cv2.imread("./images/2/frame_43_3.jpg")
+
+    image1_norm = normalise_brightness(image1, True)
+    image2_norm = normalise_brightness(image2)
+    image3_norm = normalise_brightness(image3)
+    image4_norm = normalise_brightness(image4)
+
 
     objects = [[], [], [], []]
 
@@ -91,3 +97,10 @@ if __name__ == "__main__":
         [image1, image2, image3, image4], objects
     )
     showImage(panorama)
+
+
+    panorama, objects = performPanoramicStitching(
+        [image1_norm, image2_norm, image3_norm, image4_norm], objects
+    )
+    showImage(panorama)
+    
