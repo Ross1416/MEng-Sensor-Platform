@@ -127,7 +127,7 @@ def calculate_custom1(full_image, cal_arr):
     b = get_wavelength_index(cal_arr, 770, 2)
     a = full_image[:, :, a].astype(np.float32)
     b = full_image[:, :, b].astype(np.float32)
-    custom1 = ((b - a) / (b + a))
+    custom1 = 5*((b - a) / (b + a))
     return np.nan_to_num(custom1, nan=0.0, posinf=0.0, neginf=0.0)
 
 def calculate_custom2(full_image, cal_arr):
@@ -135,7 +135,7 @@ def calculate_custom2(full_image, cal_arr):
     b = get_wavelength_index(cal_arr, 580, 2)
     a = full_image[:, :, a].astype(np.float32)
     b = full_image[:, :, b].astype(np.float32)
-    result = (4*(b - a) / (b + a))
+    result = np.clip((6*(b - a) / (b + a)),-1,1)
     return np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
 
 def calculate_custom3_sky(full_image, cal_arr):
@@ -162,12 +162,25 @@ def calculate_custom1_2_combo(full_image, cal_arr):
     result = custom1+custom2
     return np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
 
-def calculate_custom2_ndvi_combo(full_image, cal_arr):
-    ndvi = calculate_ndvi(full_image, cal_arr)
-    # custom2 = calculate_ndvi(full_image, cal_arr)
-    ndwi = calculate_ndwi(full_image, cal_arr)
-    result = custom2+0.5*ndwi
+def calculate_custom4(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 820, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    result = 2*(nir_band - red_band) / (nir_band + red_band)
+    ndvi = np.clip(result, -1, 1)
     return np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_custom_artifical(full_image, cal_arr):
+    custom1 = calculate_custom1(full_image, cal_arr)
+    custom2 = calculate_custom2(full_image, cal_arr)
+    custom4 = calculate_custom4(full_image, cal_arr)
+    ndvi = calculate_ndvi(full_image, cal_arr)
+    # result = np.where(ndvi < -0.4, ndvi, custom2)# + np.where(ndvi < -0.4, -1, 0) #+ np.where(custom1 < 0.1, -1, 0) + np.where(custom2 < -0.5, -1, 0)
+    result = np.where(custom4 < -0.55, custom4, np.where(custom1 < -0.4, custom1,custom2))
+    # result = np.where(custom1 < -0.4, custom1, custom2)
+    result = np.clip(result, -1, 1)
+    return np.nan_to_num(np.clip(result,-1,1), nan=0.0, posinf=0.0, neginf=0.0)
 
 def save_spectrum(spectrum, label, x, y):
     header = ["file", "x", "y", "label"] + [f"{wl:.2f}" for wl in wavelengths]
@@ -249,8 +262,9 @@ ndbi = calculate_ndbi(image_data, cal_arr)
 custom1 = calculate_custom1(image_data, cal_arr)
 custom2 = calculate_custom2(image_data, cal_arr)
 custom1_2_combo = calculate_custom1_2_combo(image_data,cal_arr)
-custom2_ndvi_combo = calculate_custom2_ndvi_combo(image_data,cal_arr)
+custom_artifical = calculate_custom_artifical(image_data,cal_arr)
 custom3_sky = calculate_custom3_sky(image_data, cal_arr)
+custom4 = calculate_custom4(image_data, cal_arr)
 
 quick_save(folder_path, file_name, ndvi, "ndvi")
 quick_save(folder_path, file_name, gndvi, "gndvi")
@@ -264,10 +278,12 @@ quick_save(folder_path, file_name, ndbi, "ndbi")
 quick_save(folder_path, file_name, custom1, "custom1")
 quick_save(folder_path, file_name, custom2, "custom2")
 quick_save(folder_path, file_name, custom1_2_combo, "custom1_2_combo")
-quick_save(folder_path, file_name, custom2_ndvi_combo, "custom2_ndvi_combo")
+quick_save(folder_path, file_name, custom_artifical, "custom_artifical")
 quick_save(folder_path, file_name, custom3_sky, "custom3_sky")
+quick_save(folder_path, file_name, custom4, "custom4")
 
 exit()
+
 # === RGB Image Creation ===
 try:
     r_idx = get_wavelength_index(cal_arr, 650, 2)
@@ -278,7 +294,7 @@ except Exception as e:
     r_idx, g_idx, b_idx = 50, 30, 10  # Fallback
 
 rgb_image = image_data[:, :, [r_idx, g_idx, b_idx]]
-p_low, p_high = np.percentile(rgb_image, (1, 75))
+p_low, p_high = np.percentile(rgb_image, (1, 90))
 rgb_image = np.clip(rgb_image, p_low, p_high)
 rgb_image = ((rgb_image - p_low) / (p_high - p_low) * 255).astype(np.uint8)
 
@@ -322,10 +338,10 @@ plt.show()
 print(f"NDVI overlay image saved as {overlay_path}")
 
 # === Custom 2 thresholding and overlay ===
-threshold = -0.1
-low_custom2_mask = custom2 < threshold
-overlay_color = [235, 52, 192]  # Red
-alpha =0.5
+threshold = -0.5
+low_custom2_mask = custom_artifical < threshold
+overlay_color = [255, 0, 0]  # Red
+alpha =0.7
 
 rgb_overlay = rgb_image.copy()
 for c in range(3):
