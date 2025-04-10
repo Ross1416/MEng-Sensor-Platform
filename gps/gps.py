@@ -73,7 +73,7 @@ class Neo8T:
                 except pynmea2.ParseError:
                     pass
 
-            if count > 10:
+            if count > 50:
                 self.location = None
                 break
             else:
@@ -121,7 +121,7 @@ class Neo8T:
             self.distance_moved = self.haversine(pos1, pos2)
 
             if self.distance_moved >= self.distance_threshold:
-                self.last_location = location
+                self.last_location = self.location
                 return True
         else:
             self.distance_moved = 0
