@@ -15,7 +15,9 @@ import traceback
 
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy=False):
+def new_scan(
+    rgb_model, activeFile, lat, lon, time, distance_moved, manual_hs, privacy=False
+):
     global last_objects
 
     # Update classes of objects to detect from UI
@@ -106,8 +108,9 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
 
     # Updates json and moves images to correct folder
     setStatusMessage("updating ui")
-    uid = str(lon) + str(lat)
-    updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
+    # uid = str(lon) + str(lat)
+    uid = f"{lat},{lon}-{time.strftime("%Y%m%d_%H%M%S")}"
+    updateJSON(uid, lat, lon, filtered_objects, panorama, activeFile)
 
     # If manual hs scan checked
     if manual_hs:
@@ -136,8 +139,8 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         # Update JSON with hyperspectral data
         updateJSON_HS(
             filtered_objects,
-            lon,
             lat,
+            lon,
             activeFile,
             hsi_ref,
             ndvi_ref,
@@ -160,9 +163,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
 
                 # Receive scan information
                 logging.debug(f"Receiving scan data")
-                hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(
-                    conn
-                )
+                hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(conn)
                 hs_materials = receive_object_detection_results(conn)[0]
                 logging.debug("Received scan data")
 
@@ -181,19 +182,17 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
                 cv2.imwrite(save_path + rgb_ref, hs_rgb)
 
                 # Update object with refereances and materials
-                filtered_objects[i].set_hs_classification_ref(
-                    f"./hs_{uid}_{id}_classification.jpg"
-                )
-                filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
-                filtered_objects[i].set_hs_pi_ref(f"./hs_{uid}_{id}_pi.jpg")
-                filtered_objects[i].set_hs_rgb_ref(f"./hs_{uid}_{id}_rgb.jpg")
+                filtered_objects[i].set_hs_classification_ref(hsi_ref)
+                filtered_objects[i].set_hs_ndvi_ref(ndvi_ref)
+                filtered_objects[i].set_hs_pi_ref(pi_ref)
+                filtered_objects[i].set_hs_rgb_ref(rgb_ref)
                 filtered_objects[i].set_hs_materials(hs_materials)
 
         # Update JSON with hyperspectral data
         updateJSON_HS(
             filtered_objects,
-            lon,
             lat,
+            lon,
             activeFile,
         )
 
@@ -304,8 +303,9 @@ if __name__ == "__main__":
                     new_scan(
                         rgb_model,
                         activeFile,
-                        lat=location["longitude"],
-                        lon=location["latitude"],
+                        lat=location["latitude"],
+                        lon=location["longitude"],
+                        time=datetime.now(),
                         distance_moved=distance_moved,
                         manual_hs=hsi_manual,
                         privacy=PRIVACY,
@@ -320,7 +320,7 @@ if __name__ == "__main__":
                     setPlatformStatus(0)
 
             # Update GPS status every 30 cycles
-            if count > 30:
+            if count > 50:
                 gps.update_location()
                 gps_status = gps.check_if_gps_locaiton()
                 updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)

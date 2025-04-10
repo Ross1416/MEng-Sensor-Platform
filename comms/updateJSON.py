@@ -49,7 +49,7 @@ def resetJSON(filename="New Scan"):
 
 
 # Save images to front-end, then update JSON with latest data
-def updateJSON(uid, lon, lat, objects, image, activeFile):
+def updateJSON(uid, lat, lon, objects, image, activeFile):
     logging.debug("Updating ui json")
     # Specify panorama path
     save_path = (
@@ -66,7 +66,7 @@ def updateJSON(uid, lon, lat, objects, image, activeFile):
 
     # Construct dictionary with new data
     newPin = {
-        "geo_coords": [lon, lat],
+        "geo_coords": [lat, lon],
         "panorama_ref": "/img" + uid + ".jpg",
         "objects": format_results(objects, image.shape),
     }
@@ -84,8 +84,8 @@ def updateJSON(uid, lon, lat, objects, image, activeFile):
 
 def updateJSON_HS(
     filtered_objects,
-    lon,
     lat,
+    lon,
     activeFile,
     hs_classifcation_ref=None,
     hs_ndvi_ref=None,
@@ -100,12 +100,12 @@ def updateJSON_HS(
 
     # Construct dictionary with new data
     for pin in data["pins"]:
-        if pin["geo_coords"] == [lon, lat]:
+        if pin["geo_coords"] == [lat, lon]:
             if hs_classifcation_ref:
                 pin["hsi_ref"] = hs_classifcation_ref
                 pin["ndvi_ref"] = hs_ndvi_ref
                 pin["pi_ref"] = hs_pi_ref
-                # pin["rgb_ref"] = hs_rgb_ref
+                pin["rgb_ref"] = hs_rgb_ref
                 pin["materials_ref"] = hs_materials_ref
 
             for i, json_obj in enumerate(pin["objects"]):
@@ -116,7 +116,7 @@ def updateJSON_HS(
                         )
                         json_obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
                         json_obj["HS_pi_ref"] = detect_obj.hs_pi_ref
-                        # json_obj["HS_rgb_ref"] = detect_obj.hs_rgb_ref
+                        json_obj["HS_rgb_ref"] = detect_obj.hs_rgb_ref
                         json_obj["HS_materials"] = detect_obj.hs_materials
 
     # Write to file
