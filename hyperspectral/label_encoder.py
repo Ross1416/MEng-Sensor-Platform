@@ -92,5 +92,5 @@ def create_label_encoder(
     return label_encoder  # Return the mapping
 
 
-images_folder = "images/outdoor_dataset_limited"
+images_folder = "images/training_dataset"
 label_encoder = create_label_encoder(images_folder)

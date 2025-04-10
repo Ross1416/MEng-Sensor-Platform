@@ -109,6 +109,8 @@ def classify_and_save(
     # Keep the reduced image for classification
     selected_band_indices = select_bands()
     image = full_image[:, :, selected_band_indices]  # reduced image
+    image = image / np.max(image)
+    # image = normalize_image(image)
 
     h, w, num_bands = image.shape
     image_reshaped = image.reshape(-1, num_bands)  # Flatten for model input
@@ -164,13 +166,12 @@ def classify_and_save(
     )
     # plt.title("Material Classification", color="white")
 
-    """
     # Add colorbar legend
-    cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
-    cbar.set_ticklabels(list(legend_labels.values()))
-    cbar.set_label("Class Labels", color="white")
-    cbar.ax.tick_params(color="white", labelcolor="white")
-    """
+    # cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
+    # cbar.set_ticklabels(list(legend_labels.values()))
+    # cbar.set_label("Class Labels", color="white")
+    # cbar.ax.tick_params(color="white", labelcolor="white")
+
     # Save output image
     output_path = output_name + "_classification.png"
     plt.savefig(
@@ -216,9 +217,9 @@ if __name__ == "__main__":
     CALIBRATION_FILE_PATH = "calibration/BaslerPIA1600_CalibrationA.txt"
     cal_arr = get_calibration_array(CALIBRATION_FILE_PATH)
 
-    model_path = "NN_18_03_2025.keras"
-    image_path = "images/indoor_fixed/indoor_007.npy"
-    label_encoding_path = "images/outdoor_dataset_limited/label_encoding.npy"
+    model_path = "NN_09_04_2025_v3.keras"
+    image_path = "debug_PiB/scene_8.npy"
+    label_encoding_path = "images/training_dataset/label_encoding.npy"
     output_name = "test.png"
 
     full_image = np.load(image_path)

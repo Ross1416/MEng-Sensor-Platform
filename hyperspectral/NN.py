@@ -139,7 +139,7 @@ def train_neural_network(
     l2_reg=0.001,
     num_layers=3,
     neurons_per_layer=[64, 128, 64],
-    random_search=True,
+    random_search=False,
     num_random_searches=15,
     loss_function="sparse_categorical_crossentropy",
     metrics=["accuracy"],
@@ -364,7 +364,7 @@ if __name__ == "__main__":
 
     set_seed()
 
-    images_folder = "images/outdoor_dataset_limited"
+    images_folder = "images/training_dataset"
 
     label_encoder_path = os.path.join(images_folder, "label_encoding.npy")
     label_encoder = load_label_encoder(label_encoder_path)
@@ -375,6 +375,8 @@ if __name__ == "__main__":
     # Load and preprocess dataset
     X, y = load_dataset(images_folder, selected_bands)
     X, y = subsample_data(X, y)
+
+    X = X / np.max(X)
 
     # Split into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(
@@ -398,7 +400,7 @@ if __name__ == "__main__":
     )
 
     # Save the trained model
-    best_model.save("NN_19_03_2025.keras")
+    best_model.save("NN_09_04_2025_v3.keras")
 
     # Remove model object which prevents writing to the jSon file
     results_json = [
@@ -406,7 +408,7 @@ if __name__ == "__main__":
     ]
 
     # Save results to JSON
-    with open("random_search_results_2.json", "w") as f:
+    with open("random_search_results_3.json", "w") as f:
         json.dump(results_json, f, indent=4)
 
     print("Results saved to results.json successfully!")
