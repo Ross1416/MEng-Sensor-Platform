@@ -114,7 +114,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         # Perform singular 360 hs scan
         logging.debug("Recieving manual hyperspectral scan results")
         setStatusMessage("Performing manual 360 hyperspectral scan")
-        hs_classification, hs_ndvi, hs_pi = receive_image_arrays(conn)
+        hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(conn)
         hs_materials = receive_object_detection_results(conn)[0]
 
         # Save results to images in ui
@@ -131,7 +131,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
         cv2.imwrite(save_path + hsi_ref, hs_classification)
         cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
         cv2.imwrite(save_path + pi_ref, hs_pi)
-        # cv2.imwrite(rgb_ref, rgb_image)
+        cv2.imwrite(rgb_ref, hs_rgb)
 
         # Update JSON with hyperspectral data
         updateJSON_HS(
@@ -143,7 +143,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
             ndvi_ref,
             pi_ref,
             hs_materials,
-            # rgb_ref,
+            rgb_ref,
         )
     else:
         # Send filtered objects to PiB
@@ -160,7 +160,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
 
                 # Receive scan information
                 logging.debug(f"Receiving scan data")
-                hs_classification, hs_ndvi, hs_pi = receive_image_arrays(
+                hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(
                     conn
                 )
                 hs_materials = receive_object_detection_results(conn)[0]
@@ -178,7 +178,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, manual_hs, privacy
                 cv2.imwrite(save_path + hsi_ref, hs_classification)
                 cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
                 cv2.imwrite(save_path + pi_ref, hs_pi)
-                # cv2.imwrite(save_path + rgb_ref, rgb_image)
+                cv2.imwrite(save_path + rgb_ref, hs_rgb)
 
                 # Update object with refereances and materials
                 filtered_objects[i].set_hs_classification_ref(

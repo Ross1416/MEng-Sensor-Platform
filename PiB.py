@@ -62,7 +62,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
             )
             logging.debug("Sending manual hyperspectral scan results to PiA")
             send_image_arrays(
-                client_socket, [hs_classification, hs_ndvi, hs_ndmi]
+                client_socket, [hs_classification, hs_ndvi, hs_ndmi, rgb_image]
             )
             send_object_detection_results(client_socket, [mats])
             logging.debug("Successfully sent manual hyperspectral scan results to PiA")
@@ -99,7 +99,7 @@ def on_trigger(rgb_model, axis, hs_cam, cal_arr):
                     )
                     logging.debug("Sending scan results to PiA")
                     send_image_arrays(
-                        client_socket, [hs_classification, hs_ndvi, hs_pi]
+                        client_socket, [hs_classification, hs_ndvi, hs_pi, rgb_image]
                     )
                     send_object_detection_results(client_socket, [mats])
 
@@ -157,7 +157,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id, manual_hs=False):
     )
 
     rgb_image = scene[:, :, RGB]
-    plt.imsave(f"hs_{id}_rgb.png", rgb_image)
+    plt.imsave(HSI_SCANS_PATH + f"hs_{id}_rgb.png", rgb_image)
 
     output_path = HSI_SCANS_PATH + f"hs_{id}.png"
     mats = classify_and_save(
