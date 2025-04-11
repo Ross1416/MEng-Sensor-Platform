@@ -117,7 +117,7 @@ def new_scan(
         # Perform singular 360 hs scan
         logging.debug("Recieving manual hyperspectral scan results")
         setStatusMessage("Performing manual 360 hyperspectral scan")
-        hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(conn)
+        hs_classification, hs_ndvi, hs_msavi, hs_custom2, hs_artificial, hs_rgb = receive_image_arrays(conn)
         hs_materials = receive_object_detection_results(conn)[0]
 
         # Save results to images in ui
@@ -127,13 +127,17 @@ def new_scan(
         save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
         hsi_ref = f"/hs_{uid}_{id}_classification.jpg"
         ndvi_ref = f"/hs_{uid}_{id}_ndvi.jpg"
-        pi_ref = f"/hs_{uid}_{id}_pi.jpg"
+        msavi_ref = f"/hs_{uid}_{id}_msavi.jpg"
+        custom2_ref = f"/hs_{uid}_{id}_custom2.jpg"
+        artificial_ref = f"/hs_{uid}_{id}_artificial.jpg"
         rgb_ref = f"/hs_{uid}_{id}_rgb.jpg"
 
         logging.debug(f"Writing images to {save_path}")
         cv2.imwrite(save_path + hsi_ref, hs_classification)
         cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
-        cv2.imwrite(save_path + pi_ref, hs_pi)
+        cv2.imwrite(save_path + msavi_ref, hs_msavi)
+        cv2.imwrite(save_path + custom2_ref, hs_custom2)
+        cv2.imwrite(save_path + artificial_ref, hs_artificial)
         cv2.imwrite(rgb_ref, hs_rgb)
 
         # Update JSON with hyperspectral data
@@ -144,7 +148,9 @@ def new_scan(
             activeFile,
             hsi_ref,
             ndvi_ref,
-            pi_ref,
+            msavi_ref,
+            custom2_ref, 
+            artificial_ref,
             hs_materials,
             rgb_ref,
         )
@@ -163,7 +169,7 @@ def new_scan(
 
                 # Receive scan information
                 logging.debug(f"Receiving scan data")
-                hs_classification, hs_ndvi, hs_pi, hs_rgb = receive_image_arrays(conn)
+                hs_classification, hs_ndvi, hs_msavi, hs_custom2, hs_artificial, hs_rgb = receive_image_arrays(conn)
                 hs_materials = receive_object_detection_results(conn)[0]
                 logging.debug("Received scan data")
 
@@ -171,20 +177,26 @@ def new_scan(
                 save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
                 hsi_ref = f"/hs_{uid}_{id}_classification.jpg"
                 ndvi_ref = f"/hs_{uid}_{id}_ndvi.jpg"
-                pi_ref = f"/hs_{uid}_{id}_pi.jpg"
+                msavi_ref = f"/hs_{uid}_{id}_msavi.jpg"
+                custom2_ref = f"/hs_{uid}_{id}_custom2.jpg"
+                artificial_ref = f"/hs_{uid}_{id}_artificial.jpg"
                 rgb_ref = f"/hs_{uid}_{id}_rgb.jpg"
 
                 # Save results to images in ui
                 logging.debug(f"Writing images to {save_path}")
                 cv2.imwrite(save_path + hsi_ref, hs_classification)
                 cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
-                cv2.imwrite(save_path + pi_ref, hs_pi)
+                cv2.imwrite(save_path + msavi_ref, hs_msavi)
+                cv2.imwrite(save_path + custom2_ref, hs_custom2)
+                cv2.imwrite(save_path + artificial_ref, hs_artificial)
                 cv2.imwrite(save_path + rgb_ref, hs_rgb)
 
                 # Update object with refereances and materials
                 filtered_objects[i].set_hs_classification_ref(hsi_ref)
                 filtered_objects[i].set_hs_ndvi_ref(ndvi_ref)
-                filtered_objects[i].set_hs_pi_ref(pi_ref)
+                filtered_objects[i].set_hs_msavi_ref(hs_msavi)
+                filtered_objects[i].set_hs_custom2_ref(hs_custom2)
+                filtered_objects[i].set_hs_artificial_ref(hs_artificial)
                 filtered_objects[i].set_hs_rgb_ref(rgb_ref)
                 filtered_objects[i].set_hs_materials(hs_materials)
 

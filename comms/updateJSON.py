@@ -89,7 +89,9 @@ def updateJSON_HS(
     activeFile,
     hs_classifcation_ref=None,
     hs_ndvi_ref=None,
-    hs_pi_ref=None,
+    hs_msavi_ref=None,
+    hs_custom2_ref=None,
+    hs_artificial_ref=None,
     hs_materials_ref=None,
     hs_rgb_ref=None,
 ):
@@ -104,7 +106,9 @@ def updateJSON_HS(
             if hs_classifcation_ref:
                 pin["hsi_ref"] = hs_classifcation_ref
                 pin["ndvi_ref"] = hs_ndvi_ref
-                pin["pi_ref"] = hs_pi_ref
+                pin["msavi_ref"] = hs_msavi_ref
+                pin["custom2_ref"] = hs_custom2_ref
+                pin["artificial_ref"] = hs_artificial_ref
                 pin["rgb_ref"] = hs_rgb_ref
                 pin["materials_ref"] = hs_materials_ref
 
@@ -115,7 +119,9 @@ def updateJSON_HS(
                             detect_obj.hs_classification_ref
                         )
                         json_obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
-                        json_obj["HS_pi_ref"] = detect_obj.hs_pi_ref
+                        json_obj["HS_msavi_ref"] = detect_obj.hs_msavi_ref
+                        json_obj["HS_custom2_ref"] = detect_obj.hs_custom2_ref
+                        json_obj["HS_artificial_ref"] = detect_obj.hs_artificial_ref
                         json_obj["HS_rgb_ref"] = detect_obj.hs_rgb_ref
                         json_obj["HS_materials"] = detect_obj.hs_materials
 

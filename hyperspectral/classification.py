@@ -70,6 +70,50 @@ def calculate_ndvi(full_image, cal_arr):
     logging.debug("Succesfully calculated NDVI")
     return ndvi
 
+def calculate_msavi(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 860, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    msavi = 0.5*(2*(nir_band+1)-np.sqrt((2*nir_band+1)**2-8*(nir_band-red_band)))
+    return np.nan_to_num(msavi, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_custom1(full_image, cal_arr):
+    a = get_wavelength_index(cal_arr, 700, 2)
+    b = get_wavelength_index(cal_arr, 770, 2)
+    a = full_image[:, :, a].astype(np.float32)
+    b = full_image[:, :, b].astype(np.float32)
+    result = 5*((b - a) / (b + a))
+    result = np.clip(result, -1, 1)
+    return np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_custom2(full_image, cal_arr):
+    a = get_wavelength_index(cal_arr, 540, 2)
+    b = get_wavelength_index(cal_arr, 580, 2)
+    a = full_image[:, :, a].astype(np.float32)
+    b = full_image[:, :, b].astype(np.float32)
+    result = np.clip((6*(b - a) / (b + a)),-1,1)
+    return np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_custom4(full_image, cal_arr):
+    red_idx = get_wavelength_index(cal_arr, 690, 2)
+    nir_idx = get_wavelength_index(cal_arr, 820, 2)
+    red_band = full_image[:, :, red_idx].astype(np.float32)
+    nir_band = full_image[:, :, nir_idx].astype(np.float32)
+    result = 2*(nir_band - red_band) / (nir_band + red_band)
+    result = np.clip(result, -1, 1)
+    return np.nan_to_num(result, nan=0.0, posinf=0.0, neginf=0.0)
+
+def calculate_custom_artifical(full_image, cal_arr):
+    custom1 = calculate_custom1(full_image, cal_arr)
+    custom2 = calculate_custom2(full_image, cal_arr)
+    custom4 = calculate_custom4(full_image, cal_arr)
+    ndvi = calculate_ndvi(full_image, cal_arr)
+    # result = np.where(ndvi < -0.4, ndvi, custom2)# + np.where(ndvi < -0.4, -1, 0) #+ np.where(custom1 < 0.1, -1, 0) + np.where(custom2 < -0.5, -1, 0)
+    result = np.where(custom4 < -0.55, custom4, np.where(custom1 < -0.4, custom1,custom2))
+    # result = np.where(custom1 < -0.4, custom1, custom2)
+    result = np.clip(result, -1, 1)
+    return np.nan_to_num(np.clip(result,-1,1), nan=0.0, posinf=0.0, neginf=0.0)
 
 def calculate_pi(full_image, cal_arr):
     """ """
@@ -188,8 +232,14 @@ def classify_and_save(
     Calculate Indices
     """
 
+    logging.debug("Calculating NDVI...")
     ndvi = calculate_ndvi(full_image, cal_arr)
-    pi = calculate_pi(full_image, cal_arr)
+    logging.debug("Calculating MSAVI...")
+    masavi = calculate_msavi(full_image, cal_arr)
+    logging.debug("Calculating CUSTOM2 Index...")
+    custom2 = calculate_custom2(full_image, cal_arr)
+    logging.debug("Calculating ARTIFICIAL index...")
+    artificial = calculate_custom_artifical(full_image, cal_arr)
 
     plot_and_save_index(
         ndvi,
@@ -201,9 +251,27 @@ def classify_and_save(
     )
 
     plot_and_save_index(
-        pi,
-        output_name + "_pi.png",
-        title="PI",
+        masavi,
+        output_name + "_msavi.png",
+        title="MSAVI",
+        cmap="RdYlGn",
+        vmin=-1,
+        vmax=1,
+    )
+
+    plot_and_save_index(
+        custom2,
+        output_name + "_custom2.png",
+        title="CUSTOM2",
+        cmap="RdYlGn",
+        vmin=-1,
+        vmax=1,
+    )
+
+    plot_and_save_index(
+        artificial,
+        output_name + "_artificial.png",
+        title="ARTIFICIAL",
         cmap="RdYlGn",
         vmin=-1,
         vmax=1,

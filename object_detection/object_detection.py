@@ -18,7 +18,9 @@ class Object:
         hs_materals=None,
         hs_classification_ref=None,
         hs_ndvi_ref=None,
-        hs_pi_ref=None,
+        hs_msavi=None,
+        hs_custom2=None,
+        hs_artificial=None,
         hs_rgb_ref=None,
     ):
         self.id = id
@@ -32,7 +34,9 @@ class Object:
         self.hs_materials = hs_materals
         self.hs_classification_ref = hs_classification_ref
         self.hs_ndvi_ref = hs_ndvi_ref
-        self.hs_pi_ref = hs_pi_ref
+        self.hs_msavi = hs_msavi
+        self.hs_custom2 = hs_custom2
+        self.hs_artificial = hs_artificial
         self.hs_rgb_ref = hs_rgb_ref
 
     # def get_array():
