@@ -192,9 +192,19 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                 {selectedPin?.ndvi_ref ? (
                 <h2 style={{color: showNVDI?'white':'grey'}} onClick={()=>handleToggle(setShowNDVI)}>NDVI</h2>
                 ):<div/>}
-                {selectedPin?.ndmi_ref ? (
-                <h2 style={{color: showNDMI?'white':'grey'}} onClick={()=>handleToggle(setShowNDMI)}>NDMI</h2>
+                {selectedPin?.msavi_ref ? (
+                <h2 style={{color: showMSAVI?'white':'grey'}} onClick={()=>handleToggle(setShowMSAVI)}>MSAVI</h2>
                 ):<div/>}
+                {selectedPin?.custom2_ref ? (
+                <h2 style={{color: showCustom?'white':'grey'}} onClick={()=>handleToggle(setShowCustom)}>Custom</h2>
+                ):<div/>}
+                {selectedPin?.artificial_ref ? (
+                <h2 style={{color: showArtificial?'white':'grey'}} onClick={()=>handleToggle(setShowArtifical)}>Artficial</h2>
+                ):<div/>}
+                {selectedPin?.rgb_ref ? (
+                <h2 style={{color: showRGB?'white':'grey'}} onClick={()=>handleToggle(setShowHSIRGB)}>HSI-RGB</h2>
+                ):<div/>}
+
                 <div className='search-input'>
                     <input style={{width: '100%', backgroundColor: 'transparent', color: 'white', fontSize: '20px', fontWeight: 'lighter', borderColor: 'transparent', fontFamily: 'inherit', left: '5px'}} placeholder='Search for...' value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}/>
                     <div style={{display: 'flex', flexDirection: 'row', position: 'absolute', right: '20px', height: '100%'}}> 
