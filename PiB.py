@@ -161,7 +161,7 @@ def on_rotate(axis, angles, hs_cam, cal_arr, id, manual_hs=False):
 
     output_path = HSI_SCANS_PATH + f"hs_{id}.png"
     mats = classify_and_save(
-        MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr
+        MODEL_PATH, scene, LABEL_ENCODING_PATH, output_path, cal_arr, manual_flag = manual_hs
     )
 
     # Open plots as arrays

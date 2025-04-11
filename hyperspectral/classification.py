@@ -29,7 +29,7 @@ def apply_smoothing(image, filter_size=10):
 
 
 def plot_and_save_index(
-    index_data, output_path, title="Index", cmap="RdYlGn", vmin=-1, vmax=1
+    index_data, output_path, manual_flag, title="Index", cmap="RdYlGn", vmin=-1, vmax=1
 ):
     """
     Plots and saves a vegetation index image
@@ -38,10 +38,17 @@ def plot_and_save_index(
     plt.figure(figsize=(8, 6))
     plt.axis("off")
     im = plt.imshow(index_data, cmap=cmap, vmin=vmin, vmax=vmax)
-    # cbar = plt.colorbar(im, label=title)
-    # cbar.ax.yaxis.label.set_color("white")
-    # cbar.ax.tick_params(color="white", labelcolor="white")
-    # plt.title(title, color="white")
+
+    if not manual_flag:
+        plt.axis("off")
+        ax = plt.gca()
+        ax.set_facecolor("black")
+
+        cbar = plt.colorbar(im, label=title)
+        cbar.ax.yaxis.label.set_color("white")
+        cbar.ax.tick_params(color="white", labelcolor="white")
+        plt.title(title, color="white")
+
     plt.savefig(
         output_path,
         dpi=300,
@@ -137,7 +144,7 @@ def calculate_pi(full_image, cal_arr):
 
 
 def classify_and_save(
-    model_path, full_image, label_encoding_path, output_path, cal_arr
+    model_path, full_image, label_encoding_path, output_path, cal_arr, manual_flag
 ):
     logging.debug("Classifying hyperspectral scene")
     output_name, _ = os.path.splitext(output_path)
@@ -208,13 +215,19 @@ def classify_and_save(
         vmin=unique_classes[0],
         vmax=unique_classes[-1],
     )
-    # plt.title("Material Classification", color="white")
 
-    # Add colorbar legend
-    # cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
-    # cbar.set_ticklabels(list(legend_labels.values()))
-    # cbar.set_label("Class Labels", color="white")
-    # cbar.ax.tick_params(color="white", labelcolor="white")
+    if not manual_flag:
+
+        ax = plt.gca()
+        ax.set_facecolor("black")
+
+        plt.title("Material Classification", color="white")
+
+        # Add colorbar legend
+        cbar = plt.colorbar(img, ticks=list(legend_labels.keys()))
+        cbar.set_ticklabels(list(legend_labels.values()))
+        cbar.set_label("Class Labels", color="white")
+        cbar.ax.tick_params(color="white", labelcolor="white")
 
     # Save output image
     output_path = output_name + "_classification.png"
@@ -244,6 +257,7 @@ def classify_and_save(
     plot_and_save_index(
         ndvi,
         output_name + "_ndvi.png",
+        manual_flag=manual_flag,
         title="NDVI",
         cmap="RdYlGn",
         vmin=-1,
@@ -253,6 +267,7 @@ def classify_and_save(
     plot_and_save_index(
         masavi,
         output_name + "_msavi.png",
+        manual_flag=manual_flag,
         title="MSAVI",
         cmap="RdYlGn",
         vmin=-1,
@@ -262,6 +277,7 @@ def classify_and_save(
     plot_and_save_index(
         custom2,
         output_name + "_custom2.png",
+        manual_flag=manual_flag,
         title="CUSTOM2",
         cmap="RdYlGn",
         vmin=-1,
@@ -271,6 +287,7 @@ def classify_and_save(
     plot_and_save_index(
         artificial,
         output_name + "_artificial.png",
+        manual_flag=manual_flag,
         title="ARTIFICIAL",
         cmap="RdYlGn",
         vmin=-1,

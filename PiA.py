@@ -223,7 +223,7 @@ FOV = (102, 67)
 # OBJECT DETECTION
 PRIVACY = True  # Blur people
 CLASSES = ["person"]
-OD_THRESHOLD = 0.03
+OD_THRESHOLD = 0.1
 last_objects = []
 
 # UI
