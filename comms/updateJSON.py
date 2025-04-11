@@ -111,19 +111,19 @@ def updateJSON_HS(
                 pin["artificial_ref"] = hs_artificial_ref
                 pin["rgb_ref"] = hs_rgb_ref
                 pin["materials_ref"] = hs_materials_ref
-
-            for i, json_obj in enumerate(pin["objects"]):
-                for j, detect_obj in enumerate(filtered_objects):
-                    if json_obj["id"] == detect_obj.id:
-                        json_obj["HS_classification_ref"] = (
-                            detect_obj.hs_classification_ref
-                        )
-                        json_obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
-                        json_obj["HS_msavi_ref"] = detect_obj.hs_msavi_ref
-                        json_obj["HS_custom2_ref"] = detect_obj.hs_custom2_ref
-                        json_obj["HS_artificial_ref"] = detect_obj.hs_artificial_ref
-                        json_obj["HS_rgb_ref"] = detect_obj.hs_rgb_ref
-                        json_obj["HS_materials"] = detect_obj.hs_materials
+            else:
+                for i, json_obj in enumerate(pin["objects"]):
+                    for j, detect_obj in enumerate(filtered_objects):
+                        if json_obj["id"] == detect_obj.id:
+                            json_obj["HS_classification_ref"] = (
+                                detect_obj.hs_classification_ref
+                            )
+                            json_obj["HS_ndvi_ref"] = detect_obj.hs_ndvi_ref
+                            json_obj["HS_msavi_ref"] = detect_obj.hs_msavi_ref
+                            json_obj["HS_custom2_ref"] = detect_obj.hs_custom2_ref
+                            json_obj["HS_artificial_ref"] = detect_obj.hs_artificial_ref
+                            json_obj["HS_rgb_ref"] = detect_obj.hs_rgb_ref
+                            json_obj["HS_materials"] = detect_obj.hs_materials
 
     # Write to file
     with open(file_path, "w") as file:

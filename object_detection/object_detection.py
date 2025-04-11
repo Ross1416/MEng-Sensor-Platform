@@ -110,8 +110,14 @@ class Object:
     def set_hs_ndvi_ref(self, hs_ndvi_ref):
         self.hs_ndvi_ref = hs_ndvi_ref
 
-    def set_hs_pi_ref(self, hs_pi_ref):
-        self.hs_pi_ref = hs_pi_ref
+    def set_hs_msavi_ref(self, hs_msavi_ref):
+        self.hs_msavi_ref = hs_msavi_ref
+
+    def set_hs_custom2_ref(self, hs_custom2_ref):
+        self.hs_custom2_ref = hs_custom2_ref
+    
+    def set_hs_artificial_ref(self, hs_artificial_ref):
+        self.hs_artificial_ref = hs_artificial_ref
 
     def set_hs_rgb_ref(self, hs_rgb_ref):
         self.hs_rgb_ref = hs_rgb_ref
