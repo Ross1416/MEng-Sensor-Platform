@@ -10,6 +10,10 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
     const [showHSIClassification, setShowHSIClassification] = useState(false)
     const [showNVDI, setShowNDVI] = useState(false)
     const [showNDMI, setShowNDMI] = useState(false)
+    const [showMSAVI, setShowMSAVI] = useState(false)
+    const [showCustom, setShowCustom] = useState(false)
+    const [showArtificial, setShowArtifical] = useState(false)
+    const [showHSIRGB, setShowHSIRGB] = useState(false)
 
     const [searchInput, setSearchInput] = useState('') // Input to search for a new object
     const [hsiScan, setHsiScan] = useState(false) // Wether the new object should be scanned
@@ -69,6 +73,10 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
         setShowNDMI(false)
         setShowObjects(false)
         setShowRGB(false)
+        setShowMSAVI(false)
+        setShowCustom(false)
+        setShowArtifical(false)
+        setShowHSIRGB(false)
 
         // set target state to true
         setButton(true)
@@ -80,7 +88,7 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
             setPanorama('./images/' + selectedEnviroment.slice(0, -5) + selectedPin?.panorama_ref)
         }
     }, [selectedPin])
-
+    
 
     useEffect(()=> {
     if (selectedEnviroment && selectedPin) {
@@ -91,6 +99,14 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
             suffix = selectedPin?.ndvi_ref
         } else if (showHSIClassification) {
             suffix = selectedPin?.hsi_ref
+        } else if (showMSAVI) {
+            suffix = selectedPin?.msavi_ref
+        } else if (showCustom){
+            suffix = selectedPin?.custom2_ref
+        } else if (showArtificial){
+            suffix = selectedPin?.artificial_ref
+        } else if (showHSIRGB) {
+            suffix = selectedPin?.rgb_ref
         }
         if (suffix != null) {
             console.log('updating panorama')
@@ -98,7 +114,7 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
         }
        }
         
-    }, [showRGB, showObjects, showHSIClassification, showNDMI, showNVDI])
+    }, [showRGB, showObjects, showHSIClassification, showNDMI, showNVDI, showMSAVI, showCustom, showArtificial, showHSIRGB])
         
     return (
         <div className='panorama-container'>
@@ -149,7 +165,6 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                               }}
                     
                             handleClick={() => handleHotspot(obj)}/> 
-                            
                     ))
                     ) : <div/>}
                 </Pannellum>
