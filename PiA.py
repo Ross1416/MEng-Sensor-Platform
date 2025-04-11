@@ -139,7 +139,7 @@ def new_scan(
         cv2.imwrite(save_path + msavi_ref, hs_msavi)
         cv2.imwrite(save_path + custom2_ref, hs_custom2)
         cv2.imwrite(save_path + artificial_ref, hs_artificial)
-        cv2.imwrite(rgb_ref, hs_rgb)
+        cv2.imwrite(save_path + rgb_ref, hs_rgb)
 
         # Update JSON with hyperspectral data
         updateJSON_HS(

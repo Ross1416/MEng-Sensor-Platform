@@ -187,6 +187,10 @@ def format_results(objects, image_shape):
                 "HS_materials": obj.hs_materials,
                 "HS_classification_ref": "",
                 "HS_ndvi_ref": "",
+                "HS_msavi_ref": "",
+                "HS_custom2_ref": "",
+                "HS_artificial_ref": "",
+                "HS_rgb_ref": "",
                 "distance": obj.distance,
             }
         )
