@@ -195,9 +195,9 @@ def new_scan(
                 # Update object with refereances and materials
                 filtered_objects[i].set_hs_classification_ref(hsi_ref)
                 filtered_objects[i].set_hs_ndvi_ref(ndvi_ref)
-                filtered_objects[i].set_hs_msavi_ref(hs_msavi)
-                filtered_objects[i].set_hs_custom2_ref(hs_custom2)
-                filtered_objects[i].set_hs_artificial_ref(hs_artificial)
+                filtered_objects[i].set_hs_msavi_ref(msavi_ref)
+                filtered_objects[i].set_hs_custom2_ref(custom2_ref)
+                filtered_objects[i].set_hs_artificial_ref(artificial_ref)
                 filtered_objects[i].set_hs_rgb_ref(rgb_ref)
                 filtered_objects[i].set_hs_materials(hs_materials)
 
