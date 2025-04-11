@@ -109,7 +109,8 @@ def new_scan(
     # Updates json and moves images to correct folder
     setStatusMessage("updating ui")
     # uid = str(lon) + str(lat)
-    uid = f"{lat},{lon}-{time.strftime("%Y%m%d_%H%M%S")}"
+    t = time.strftime("%Y%m%d_%H%M%S")
+    uid = f"{lat},{lon}-{t}"
     updateJSON(uid, lat, lon, filtered_objects, panorama, activeFile)
 
     # If manual hs scan checked
