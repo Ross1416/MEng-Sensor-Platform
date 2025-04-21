@@ -17,7 +17,6 @@
 
 .bottomBar {
     position: fixed;
-    width: fit-content;
     bottom: 10%;
     align-self: center;
     flex-direction: row;
@@ -25,6 +24,7 @@
     background: linear-gradient(black, rgb(65, 63, 63));
     border: 0.5px solid grey;
     border-radius: 15px;
+    max-width: 100%;
 }
 
 .bottomBar h1 {

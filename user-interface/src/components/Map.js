@@ -45,7 +45,7 @@ export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelec
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           />
           {pins?.map((pin) => (
-                  <Marker key={pin.id} position={pin.geo_coords} icon={customIcon} eventHandlers={{
+                  <Marker key={pin.id} position={pin.geo_coords} icon={pin?.hsi_ref ? customIcon : customIcon2 } eventHandlers={{
                     click: () => handlePinClick(pin),
                   }}>
                   <Popup>
@@ -61,4 +61,9 @@ export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelec
 const customIcon = L.divIcon({
     className: "emoji-icon", // Optional CSS for further styling
     html: '<span style="font-size: 30px;">📍</span>', // Adjust the font-size
+});
+
+const customIcon2 = L.divIcon({
+  className: "emoji-icon", // Optional CSS for further styling
+  html: '<span style="font-size: 15px;">📍</span>', // Adjust the font-size
 });

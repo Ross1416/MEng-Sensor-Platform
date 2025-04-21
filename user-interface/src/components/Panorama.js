@@ -144,9 +144,9 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                         yaw={showRGB|| showObjects ? 225 : 0}
                         autoLoad={true}
                         autoRotate={0}
-                        showControls={false}
-                        showFullscreenCtrl={false}
-                        showZoomCtrl={false}
+                        showControls={true}
+                        showFullscreenCtrl={true}
+                        showZoomCtrl={true}
                         orientationOnByDefault={true}
                     >
 
