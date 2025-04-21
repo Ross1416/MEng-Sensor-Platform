@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualScan, setHSIManualScan,   objects, locationName, setShowHSI, setSearchObjects, searchObjects, selectedPin, setTargetObject}) {
+export function Panorama({setShowLegend, panorama, setPanorama, selectedEnviroment, hsiManualScan, setHSIManualScan,   objects, locationName, setShowHSI, setSearchObjects, searchObjects, selectedPin, setTargetObject}) {
 
     const [showRGB, setShowRGB] = useState(true)
     const [showObjects, setShowObjects] = useState(false) // Whether objects are shown 
@@ -78,6 +78,14 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
         setShowArtifical(false)
         setShowHSIRGB(false)
 
+        if (setButton == setShowHSIClassification) {
+            setShowLegend('classification')
+        } else if (setButton != setShowRGB && setButton != setShowObjects) {
+            setShowLegend('index')
+        } else {
+            setShowLegend('none')
+        }
+
         // set target state to true
         setButton(true)
     }
@@ -140,7 +148,7 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                         height={"100vh"}
                         image={panorama}
                         haov={showRGB|| showObjects ? 358 : 220}
-                        vaov={showRGB|| showObjects ? 60 : 30}
+                        vaov={showRGB|| showObjects ? 60 : 27}
                         yaw={showRGB|| showObjects ? 225 : 0}
                         autoLoad={true}
                         autoRotate={0}
@@ -196,7 +204,7 @@ export function Panorama({panorama, setPanorama, selectedEnviroment, hsiManualSc
                 <h2 style={{color: showMSAVI?'white':'grey'}} onClick={()=>handleToggle(setShowMSAVI)}>MSAVI</h2>
                 ):<div/>}
                 {selectedPin?.custom2_ref ? (
-                <h2 style={{color: showCustom?'white':'grey'}} onClick={()=>handleToggle(setShowCustom)}>Custom</h2>
+                <h2 style={{color: showCustom?'white':'grey'}} onClick={()=>handleToggle(setShowCustom)}>Artifical</h2>
                 ):<div/>}
                 {selectedPin?.artificial_ref ? (
                 <h2 style={{color: showArtificial?'white':'grey'}} onClick={()=>handleToggle(setShowArtifical)}>Artficial</h2>

@@ -40,13 +40,22 @@
 
 .panoramic-container {
   height: 95%;
-  width: 75%;
   border: 1px solid white;
   border: 1px solid white;
   border-radius: 15px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.legend-container {
+  border: 1px solid white;
+  border: 1px solid white;
+  border-radius: 15px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 95%;
 }
 
 .dropdown {

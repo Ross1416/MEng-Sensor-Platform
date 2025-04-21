@@ -20,6 +20,7 @@ function App() {
   const [selectedEnviroment, setSelectedEnviroment] = useState(null) // user selected file 
   const [targetObject, setTargetObject] = useState({}) // selected object information
   const [panorama, setPanorama] = useState('')
+  const [showLegend, setShowLegend] = useState('none')
 
   // INTERFACE CONTROL
   const [showHSI, setShowHSI] = useState(false) // show modal?
@@ -235,10 +236,12 @@ function App() {
           <Map setPanorama={setPanorama} pins={pins} setPins={setPins} setObjects={setObjects} selectedEnviroment={selectedEnviroment} selectedPin={selectedPin} setSelectedPin={setSelectedPin} />
         </div>
         
-        <div className='panoramic-container'>
-          <Panorama panorama={panorama} hsiManualScan={hsiManualScan} setHSIManualScan={setHSIManualScan} setPanorama={setPanorama} selectedEnviroment={selectedEnviroment} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPin={selectedPin} setTargetObject={setTargetObject}/>
+        <div className='panoramic-container' style={{width: showLegend != 'none' ? '70%' :  '75%'}}>
+          <Panorama setShowLegend={setShowLegend} panorama={panorama} hsiManualScan={hsiManualScan} setHSIManualScan={setHSIManualScan} setPanorama={setPanorama} selectedEnviroment={selectedEnviroment} locationName={locationName} setLocationName={setLocationName} objects={objects} selectedEnviroment={selectedEnviroment} setShowHSI={setShowHSI} setSearchObjects={setSearchObjects} searchObjects={searchObjects} selectedPin={selectedPin} setTargetObject={setTargetObject}/>
         </div>
 
+        <img src={showLegend  == 'index' ? './images/nvdi_index.jpg' : './images/classification_legend.png'} className='legend-container' style={{width: showLegend  != 'none' ? '8%' : '0%', backgroundColor: 'black'}}/>
+        
       </div> 
     </div>
   );

@@ -1,6 +1,6 @@
 // This files creates a Map component, which shows the coordinates of each scan
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import '../styles/Map.css';
 import 'leaflet/dist/leaflet.css';
@@ -8,7 +8,6 @@ import L from "leaflet";
 
 
 export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelectedPin}) {
-    
     const [mapCenter, setMapCenter] = useState([55.851771, -4.2379665]) // map center - default to Glasgow
 
     // Set co-ords to users location
@@ -31,6 +30,13 @@ export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelec
       setSelectedPin(pin)
       setObjects(pin.objects)
     };
+
+    useEffect(()=> {
+      if (pins) {
+        console.log('updated')
+        setMapCenter(pins[0]?.geo_coords)
+      }
+    },  [selectedEnviroment])
     
     return (
    
@@ -39,7 +45,7 @@ export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelec
           center={mapCenter} // Latitude and Longitude (e.g., London)
           zoom={14} // Zoom level
           >
-        
+      
           <TileLayer
               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
@@ -65,5 +71,5 @@ const customIcon = L.divIcon({
 
 const customIcon2 = L.divIcon({
   className: "emoji-icon", // Optional CSS for further styling
-  html: '<span style="font-size: 15px;">📍</span>', // Adjust the font-size
+  html: '<span style="font-size: 30px;">📍</span>', // Adjust the font-size
 });
