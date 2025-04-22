@@ -187,7 +187,7 @@ export function Panorama({setShowLegend, panorama, setPanorama, selectedEnvirome
             <div className='bottomBar'>
                 <h1>{locationName}</h1>
                 <h1>|</h1>
-                <h2>Select Overlay:</h2>
+               
                 {selectedPin?.panorama_ref ? (
                     <h2 style={{color: showRGB?'white':'grey'}} onClick={()=>handleToggle(setShowRGB)}>RGB</h2>
                 ):<div/>}
