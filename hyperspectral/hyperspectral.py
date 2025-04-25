@@ -1,5 +1,5 @@
 from zaber_driver import *
-from hyperspectral_driver import *
+from hyperspectral.hyperspectral_driver import *
 import matplotlib.pyplot as plt
 import os
 

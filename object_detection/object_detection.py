@@ -2,6 +2,7 @@ from ultralytics import YOLOWorld
 import math
 import cv2
 import numpy as np
+import logging
 
 
 class Object:
@@ -11,21 +12,32 @@ class Object:
         label=None,
         coords=None,
         conf=None,
+        camera=None,
         distance=None,
         hs_scan=True,
         hs_materals=None,
         hs_classification_ref=None,
         hs_ndvi_ref=None,
+        hs_msavi_ref=None,
+        hs_custom2_ref=None,
+        hs_artificial_ref=None,
+        hs_rgb_ref=None,
     ):
         self.id = id
         self.label = label
         self.coords = coords
+        self.coords_original = coords
         self.conf = conf
+        self.camera = camera
         self.distance = distance
         self.hs_scan = hs_scan
         self.hs_materials = hs_materals
         self.hs_classification_ref = hs_classification_ref
         self.hs_ndvi_ref = hs_ndvi_ref
+        self.hs_msavi_ref = hs_msavi_ref
+        self.hs_custom2_ref = hs_custom2_ref
+        self.hs_artificial_ref = hs_artificial_ref
+        self.hs_rgb_ref = hs_rgb_ref
 
     # def get_array():
     #     return [
@@ -42,6 +54,12 @@ class Object:
 
     def get_xyxy(self):
         return self.coords
+
+    def get_xyxy_original(self):
+        return self.coords_original
+
+    def get_camera(self):
+        return self.camera
 
     def set_xyxy(self, xyxy):
         self.coords = xyxy
@@ -92,11 +110,23 @@ class Object:
     def set_hs_ndvi_ref(self, hs_ndvi_ref):
         self.hs_ndvi_ref = hs_ndvi_ref
 
+    def set_hs_msavi_ref(self, hs_msavi_ref):
+        self.hs_msavi_ref = hs_msavi_ref
+
+    def set_hs_custom2_ref(self, hs_custom2_ref):
+        self.hs_custom2_ref = hs_custom2_ref
+    
+    def set_hs_artificial_ref(self, hs_artificial_ref):
+        self.hs_artificial_ref = hs_artificial_ref
+
+    def set_hs_rgb_ref(self, hs_rgb_ref):
+        self.hs_rgb_ref = hs_rgb_ref
+
     def set_hs_materials(self, hs_materials):
         self.hs_materials = hs_materials
 
 
-def object_detection(model, frame, conf=0.25):
+def object_detection(model, frame, camera, conf=0.25):
     """
     Detects objects in frame using YOLO model.
     Inputs:
@@ -106,7 +136,7 @@ def object_detection(model, frame, conf=0.25):
     Outputs:
     -Array of objects [[label,[x1,y1,x2,y2],confidence]]
     """
-
+    logging.debug(f"Detecting objects in frame {camera}")
     detections = model.predict(frame, conf=conf)
     results = []
     for box in detections[0].boxes:
@@ -115,8 +145,11 @@ def object_detection(model, frame, conf=0.25):
         coords = [round(i) for i in coords]
         conf = math.ceil((box.conf[0] * 100)) / 100
         # results.append([label,coords,conf])
-        results.append(Object(label=label, coords=coords, conf=conf))
-    print(f"Object detection results:\n{results}")
+        obj = Object(label=label, coords=coords, conf=conf, camera=camera)
+        results.append(obj)
+        logging.debug(
+            f"Object detected:\n{obj.label}, {obj.coords}, {obj.conf}, {obj.camera}"
+        )
     return results
 
 
@@ -193,15 +226,16 @@ def blur_people(frame, detections, blur_size=25):
     Output:
     - blurred_image : image with all detected faces blurred
     """
-
+    logging.debug("Blurring people")
     for i in range(len(detections)):
         # if detections[i][0] == "person":
-        if detections[i].label == "person":
+        if detections[i].label.lower() == "person":
             # x1, y1, x2, y2 = detections[i][1]
             x1, y1, x2, y2 = detections[i].get_xyxy()
             roi = frame[y1:y2, x1:x2]
             roi = cv2.GaussianBlur(roi, (blur_size, blur_size), 0)
             frame[y1 : y1 + roi.shape[0], x1 : x1 + roi.shape[1]] = roi
+    logging.debug("Blurring complete")
     return frame
 
 
@@ -234,10 +268,10 @@ def non_maximum_suppression(objects, iou_threshold=0.5):
         -list: Filtered list of objects with unique detections
     """
     # Sort objects by confidence score in descending order
+    logging.debug("Performing non maximum suppression")
     objects = sorted(objects, key=lambda x: x.conf, reverse=True)
 
     selected_objects = []
-
     # Loop while unfiltered objects remaining
     while len(objects) > 0:
         # Select the object with the highest score
@@ -260,6 +294,7 @@ def non_maximum_suppression(objects, iou_threshold=0.5):
 
         objects = filtered_objects
 
+    logging.debug("Non-maximum suppression complete")
     return selected_objects
 
 

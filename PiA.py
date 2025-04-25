@@ -1,6 +1,5 @@
 from object_detection.object_detection import *
-from comms.receive import *
-from comms.send import *
+from comms.comms import *
 from gps.gps import Neo8T
 from depth.depth import *
 from datetime import datetime
@@ -11,44 +10,65 @@ from cameras import *
 import logging
 from stitching.stitching_main import performPanoramicStitching
 import json
-import shutil
+import traceback
 
 
 # Triggers when change in GPS location
-def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
+def new_scan(
+    rgb_model, activeFile, lat, lon, time, distance_moved, manual_hs, privacy=False
+):
     global last_objects
-    
+
+    # Update classes of objects to detect from UI
     classes = getUserRequestedClasses()
 
+    # If privacy enabled and "person" class not included,
+    # it is added to allow blurring
+    if privacy:
+        if "person" not in list(classes.keys()):
+            classes["person"] = False
+
+    # Update YOLO model with objects of interest
+    logging.info(f"Set objects of interest to {list(classes.keys())}.")
     rgb_model.set_classes(list(classes.keys()))
-    
-    logging.info(f"Set YOLO classes to {classes}.")
-    
+
     # Captures two images
     setStatusMessage("capturing images")
     frames = capture(cams, "PiA")
+
     # Triggers capture on PiB
     request_client_capture(server_socket, conn)
 
+    # Wait for PiB to have captured
+    capture_success = False
+    while not capture_success:
+        capture_success = check_capture_success(conn)
+
     # Sending RGB classes to PiB
-    logging.info(f"Sending Object detection classes to PiB.")
+    logging.info("Sending Object detection classes to PiB.")
     send_object_detection_results(conn, [classes])
 
     setStatusMessage("detecting objects")
     # Perform object detection
     objects = []
-    for f in frames:
-        objects.append(object_detection(rgb_model, f, OD_THRESHOLD))
+    for i, f in enumerate(frames):
+        objects.append(object_detection(rgb_model, f, i, OD_THRESHOLD))
+
     # Retrieve slave images and data
+    logging.info("Receiving PiB frames")
     frames += receive_image_arrays(conn)
 
+    # If in debug mode, save rgb frames
     if ENABLE_DEBUG:
         debug_dir = "./debug_PiA/"
         os.makedirs(debug_dir, exist_ok=True)
 
         for i, frame in enumerate(frames):
             frame_id = len([f for f in os.listdir(debug_dir) if f.endswith(".jpg")])
-            cv2.imwrite(os.path.join(debug_dir, f"frame_{frame_id}_{i}.jpg"), frame)
+            path = os.path.join(debug_dir, f"frame_{frame_id}_{i}.jpg")
+            cv2.imwrite(path, frame)
+
+        logging.debug(f"Saved individual RGB frames to {path}")
 
     # # Send object detection results to PiB
     # send_object_detection_results(conn, objects)
@@ -57,14 +77,16 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
 
     # Calculate distance estimation to objects - append distance to object array
     # objects = calculate_distance(objects, distance_moved, last_objects)
-    last_objects = objects # Update last objects
+    last_objects = objects  # Update last objects
     # Assign IDs to objects
     objects = assign_id(objects)
 
-    # Blur people if privacy
-    setStatusMessage("blurring people")
+    # Send manual hyperspectral options
+    logging.debug("Send manual hyperspectral scan option value")
+    send_object_detection_results(conn, [manual_hs])
 
     # Blur people if privacy
+    setStatusMessage("blurring people")
     if privacy:
         for i in range(len(frames)):
             frames[i] = blur_people(frames[i], objects[i], 255)
@@ -74,6 +96,7 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     panorama, objects = performPanoramicStitching(frames, objects)
 
     # Restructure objects into one array instead of separated by frames
+    logging.debug("Restructuring objects array")
     objects_restructured = []
     for frame in objects:
         objects_restructured += frame
@@ -82,47 +105,111 @@ def new_scan(rgb_model, activeFile, lon, lat, distance_moved, privacy=False):
     setStatusMessage("removing duplicate objects")
     filtered_objects = non_maximum_suppression(objects_restructured)
 
-    # Send filtered objects to PiB
-    send_object_detection_results(conn, filtered_objects)
-
     # Updates json and moves images to correct folder
     setStatusMessage("updating ui")
-    uid = str(lon) + str(lat)
-    # for i in range(len(filtered_objects)):
-    #     filtered_objects[i][1] = xyxy_to_xywh(
-    #         filtered_objects[i][1], panorama.shape[1], panorama.shape[0], True
-    #     )
+    # uid = str(lon) + str(lat)
+    t = time.strftime("%Y%m%d_%H%M%S")
+    uid = f"{lat},{lon}-{t}"
+    updateJSON(uid, lat, lon, filtered_objects, panorama, activeFile)
 
-    updateJSON(uid, lon, lat, filtered_objects, panorama, activeFile)
+    # If manual hs scan checked
+    if manual_hs:
+        # Perform singular 360 hs scan
+        logging.debug("Recieving manual hyperspectral scan results")
+        setStatusMessage("Performing manual 360 hyperspectral scan")
+        hs_classification, hs_ndvi, hs_msavi, hs_custom2, hs_artificial, hs_rgb = receive_image_arrays(conn)
+        hs_materials = receive_object_detection_results(conn)[0]
 
-    # # Extract filtered IDs
-    # filtered_ids = []
-    # for obj in filtered_objects:
-    #     filtered_ids.append(int(obj[3]))
+        # Save results to images in ui
+        id = -1
 
-    # Receive processed hyperspectral scans from PiB
-    # Receive hyperspectral material distribution data from PiB
-    for i in range(len(filtered_objects)):
-        if classes[filtered_objects[i].label]:
-            setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
-            # Receive scan information
-            hs_classification, hs_ndvi = receive_image_arrays(conn)
-            hs_materials = receive_object_detection_results(conn)[0]
+        # Save paths
+        save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
+        hsi_ref = f"/hs_{uid}_{id}_classification.jpg"
+        ndvi_ref = f"/hs_{uid}_{id}_ndvi.jpg"
+        msavi_ref = f"/hs_{uid}_{id}_msavi.jpg"
+        custom2_ref = f"/hs_{uid}_{id}_custom2.jpg"
+        artificial_ref = f"/hs_{uid}_{id}_artificial.jpg"
+        rgb_ref = f"/hs_{uid}_{id}_rgb.jpg"
 
-            id = filtered_objects[i].id
-            # Save results to images in ui
-            save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
-            cv2.imwrite(save_path + f"/hs_{uid}_{id}_classification.jpg", hs_classification)
-            cv2.imwrite(save_path + f"/hs_{uid}_{id}_ndvi.jpg", hs_ndvi)
+        logging.debug(f"Writing images to {save_path}")
+        cv2.imwrite(save_path + hsi_ref, hs_classification)
+        cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
+        cv2.imwrite(save_path + msavi_ref, hs_msavi)
+        cv2.imwrite(save_path + custom2_ref, hs_custom2)
+        cv2.imwrite(save_path + artificial_ref, hs_artificial)
+        cv2.imwrite(save_path + rgb_ref, hs_rgb)
 
-            # Update object with refereances and materials
-            filtered_objects[i].set_hs_classification_ref(f"./hs_{uid}_{id}_classification.jpg")
-            filtered_objects[i].set_hs_ndvi_ref(f"./hs_{uid}_{id}_ndvi.jpg")
-            filtered_objects[i].set_hs_materials(hs_materials)
+        # Update JSON with hyperspectral data
+        updateJSON_HS(
+            filtered_objects,
+            lat,
+            lon,
+            activeFile,
+            hsi_ref,
+            ndvi_ref,
+            msavi_ref,
+            custom2_ref, 
+            artificial_ref,
+            hs_materials,
+            rgb_ref,
+        )
+    else:
+        # Send filtered objects to PiB
+        logging.debug(
+            "Sending filtered object detection results to PiB for hyperspectral scanning"
+        )
+        send_object_detection_results(conn, filtered_objects)
 
-    # Update JSON with hyperspectral data
-    updateJSON_HS(filtered_objects, lon, lat, activeFile)
+        # Receive processed hyperspectral data from PiB for each object
+        for i in range(len(filtered_objects)):
+            if classes[filtered_objects[i].label]:
+                setStatusMessage(f"hyperspectral scanning {filtered_objects[i].label}")
+                logging.debug(f"hyperspectral scanning {filtered_objects[i].label}")
 
+                # Receive scan information
+                logging.debug(f"Receiving scan data")
+                hs_classification, hs_ndvi, hs_msavi, hs_custom2, hs_artificial, hs_rgb = receive_image_arrays(conn)
+                hs_materials = receive_object_detection_results(conn)[0]
+                logging.debug("Received scan data")
+
+                id = filtered_objects[i].id
+                save_path = UI_IMAGES_SAVE_PATH + activeFile[:-5]
+                hsi_ref = f"/hs_{uid}_{id}_classification.jpg"
+                ndvi_ref = f"/hs_{uid}_{id}_ndvi.jpg"
+                msavi_ref = f"/hs_{uid}_{id}_msavi.jpg"
+                custom2_ref = f"/hs_{uid}_{id}_custom2.jpg"
+                artificial_ref = f"/hs_{uid}_{id}_artificial.jpg"
+                rgb_ref = f"/hs_{uid}_{id}_rgb.jpg"
+
+                # Save results to images in ui
+                logging.debug(f"Writing images to {save_path}")
+                cv2.imwrite(save_path + hsi_ref, hs_classification)
+                cv2.imwrite(save_path + ndvi_ref, hs_ndvi)
+                cv2.imwrite(save_path + msavi_ref, hs_msavi)
+                cv2.imwrite(save_path + custom2_ref, hs_custom2)
+                cv2.imwrite(save_path + artificial_ref, hs_artificial)
+                cv2.imwrite(save_path + rgb_ref, hs_rgb)
+
+                # Update object with refereances and materials
+                filtered_objects[i].set_hs_classification_ref(hsi_ref)
+                filtered_objects[i].set_hs_ndvi_ref(ndvi_ref)
+                filtered_objects[i].set_hs_msavi_ref(msavi_ref)
+                filtered_objects[i].set_hs_custom2_ref(custom2_ref)
+                filtered_objects[i].set_hs_artificial_ref(artificial_ref)
+                filtered_objects[i].set_hs_rgb_ref(rgb_ref)
+                filtered_objects[i].set_hs_materials(hs_materials)
+
+        # Update JSON with hyperspectral data
+        updateJSON_HS(
+            filtered_objects,
+            lat,
+            lon,
+            activeFile,
+        )
+
+
+# ----- GLOBAL VARIABLES ----- #
 
 # COMMUNICATIONS
 PORT = 5002
@@ -133,27 +220,27 @@ RESOLUTION = (4608, 2592)
 FOV = (102, 67)
 
 # OBJECT DETECTION
-PRIVACY = False  # Blur people
-CLASSES = ["plant"]
+PRIVACY = True  # Blur people
+CLASSES = ["person"]
 OD_THRESHOLD = 0.1
+last_objects = []
 
 # UI
 UI_IMAGES_SAVE_PATH = "./user-interface/public/images/"
 
 # GPS
-GPS_PORT = "/dev/ttyACM0"  # USB Port (check automatically?)
+GPS_PORT = "/dev/ttyACM0"
 GPS_BAUDRATE = 115200
 DISTANCE_THRESHOLD = 10
-
-# Globals
-last_objects = []
-
 
 # OTHER
 ENABLE_DEBUG = True
 
+# ----- MAIN ----- #
 if __name__ == "__main__":
+    # Update UI status msg
     setStatusMessage("setting up")
+
     # Setup Logging
     logging.basicConfig(
         level=logging.DEBUG,
@@ -164,65 +251,108 @@ if __name__ == "__main__":
     )
     logging.info("##### Start up new sesson. #####")
 
-    # Setup cameras and GPIO
-    cams = setup_cameras()
-    logging.debug("Setup cameras.")
-    # Setup GPS
-    gps = Neo8T(
-        port=GPS_PORT,
-        baudrate=GPS_BAUDRATE,
-        timeout=1,
-        distance_threshold=DISTANCE_THRESHOLD,
-    )
-    logging.debug("Setup GPS")
-    # Make connection
-    server_socket, conn = make_server_connection(HOST, PORT)
-    logging.debug("Connected to PiB")
-    # Setup object detection model
-    rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
-    logging.debug("Loaded RGB object detection model.")
-    logging.info(f"Privacy set {PRIVACY}.")
+    try:
+        # Setup cameras and GPIO
+        cams = setup_cameras()
+        logging.debug(f"Setup {len(cams)} cameras.")
+        if len(cams) < 2:
+            raise Exception(
+                "Cameras not working. Check connections."
+            )  # TODO move into function
 
-    # Make connection
-    server_socket, conn = make_server_connection(HOST, PORT)
-    logging.debug("Connected to PiB")
+        # Setup GPS
+        gps = Neo8T(
+            port=GPS_PORT,
+            baudrate=GPS_BAUDRATE,
+            timeout=1,
+            distance_threshold=DISTANCE_THRESHOLD,
+        )
+        logging.debug("Setup GPS")
 
-    logging.info(f"Waiting for trigger...")
+        # Make connection to PiB
+        server_socket, conn = make_server_connection(HOST, PORT)
+        logging.debug("Connected to PiB")
 
-    # Mainloop
-    while True:
-        # Update save location
-        try:
-            status, activeFile = getPlatformStatus()
-        except json.decoder.JSONDecodeError:
-            logging.error("Error accessing JSON configuration file.")
+        # Setup object detection model
+        rgb_model = YOLOWorld("object_detection/yolo_models/yolov8s-worldv2.pt")
+        logging.debug("Loaded RGB object detection model.")
 
-        # Update GPS status
-        gps_status = gps.check_if_gps_locaiton()
-        updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
+        logging.info("All systems setup.")
+        logging.info(f"Privacy set {PRIVACY}.")
+        logging.info(f"Waiting for trigger from UI...")
 
-        GPS_coordinate_change = gps.check_for_movement()
-        if status == 2 or (status == 1 and GPS_coordinate_change):
-            timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-            save_location = f"./capture/{timestamp}-capture/"
+        setStatusMessage("setup complete. ready for capture")
 
-            # Get current location
-            location = gps.get_location()
-            distance_moved = gps.get_distance_moved()
-            if location:
+        ### Mainloop ###
+        count = 0
+        while True:
+            # Update save location
+            status = None
+            while not status:
+                try:
+                    status, activeFile, hsi_manual = getPlatformStatus()
+                except json.decoder.JSONDecodeError:
+                    logging.error("Error accessing JSON configuration file.")
+                sleep(0.25)
+
+            # Update GPS location and check for change in location > than  DISTANCE_THRESHOLD
+            GPS_coordinate_change = gps.check_for_movement()
+            if GPS_coordinate_change:
+                logging.info("Movement detected.")
+
+            # If manual UI trigger or in wait for movement mode + change in movement, perform new scn
+            if status == 2 or (status == 1 and GPS_coordinate_change):
+                logging.info("Scan triggered.")
+
+                # Get current location
+                location = gps.get_location()
+                distance_moved = gps.get_distance_moved()
+                logging.info(f"Location: {location}")
+                logging.info(f"Distance moved: {distance_moved}m")
+
+                # If location known, trigger a new scan
+                if location:
                     new_scan(
-                    rgb_model,
-                    activeFile,
-                    lat=location["latitude"],
-                    lon=location["longitude"], 
-                    distance_moved=distance_moved,
-                    privacy=PRIVACY,
-                )
-            else:
-                logging.debug("No location => using default Lat and long")
-                new_scan(rgb_model, activeFile, privacy=PRIVACY)
+                        rgb_model,
+                        activeFile,
+                        lat=location["latitude"],
+                        lon=location["longitude"],
+                        time=datetime.now(),
+                        distance_moved=distance_moved,
+                        manual_hs=hsi_manual,
+                        privacy=PRIVACY,
+                    )
+                else:
+                    logging.info("No GPS location found. Try again.")
+                    setPlatformStatus(0)
 
-            logging.info("Completed scan.")
+                logging.info("Completed scan.")
 
-            if status == 2:
-                setPlatformStatus(0)
+                if status == 2:
+                    setPlatformStatus(0)
+
+            # Update GPS status every 30 cycles
+            if count > 50:
+                gps.update_location()
+                gps_status = gps.check_if_gps_locaiton()
+                updateGPSConnection(CONFIGURATION_FILE_PATH, gps_status)
+
+            count += 1
+
+    except KeyboardInterrupt:
+        logging.error(f"Keyboard interrupt")
+        server_socket.close()
+        logging.info("All connections closed.")
+
+    except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        filename, line, func, text = tb[-1]
+        logging.critical(f"Error in PiB.py: {e}")
+        logging.critical(f"Occurred in file:{filename}, line {line}")
+
+        server_socket.close()
+        logging.info("All connections closed.")
+
+    finally:
+        setPlatformStatus(0)
+        logging.info("System terminated.")

@@ -1,26 +1,24 @@
-import React, {useState, useEffect, useRef} from 'react';
+// This files creates a Panorama component, which shows stitched images and the position of objects in the enviroment
+import React, {useState, useEffect} from 'react';
 import '../styles/Panorama.css';
 import { Pannellum } from "pannellum-react";
 
-export function Panorama({panorama, objects, locationName, setLocationName, selectedEnviroment, setShowHSI, setHSIData, setSearchObjects, searchObjects, selectedPinInfo, setTargetObject}) {
+export function Panorama({setShowLegend, panorama, setPanorama, selectedEnviroment, hsiManualScan, setHSIManualScan,   objects, locationName, setShowHSI, setSearchObjects, searchObjects, selectedPin, setTargetObject}) {
 
+    const [showRGB, setShowRGB] = useState(true)
+    const [showObjects, setShowObjects] = useState(false) // Whether objects are shown 
+    const [showHSIClassification, setShowHSIClassification] = useState(false)
+    const [showNVDI, setShowNDVI] = useState(false)
+    const [showNDMI, setShowNDMI] = useState(false)
+    const [showMSAVI, setShowMSAVI] = useState(false)
+    const [showCustom, setShowCustom] = useState(false)
+    const [showArtificial, setShowArtifical] = useState(false)
+    const [showHSIRGB, setShowHSIRGB] = useState(false)
 
-    const [showObjects, setShowObjects] = useState(true)
-    const [showMaterials, setShowMaterials] = useState(false)
-    const [showDistances, setShowDistances] = useState(false)
-    const [showConfidence, setShowConfidence] = useState(false)
-    const [edit, setEdit] = useState(false)
-    const [reset, setReset] = useState(false)
-    const [download, setDownload] = useState(false)
-    const [connected, setConnected] = useState(false)
-    const [searchInput, setSearchInput] = useState('')
-    const [hsiScan, setHsiScan] = useState(false)
+    const [searchInput, setSearchInput] = useState('') // Input to search for a new object
+    const [hsiScan, setHsiScan] = useState(false) // Wether the new object should be scanned
 
-    // Toggle button change
-    const toggleButton = (state, stateFunction) => {
-        stateFunction(!state)
-    }
-
+    // If enter pressed, add new object
     const handleNewSearchObject = async (event) => {
         const newEntry = {
             object: searchInput,
@@ -34,18 +32,19 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         } 
     }
 
-    
+    // If X pressed, delete this object
     const handleDeleteObject = async (index) => {
         setSearchObjects((prevItems) => prevItems.filter((_, i) => i !== index));
     }
     
-    const updateSearchObjects = () => {
+    // Every second, send current object array to back end
+    const updateSearchObjects = async () => {
         if (searchObjects) {
             try {
                 fetch("/updateObjects", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({objects: searchObjects})
+                body: JSON.stringify({objects: searchObjects, hsiManualScan: hsiManualScan})
             })} catch (err) {
                 console.log(err)
            }
@@ -53,27 +52,84 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
         }
     }
 
-
     useEffect(()=> {
         const interval = setInterval(() => {
-          updateSearchObjects();
-    }, 1000);
+            updateSearchObjects();
+    }, 200); // If this interval is greater than App.js interval, the code will not execute. Keep it small for field testing, and large for demo.
         return () => clearInterval(interval);
     }, [updateSearchObjects])
 
 
+    // On click, open further details regarding the object
     const handleHotspot = (obj) => {
         setShowHSI(true)
         setTargetObject(obj)
     }
+
+    const handleToggle = (setButton) => {
+        // Reset states
+        setShowHSIClassification(false)
+        setShowNDVI(false)
+        setShowNDMI(false)
+        setShowObjects(false)
+        setShowRGB(false)
+        setShowMSAVI(false)
+        setShowCustom(false)
+        setShowArtifical(false)
+        setShowHSIRGB(false)
+
+        if (setButton == setShowHSIClassification) {
+            setShowLegend('classification')
+        } else if (setButton != setShowRGB && setButton != setShowObjects) {
+            setShowLegend('index')
+        } else {
+            setShowLegend('none')
+        }
+
+        // set target state to true
+        setButton(true)
+    }
+
+    useEffect(()=>{
+        handleToggle(setShowRGB)
+        if (selectedEnviroment) {
+            setPanorama('./images/' + selectedEnviroment.slice(0, -5) + selectedPin?.panorama_ref)
+        }
+    }, [selectedPin])
+    
+
+    useEffect(()=> {
+    if (selectedEnviroment && selectedPin) {
+            var suffix = null
+        if (showObjects || showRGB ) {
+            suffix = selectedPin?.panorama_ref
+        } else if (showNVDI) {
+            suffix = selectedPin?.ndvi_ref
+        } else if (showHSIClassification) {
+            suffix = selectedPin?.hsi_ref
+        } else if (showMSAVI) {
+            suffix = selectedPin?.msavi_ref
+        } else if (showCustom){
+            suffix = selectedPin?.custom2_ref
+        } else if (showArtificial){
+            suffix = selectedPin?.artificial_ref
+        } else if (showHSIRGB) {
+            suffix = selectedPin?.rgb_ref
+        }
+        if (suffix != null) {
+            console.log('updating panorama')
+            setPanorama('./images/' + selectedEnviroment.slice(0, -5) + suffix)
+        }
+       }
+        
+    }, [showRGB, showObjects, showHSIClassification, showNDMI, showNVDI, showMSAVI, showCustom, showArtificial, showHSIRGB])
         
     return (
         <div className='panorama-container'>
-            
-            <h1 style={{fontWeight: 'lighter',position: 'absolute', left: '5px', top: '5px', color: 'white', zIndex: 100, fontSize: '16px'}}>Timestamp: {selectedPinInfo ? selectedPinInfo.timestamp : ''}</h1>
-            <h1 style={{fontWeight: 'lighter', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100, fontSize: '16px'}}>Lon/Lat: {selectedPinInfo ? selectedPinInfo.coords[0] : ''} </h1>
+            <h1 style={{fontWeight: 'lighter', position: 'absolute', left: '5px', top: '30px', color: 'white', zIndex: 100, fontSize: '16px'}}>Lon/Lat: {selectedPin?.geo_coords} </h1>
 
             <div style={{position: 'absolute', right: '5px', top: '5px', zIndex: 100, display: 'flex', flexDirection: 'column'}}>
+                <button style={{paddingLeft: '15x', paddingRight: '15px', borderRadius: '5px', fontSize: '16px', fontWeight: 'lighter', backgroundColor: hsiManualScan ? 'black':'transparent', color: hsiManualScan ? 'white':'black'}} onClick={()=> setHSIManualScan(!hsiManualScan)}>Full HSI</button>
                 {searchObjects?.map((item, index)=> (
                     <div key={index} style={{backgroundColor: 'black', borderRadius: '5px', margin: '5px', padding: '5px', flexDirection: 'row', display: 'flex', justifyContent: 'space-between', }}>
                          <input type="checkbox" disabled={true} checked={item.hsi} style={{width: '15px', height: '15px', accentColor: 'grey', alignSelf: 'center'}}/>
@@ -84,32 +140,30 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
 
             </div>
 
-            {/* <button onClick={changeScene}>PRESS ME</button> */}
             {panorama ? (
                 // <img src={panorama} alt='Dynamic' className='panorama'/>
                 <div style={{backgroundColor: 'black', width: '100%', height: '100%'}}>
                     <Pannellum
                         width={"100%"}
                         height={"100vh"}
-                        // title={scene.title}
                         image={panorama}
-                        haov={358}
-                        vaov={60}
+                        haov={showRGB|| showObjects ? 358 : 220}
+                        vaov={showRGB|| showObjects ? 60 : 27}
+                        yaw={showRGB|| showObjects ? 225 : 0}
                         autoLoad={true}
                         autoRotate={0}
-                        showControls={false}
-                        showFullscreenCtrl={false}
-                        showZoomCtrl={false}
+                        showControls={true}
+                        showFullscreenCtrl={true}
+                        showZoomCtrl={true}
                         orientationOnByDefault={true}
                     >
 
                     {showObjects ? (
-                    // objects?.map(({ x, y, width, height, RGB_classification }) => (
                         objects?.map((obj) => (
                             <Pannellum.Hotspot
                             type="custom"
-                            pitch={(obj.y/850)*30}
-                            yaw={(obj.x/6453)*179}
+                            pitch={(obj.y/815)*-1*30}
+                            yaw={(obj.x/6399)*179}
                             title="1"
                             text={obj.RGB_classification}
                             tooltip={(hotSpotDiv) => {
@@ -119,11 +173,9 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
                               }}
                     
                             handleClick={() => handleHotspot(obj)}/> 
-                            
                     ))
                     ) : <div/>}
                 </Pannellum>
-                
                 
                 </div>
                 
@@ -131,18 +183,36 @@ export function Panorama({panorama, objects, locationName, setLocationName, sele
             ) : 
             <p style={{color: 'white', margin: '10px', alignSelf:'center', justifySelf: 'center'}}>Select a location from the map</p>
             }
-
-            {/* {objects?.map((item, index) => (
-                <div  onClick={()=>alert('Clicked')} className="overlay-square" style={{left: item.x1, top: item.y1, right: item.x2, bottom: item.y2, display: showMaterials || showObjects?'block':'none'}}>
-                    <p>{showObjects ? item.RGB_classification : ''}</p>
-                    <p>{showMaterials ? String(item.HS_classification) : ''}</p>
-                    <p>{showDistances ? item.distance + ' m': ''}</p>
-                </div>
-            ))} */}
             
             <div className='bottomBar'>
                 <h1>{locationName}</h1>
-                <h2 style={{color: showObjects?'white':'grey'}} onClick={() => toggleButton(showObjects, setShowObjects)}>Show Objects</h2>
+                <h1>|</h1>
+               
+                {selectedPin?.panorama_ref ? (
+                    <h2 style={{color: showRGB?'white':'grey'}} onClick={()=>handleToggle(setShowRGB)}>RGB</h2>
+                ):<div/>}
+                {selectedPin?.panorama_ref ? (
+                    <h2 style={{color: showObjects?'white':'grey'}} onClick={()=>handleToggle(setShowObjects)}>Objects</h2>
+                ):<div/>}
+                {selectedPin?.hsi_ref ? (
+                <h2 style={{color: showHSIClassification?'white':'grey'}} onClick={()=>handleToggle(setShowHSIClassification)}>HSI Classification</h2>
+                ):<div/>}
+                {selectedPin?.ndvi_ref ? (
+                <h2 style={{color: showNVDI?'white':'grey'}} onClick={()=>handleToggle(setShowNDVI)}>NDVI</h2>
+                ):<div/>}
+                {selectedPin?.msavi_ref ? (
+                <h2 style={{color: showMSAVI?'white':'grey'}} onClick={()=>handleToggle(setShowMSAVI)}>MSAVI</h2>
+                ):<div/>}
+                {selectedPin?.custom2_ref ? (
+                <h2 style={{color: showCustom?'white':'grey'}} onClick={()=>handleToggle(setShowCustom)}>Artifical</h2>
+                ):<div/>}
+                {selectedPin?.artificial_ref ? (
+                <h2 style={{color: showArtificial?'white':'grey'}} onClick={()=>handleToggle(setShowArtifical)}>Artficial</h2>
+                ):<div/>}
+                {selectedPin?.rgb_ref ? (
+                <h2 style={{color: showRGB?'white':'grey'}} onClick={()=>handleToggle(setShowHSIRGB)}>HSI-RGB</h2>
+                ):<div/>}
+
                 <div className='search-input'>
                     <input style={{width: '100%', backgroundColor: 'transparent', color: 'white', fontSize: '20px', fontWeight: 'lighter', borderColor: 'transparent', fontFamily: 'inherit', left: '5px'}} placeholder='Search for...' value={searchInput} onChange={(event)=>{setSearchInput(event.target.value)}} onKeyDown={handleNewSearchObject}/>
                     <div style={{display: 'flex', flexDirection: 'row', position: 'absolute', right: '20px', height: '100%'}}> 

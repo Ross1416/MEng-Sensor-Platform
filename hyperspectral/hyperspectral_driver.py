@@ -3,11 +3,11 @@ import numpy as np
 import pypylon.pylon as pylon
 from time import time
 import matplotlib.pyplot as plt
-
+import logging
 
 def setup_hyperspectral(exposure_time, cam_gain, pixel_binning):
     """Sets up hyperspectral camera and opens connection"""
-
+    
     cam = pylon.InstantCamera(
         pylon.TlFactory.GetInstance().CreateFirstDevice()
     )
@@ -45,7 +45,7 @@ def grab_hyperspectral_scene(
     )
     i = 0
 
-    print("Grabbing frames")
+    logging.debug("Starting grabbing")
     while cam.IsGrabbing():
 
         grab = cam.RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
@@ -68,7 +68,7 @@ def grab_hyperspectral_scene(
     """
 
     cam.StopGrabbing()
-
+    logging.debug("Finished grabbing")
     # print(f"Acquired {nframes} frames in {time()-t0} seconds")
 
     # Define the directory path to save images to
@@ -80,11 +80,11 @@ def grab_hyperspectral_scene(
     index = num_existing // 2 + 1
 
     # Save the scene and white_image
-    scene_path = os.path.join(base_dir, f"{class_name}_{index:03d}.npy")
-    white_image_path = os.path.join(base_dir, f"white_image_{index:03d}.npy")
+    # scene_path = os.path.join(base_dir, f"{class_name}_{index:03d}.npy")
+    # white_image_path = os.path.join(base_dir, f"white_image_{index:03d}.npy")
 
-    np.save(scene_path, scene)
-    np.save(white_image_path, white_image)
+    # np.save(scene_path, scene)
+    # np.save(white_image_path, white_image)
 
     return scene
 

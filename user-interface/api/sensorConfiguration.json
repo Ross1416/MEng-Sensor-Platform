@@ -1,38 +1,15 @@
 {
-    "activeFile": "e89c9584-eb23-4e1b-aa13-0c1af972ba44.json",
-    "status": 0,
+    "activeFile": "c451a91f-0f9f-455e-be85-293b0455f9a4.json",
+    "status": 2,
     "status-message": "setting up",
     "pi-connection": false,
     "gps-connection": false,
     "wifi-connection": false,
     "search-objects": [
         {
-            "object": "Person",
-            "hsi": false
-        },
-        {
-            "object": "Bottle",
-            "hsi": false
-        },
-        {
-            "object": "Whiteboard",
-            "hsi": false
-        },
-        {
-            "object": "Plant",
-            "hsi": true
-        },
-        {
-            "object": "Electronics",
-            "hsi": false
-        },
-        {
-            "object": "Door",
-            "hsi": false
-        },
-        {
             "object": "Chair",
-            "hsi": false
+            "hsi": true
         }
-    ]
+    ],
+    "hsi_manual_scan": true
 }

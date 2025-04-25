@@ -1,17 +1,14 @@
-import React, {useState, useEffect} from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+// This files creates a Map component, which shows the coordinates of each scan
+
+import React, {useState, useEffect, useRef} from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import '../styles/Map.css';
 import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
 
-// Update Map Coordinates
-const UpdateMapCenter = ({ newCenter }) => {
-    const map = useMap();
-};
 
-export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment, setSelectedPinInfo}) {
-    
-    const [mapCenter, setMapCenter] = useState([55.88000, -4.31000]) // default to London
+export function Map({setPanorama, pins, setObjects, selectedEnviroment, setSelectedPin}) {
+    const [mapCenter, setMapCenter] = useState([55.851771, -4.2379665]) // map center - default to Glasgow
 
     // Set co-ords to users location
     useEffect(()=> {
@@ -28,11 +25,18 @@ export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment,
           }
     }, [])      
 
+    // Update the panorama component when a pin is clicked 
     const handlePinClick = (pin) => {
-      setPanorama('./images/' + selectedEnviroment.slice(0, -5) + '/' + pin.panorama_ref)
+      setSelectedPin(pin)
       setObjects(pin.objects)
-      setSelectedPinInfo({timestamp: '00:00:00',coords: String(pin.geo_coords[0]) + ', ' +String(pin.geo_coords[1])})
     };
+
+    useEffect(()=> {
+      if (pins) {
+        console.log('updated')
+        setMapCenter(pins[0]?.geo_coords)
+      }
+    },  [selectedEnviroment])
     
     return (
    
@@ -41,18 +45,17 @@ export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment,
           center={mapCenter} // Latitude and Longitude (e.g., London)
           zoom={14} // Zoom level
           >
-        
+      
           <TileLayer
               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           />
           {pins?.map((pin) => (
-                  <Marker key={pin.id} position={pin.geo_coords} icon={customIcon} eventHandlers={{
+                  <Marker key={pin.id} position={pin.geo_coords} icon={pin?.hsi_ref ? customIcon : customIcon2 } eventHandlers={{
                     click: () => handlePinClick(pin),
                   }}>
                   <Popup>
-                      <strong>{pin.name}</strong> <br /> Coordinates:{" "}
-                      {pin.geo_coords.join(", ")}
+                     {pin.geo_coords[0].toFixed(2)}, {pin.geo_coords[1].toFixed(2)}
                   </Popup>
                   </Marker>
               ))}
@@ -64,4 +67,9 @@ export function Map({setPanorama, pins, setPins, setObjects, selectedEnviroment,
 const customIcon = L.divIcon({
     className: "emoji-icon", // Optional CSS for further styling
     html: '<span style="font-size: 30px;">📍</span>', // Adjust the font-size
+});
+
+const customIcon2 = L.divIcon({
+  className: "emoji-icon", // Optional CSS for further styling
+  html: '<span style="font-size: 30px;">📍</span>', // Adjust the font-size
 });
