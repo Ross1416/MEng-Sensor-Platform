@@ -1,6 +1,5 @@
 from object_detection.object_detection import *
-from comms.receive import *
-from comms.send import *
+from comms.comms import *
 from gps.gps import Neo8T
 from depth.depth import *
 from datetime import datetime

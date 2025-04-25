@@ -1,6 +1,5 @@
 from object_detection.object_detection import *
-from comms.send import *
-from comms.receive import *
+from comms.comms import *
 from cameras import *
 from time import sleep
 import logging
