@@ -59,7 +59,7 @@
 }
 
 .dropdown {
-  background-color: black;
+  background-color: transparent;
   border-radius: 10px;
   justify-self: center;
   margin-right: 5px;
@@ -80,7 +80,7 @@
 }
 
 .dropdown select {
-  background-color: transparent;
+  background-color: black;
   border-color: transparent;
   font-size: 16px;
   font-weight: lighter;

@@ -1,0 +1,462 @@
+{
+    "location": "Kilbarchan",
+    "pins": [
+        {
+            "geo_coords": [
+                55.8373835,
+                -4.586511666666666
+            ],
+            "panorama_ref": "/img55.8372635,-4.585811666666666-20250411_125136.jpg",
+            "objects": [
+                {
+                    "id": 0,
+                    "x": -3682.0,
+                    "y": -315.0,
+                    "w": 1536,
+                    "h": 1247,
+                    "RGB_classification": "tree",
+                    "RGB_confidence": 0.21,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                }
+            ]
+        },
+        {
+            "geo_coords": [
+                55.83766133333333,
+                -4.587510833333333
+            ],
+            "panorama_ref": "/img55.83726133333333,-4.585810833333333-20250411_125254.jpg",
+            "objects": []
+        },
+        {
+            "geo_coords": [
+                55.838396166666666,
+                -4.589502666666666
+            ],
+            "panorama_ref": "/img55.838296166666666,-4.589502666666666-20250411_130459.jpg",
+            "objects": [
+                {
+                    "id": 1,
+                    "x": 1910.0,
+                    "y": 21.0,
+                    "w": 41,
+                    "h": 115,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.45,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                }
+            ],
+            "hsi_ref": "/hs_55.838296166666666,-4.589502666666666-20250411_130459_-1_classification.png",
+            "ndvi_ref": "/hs_55.838296166666666,-4.589502666666666-20250411_130459_-1_ndvi.png",
+            "msavi_ref": "/hs_55.838296166666666,-4.589502666666666-20250411_130459_-1_msavi.png",
+            "custom2_ref": "/hs_55.838296166666666,-4.589502666666666-20250411_130459_-1_custom2.png",
+            "materials_ref": {
+                "artificial": 13.979497131285859,
+                "rock": 9.54187057036787,
+                "sky": 6.006813196085049,
+                "soil": 0.18347114411069862,
+                "vegetation": 40.078974012824844,
+                "water": 0.1154024637192035,
+                "wood": 30.09397148160648
+            }
+        },
+        {
+            "geo_coords": [
+                55.838279333333336,
+                -4.5905295
+            ],
+            "panorama_ref": "/img55.838179333333336,-4.5908295-20250411_131803.jpg",
+            "objects": []
+        },
+        {
+            "geo_coords": [
+                55.838189133333333,
+                -4.591337666666667
+            ],
+            "panorama_ref": "/img55.83818133333333,-4.590827666666667-20250411_132025.jpg",
+            "objects": [
+                {
+                    "id": 0,
+                    "x": -6223.0,
+                    "y": 593.0,
+                    "w": 622,
+                    "h": 655,
+                    "RGB_classification": "Fence",
+                    "RGB_confidence": 0.17,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 1,
+                    "x": -3240.0,
+                    "y": 537.0,
+                    "w": 652,
+                    "h": 500,
+                    "RGB_classification": "Fence",
+                    "RGB_confidence": 0.14,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                }
+            ]
+        },
+        {
+            "geo_coords": [
+                55.838251666666666,
+                -4.5922785
+            ],
+            "panorama_ref": "/img55.837851666666666,-4.5960785-20250411_132737.jpg",
+            "objects": [],
+            "hsi_ref": "/hs_55.837851666666666,-4.5960785-20250411_132737_-1_classification.png",
+            "ndvi_ref": "/hs_55.837851666666666,-4.5960785-20250411_132737_-1_ndvi.png",
+            "msavi_ref": "/hs_55.837851666666666,-4.5960785-20250411_132737_-1_msavi.png",
+            "custom2_ref": "/hs_55.837851666666666,-4.5960785-20250411_132737_-1_custom2.png",
+            "materials_ref": {
+                "artificial": 33.40581758353021,
+                "rock": 34.01904741815727,
+                "sky": 2.429589942625717,
+                "soil": 0.19800455619304758,
+                "vegetation": 5.308618798515019,
+                "water": 7.474751096861289,
+                "wood": 17.164170604117448
+            }
+        },
+        {
+            "geo_coords": [
+                55.83818783333333,
+                -4.593004
+            ],
+            "panorama_ref": "/img55.83808783333333,-4.594004-20250411_134042.jpg",
+            "objects": [],
+            "hsi_ref": "/hs_55.83808783333333,-4.594004-20250411_134042_-1_classification.png",
+            "ndvi_ref": "/hs_55.83808783333333,-4.594004-20250411_134042_-1_ndvi.png",
+            "msavi_ref": "/hs_55.83808783333333,-4.594004-20250411_134042_-1_msavi.png",
+            "custom2_ref": "/hs_55.83808783333333,-4.594004-20250411_134042_-1_custom2.png"
+        },
+        {
+            "geo_coords": [
+                55.8380715,
+                -4.5938843333333335
+            ],
+            "panorama_ref": "/img55.8380715,-4.5938843333333335-20250411_135311.jpg",
+            "objects": []
+        },
+        {
+            "geo_coords": [
+                55.837993166666665,
+                -4.5943146666666665
+            ],
+            "panorama_ref": "/img55.837863166666665,-4.5943146666666665-20250411_135432.jpg",
+            "objects": [
+                {
+                    "id": 0,
+                    "x": -1480.0,
+                    "y": -83.0,
+                    "w": 3575,
+                    "h": 1370,
+                    "RGB_classification": "Trees",
+                    "RGB_confidence": 0.05,
+                    "HS_materials": {
+                        "artificial": 0.3736930860033727,
+                        "rock": 11.734949409780777,
+                        "sky": 3.9179595278246206,
+                        "soil": 1.2373524451939293,
+                        "vegetation": 17.579426644182124,
+                        "water": 0.381787521079258,
+                        "wood": 64.77483136593591
+                    },
+                    "HS_classification_ref": "/hs_55.837863166666665,-4.5943146666666665-20250411_135432_0_classification.png",
+                    "HS_ndvi_ref": "/hs_55.837863166666665,-4.5943146666666665-20250411_135432_0_ndvi.png",
+                    "HS_msavi_ref": "/hs_55.837863166666665,-4.5943146666666665-20250411_135432_0_msavi.png",
+                    "HS_custom2_ref": "/hs_55.837863166666665,-4.5943146666666665-20250411_135432_0_custom2.png",
+                    "distance": null
+                }
+            ]
+        },
+        {
+            "geo_coords": [
+                55.83754866666666,
+                -4.5972151666666665
+            ],
+            "panorama_ref": "/img55.83754866666666,-4.5972151666666665-20250411_140142.jpg",
+            "objects": [
+                {
+                    "id": 4,
+                    "x": -2041.0,
+                    "y": 850.0,
+                    "w": 2466,
+                    "h": 344,
+                    "RGB_classification": "Car",
+                    "RGB_confidence": 0.61,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 0,
+                    "x": -5940.0,
+                    "y": 37.0,
+                    "w": 1177,
+                    "h": 1523,
+                    "RGB_classification": "Tree",
+                    "RGB_confidence": 0.18,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 1,
+                    "x": -6326.0,
+                    "y": 89.0,
+                    "w": 159,
+                    "h": 543,
+                    "RGB_classification": "Tree",
+                    "RGB_confidence": 0.08,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 5,
+                    "x": -1459.0,
+                    "y": 755.0,
+                    "w": 3600,
+                    "h": 151,
+                    "RGB_classification": "Car",
+                    "RGB_confidence": 0.06,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 2,
+                    "x": -4892.0,
+                    "y": -361.0,
+                    "w": 753,
+                    "h": 1128,
+                    "RGB_classification": "Tree",
+                    "RGB_confidence": 0.05,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 3,
+                    "x": -3700.0,
+                    "y": -343.0,
+                    "w": 1553,
+                    "h": 1192,
+                    "RGB_classification": "Tree",
+                    "RGB_confidence": 0.03,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                },
+                {
+                    "id": 6,
+                    "x": -2852.0,
+                    "y": -247.0,
+                    "w": 850,
+                    "h": 1039,
+                    "RGB_classification": "Tree",
+                    "RGB_confidence": 0.03,
+                    "HS_materials": null,
+                    "HS_classification_ref": null,
+                    "HS_ndvi_ref": null,
+                    "HS_msavi_ref": null,
+                    "HS_custom2_ref": null,
+                    "HS_artificial_ref": null,
+                    "HS_rgb_ref": null,
+                    "distance": null
+                }
+            ]
+        },
+        {
+            "geo_coords": [
+                55.83736833333333,
+                -4.598252
+            ],
+            "panorama_ref": "/img55.83754833333333,-4.597252-20250411_140351.jpg",
+            "objects": [
+                {
+                    "id": 15,
+                    "x": 204.0,
+                    "y": 195.0,
+                    "w": 59,
+                    "h": 143,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.67,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 2,
+                    "x": -272.0,
+                    "y": 263.0,
+                    "w": 241,
+                    "h": 289,
+                    "RGB_classification": "Horses",
+                    "RGB_confidence": 0.45,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 5,
+                    "x": -487.0,
+                    "y": 143.0,
+                    "w": 240,
+                    "h": 262,
+                    "RGB_classification": "person",
+                    "RGB_confidence": 0.32,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 8,
+                    "x": -888.0,
+                    "y": 410.0,
+                    "w": 213,
+                    "h": 274,
+                    "RGB_classification": "bin",
+                    "RGB_confidence": 0.07,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 10,
+                    "x": -1817.0,
+                    "y": -169.0,
+                    "w": 2896,
+                    "h": 1201,
+                    "RGB_classification": "trees",
+                    "RGB_confidence": 0.05,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 1,
+                    "x": -5608.0,
+                    "y": -174.0,
+                    "w": 61,
+                    "h": 114,
+                    "RGB_classification": "trees",
+                    "RGB_confidence": 0.04,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                },
+                {
+                    "id": 11,
+                    "x": -492.0,
+                    "y": 39.0,
+                    "w": 97,
+                    "h": 85,
+                    "RGB_classification": "Yellow flowers",
+                    "RGB_confidence": 0.04,
+                    "HS_materials": null,
+                    "HS_classification_ref": "",
+                    "HS_ndvi_ref": "",
+                    "HS_msavi_ref": "",
+                    "HS_custom2_ref": "",
+                    "HS_artificial_ref": "",
+                    "HS_rgb_ref": "",
+                    "distance": null
+                }
+            ],
+            "hsi_ref": "/hs_55.83754833333333,-4.597252-20250411_140351_-1_classification.png",
+            "ndvi_ref": "/hs_55.83754833333333,-4.597252-20250411_140351_-1_ndvi.png",
+            "msavi_ref": "/hs_55.83754833333333,-4.597252-20250411_140351_-1_msavi.png",
+            "custom2_ref": "/hs_55.83754833333333,-4.597252-20250411_140351_-1_custom2.png"
+        }
+    ]
+}
